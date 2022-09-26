@@ -1,0 +1,91 @@
+name: Build
+
+on:
+  push:
+    tags:
+    - 'latest'
+    - 'v*'
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  CI: true
+  # don't print dotnet logo
+  DOTNET_NOLOGO: true
+  # disable telemetry (reduces dotnet tool output in logs)
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build-dotnet:
+    name: Build Dotnet
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v2
+      
+      - name: Build
+        run: dotnet build --configuration release
+
+      - name: Pack
+        run: dotnet pack --configuration release
+
+      - name: Upload Nuget packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: bicep-types-packages
+          path: ./out/*
+          if-no-files-found: error
+
+      - name: Test
+        run: dotnet test --configuration release --collect:"XPlat Code Coverage" --settings ./.github/workflows/codecov.runsettings
+
+      - name: Upload Code Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          flags: dotnet
+
+  build-npm:
+    name: Build NPM
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
+      
+      - name: Install
+        run: npm ci
+        working-directory: ./src/bicep-types
+      
+      - name: Lint
+        run: npm run lint
+        working-directory: ./src/bicep-types
+      
+      - name: Build
+        run: npm run build
+        working-directory: ./src/bicep-types
+
+      - name: Package
+        run: |
+          npm run package
+          mv bicep-types-*.tgz bicep-types.tgz
+        working-directory: ./src/bicep-types
+
+      - name: Upload NPM package
+        uses: actions/upload-artifact@v3
+        with:
+          name: bicep-types.tgz
+          path: ./src/bicep-types/bicep-types.tgz
+          if-no-files-found: error
