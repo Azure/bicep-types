@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json.Nodes;
 using Azure.Bicep.Types.Concrete;
 using FluentAssertions;
@@ -29,6 +31,20 @@ namespace Azure.Bicep.Types.UnitTests
 
             var serialized = TypeSerializer.Serialize(builtIns);
             var deserializedBuiltIns = TypeSerializer.Deserialize(serialized);
+
+            for (var i = 0; i < builtIns.Length; i++)
+            {
+                deserializedBuiltIns[i].Should().BeOfType<BuiltInType>();
+                var deserializedBuiltIn = (BuiltInType)deserializedBuiltIns[i];
+
+                deserializedBuiltIn.Kind.Should().Be(builtIns[i].Kind);
+            }
+
+            var serializedBytes = Encoding.UTF8.GetBytes(serialized);
+            using (var memoryStream = new MemoryStream(serializedBytes))
+            {
+                deserializedBuiltIns = TypeSerializer.Deserialize(memoryStream);
+            }
 
             for (var i = 0; i < builtIns.Length; i++)
             {
