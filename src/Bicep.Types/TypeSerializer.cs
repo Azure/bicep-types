@@ -1,6 +1,7 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 using System;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -35,6 +36,23 @@ namespace Azure.Bicep.Types
             serializeOptions.Converters.Add(new TypeBaseConverter(factory));
 
             var types = JsonSerializer.Deserialize<TypeBase[]>(content, serializeOptions) ?? throw new JsonException("Failed to deserialize content");
+
+            factory.Hydrate(types);
+
+            return types;
+        }
+
+        public static TypeBase[] Deserialize(Stream contentStream)
+        {
+            var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            };
+            serializeOptions.Converters.Add(new TypeBaseConverter(factory));
+
+            var types = JsonSerializer.Deserialize<TypeBase[]>(contentStream, serializeOptions) ?? throw new JsonException("Failed to deserialize content");
 
             factory.Hydrate(types);
 
