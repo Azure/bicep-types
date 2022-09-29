@@ -22,7 +22,7 @@
     <PackageOutputPath>$(MSBuildThisFileDirectory)\..\out</PackageOutputPath>
     <Authors>Microsoft</Authors>
     <Owners><!-- Don't set this field --></Owners>
-    <PackageProjectUrl>https://github.com/Azure/bicep-types-az</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Azure/bicep-types</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageLicenseUrl><!-- Don't set this field (deprecated) --></PackageLicenseUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
