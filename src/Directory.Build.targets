@@ -27,7 +27,7 @@
     <PackageLicenseUrl><!-- Don't set this field (deprecated) --></PackageLicenseUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-    <PackageTags>Azure;Bicep;Types;Az</PackageTags>
+    <PackageTags>Azure;Bicep;Types</PackageTags>
     <PackageIconUrl><!-- Don't set this field (deprecated) --></PackageIconUrl>
     <PackageIcon>bicep-logo-256.png</PackageIcon>
 
@@ -37,7 +37,7 @@
 
     <!-- sourcelink configuration -->
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/Azure/bicep-types-az</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Azure/bicep-types</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(EnableNuget)' == 'true'" >
