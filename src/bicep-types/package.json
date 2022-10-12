@@ -21,7 +21,6 @@
     "autorest",
     "bicep"
   ],
-  "type": "module",
   "main": "lib/src/index.js",
   "exports": {
     ".": "./lib/src/index.js"
