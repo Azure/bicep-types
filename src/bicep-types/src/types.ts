@@ -44,7 +44,7 @@ const ScopeTypeLabel = new Map<ScopeType, string>([
   [ScopeType.Extension, 'Extension'],
 ]);
 
-export function getScopeTypeLabels(input: ScopeType, ...scopeLabels: [ScopeType|undefined, string][]) {
+export function getScopeTypeLabels(input: ScopeType, ...scopeLabels: [ScopeType | undefined, string][]) {
   const types = [];
   for (const [key, value] of ScopeTypeLabel) {
     if ((key & input) === key) {
@@ -132,53 +132,29 @@ export function getResourceFlagsLabels(input: ResourceFlags) {
   return flags;
 }
 
-export abstract class TypeBase {
-  constructor(type: TypeBaseKind) {
-    this.Type = type;
-  }
+export interface TypeBase {
   readonly Type: TypeBaseKind;
 }
 
-export class TypeReference {
-  constructor(index: number) {
-    this.Index = index;
-  }
-  readonly Index: number;
-}
+export type TypeReference = number;
 
-export class BuiltInType extends TypeBase {
-  constructor(kind: BuiltInTypeKind) {
-    super(TypeBaseKind.BuiltInType);
-    this.Kind = kind;
-  }
+export interface BuiltInType extends TypeBase {
+  readonly Type: TypeBaseKind.BuiltInType;
   readonly Kind: BuiltInTypeKind;
 }
 
-export class UnionType extends TypeBase {
-  constructor(elements: TypeReference[]) {
-    super(TypeBaseKind.UnionType);
-    this.Elements = elements;
-  }
+export interface UnionType extends TypeBase {
+  readonly Type: TypeBaseKind.UnionType;
   readonly Elements: TypeReference[];
 }
 
-export class StringLiteralType extends TypeBase {
-  constructor(value: string) {
-    super(TypeBaseKind.StringLiteralType);
-    this.Value = value;
-  }
+export interface StringLiteralType extends TypeBase {
+  readonly Type: TypeBaseKind.StringLiteralType;
   readonly Value: string;
 }
 
-export class ResourceType extends TypeBase {
-  constructor(name: string, scopeType: ScopeType, readOnlyScopes: ScopeType|undefined, body: TypeReference, flags: ResourceFlags) {
-    super(TypeBaseKind.ResourceType);
-    this.Name = name;
-    this.ScopeType = scopeType;
-    this.ReadOnlyScopes = readOnlyScopes;
-    this.Body = body;
-    this.Flags = flags;
-  }
+export interface ResourceType extends TypeBase {
+  readonly Type: TypeBaseKind.ResourceType;
   readonly Name: string;
   readonly ScopeType: ScopeType;
   readonly ReadOnlyScopes?: ScopeType;
@@ -186,15 +162,8 @@ export class ResourceType extends TypeBase {
   readonly Flags: ResourceFlags;
 }
 
-export class ResourceFunctionType extends TypeBase {
-  constructor(name: string, resourceType: string, apiVersion: string, output: TypeReference, input?: TypeReference) {
-    super(TypeBaseKind.ResourceFunctionType);
-    this.Name = name;
-    this.ResourceType = resourceType;
-    this.ApiVersion = apiVersion;
-    this.Output = output;
-    this.Input = input;
-  }
+export interface ResourceFunctionType extends TypeBase {
+  readonly Type: TypeBaseKind.ResourceFunctionType;
   readonly Name: string;
   readonly ResourceType: string;
   readonly ApiVersion: string;
@@ -202,82 +171,134 @@ export class ResourceFunctionType extends TypeBase {
   readonly Input?: TypeReference;
 }
 
-export class ObjectType extends TypeBase {
-  constructor(name: string, properties: Record<string, ObjectProperty>, additionalProperties?: TypeReference) {
-    super(TypeBaseKind.ObjectType);
-    this.Name = name;
-    this.Properties = properties;
-    this.AdditionalProperties = additionalProperties;
-  }
+export interface ObjectType extends TypeBase {
+  readonly Type: TypeBaseKind.ObjectType;
   readonly Name: string;
   readonly Properties: Record<string, ObjectProperty>;
   readonly AdditionalProperties?: TypeReference;
 }
 
-export class DiscriminatedObjectType extends TypeBase {
-  constructor(name: string, discriminator: string, baseProperties: Record<string, ObjectProperty>, elements: Record<string, TypeReference>) {
-    super(TypeBaseKind.DiscriminatedObjectType);
-    this.Name = name;
-    this.Discriminator = discriminator;
-    this.BaseProperties = baseProperties;
-    this.Elements = elements;
-  }
+export interface DiscriminatedObjectType extends TypeBase {
+  readonly Type: TypeBaseKind.DiscriminatedObjectType;
   readonly Name: string;
   readonly Discriminator: string;
   readonly BaseProperties: Record<string, ObjectProperty>;
   readonly Elements: Record<string, TypeReference>;
 }
 
-export class ArrayType extends TypeBase {
-  constructor(itemType: TypeReference) {
-    super(TypeBaseKind.ArrayType);
-    this.ItemType = itemType;
-  }
+export interface ArrayType extends TypeBase {
+  readonly Type: TypeBaseKind.ArrayType;
   readonly ItemType: TypeReference;
 }
 
-export class ObjectProperty {
-  constructor(type: TypeReference, flags: ObjectPropertyFlags, description?: string) {
-    this.Type = type;
-    this.Flags = flags;
-    this.Description = description;
-  }
+export type Type = BuiltInType | UnionType | StringLiteralType | ResourceType | ResourceFunctionType | ObjectType | DiscriminatedObjectType | ArrayType;
+
+export interface ObjectProperty {
   readonly Type: TypeReference;
   readonly Flags: ObjectPropertyFlags;
   readonly Description?: string;
 }
 
 export class TypeFactory {
-  readonly types: TypeBase[];
+  readonly types: Type[];
   readonly builtInTypes: Record<BuiltInTypeKind, TypeReference>;
 
   constructor() {
     this.types = [];
     this.builtInTypes = {
-      [BuiltInTypeKind.Any]: this.addType(new BuiltInType(BuiltInTypeKind.Any)),
-      [BuiltInTypeKind.Null]: this.addType(new BuiltInType(BuiltInTypeKind.Null)),
-      [BuiltInTypeKind.Bool]: this.addType(new BuiltInType(BuiltInTypeKind.Bool)),
-      [BuiltInTypeKind.Int]: this.addType(new BuiltInType(BuiltInTypeKind.Int)),
-      [BuiltInTypeKind.String]: this.addType(new BuiltInType(BuiltInTypeKind.String)),
-      [BuiltInTypeKind.Object]: this.addType(new BuiltInType(BuiltInTypeKind.Object)),
-      [BuiltInTypeKind.Array]: this.addType(new BuiltInType(BuiltInTypeKind.Array)),
-      [BuiltInTypeKind.ResourceRef]: this.addType(new BuiltInType(BuiltInTypeKind.ResourceRef)),
+      [BuiltInTypeKind.Any]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Any }),
+      [BuiltInTypeKind.Null]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Null }),
+      [BuiltInTypeKind.Bool]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Bool }),
+      [BuiltInTypeKind.Int]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Int }),
+      [BuiltInTypeKind.String]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.String }),
+      [BuiltInTypeKind.Object]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Object }),
+      [BuiltInTypeKind.Array]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Array }),
+      [BuiltInTypeKind.ResourceRef]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.ResourceRef }),
     };
   }
 
-  public addType<TType extends TypeBase>(type: TType): TypeReference {
+  public addType(type: Type): TypeReference {
     const index = this.types.length;
     this.types[index] = type;
 
-    return new TypeReference(index);
+    return index;
   }
 
-  public lookupType<TType extends TypeBase>(reference: TypeReference): TType {
-    return this.types[reference.Index] as TType;
+  public lookupType(reference: TypeReference): Type {
+    return this.types[reference];
   }
 
   public lookupBuiltInType(kind: BuiltInTypeKind): TypeReference {
     return this.builtInTypes[kind];
+  }
+
+  public addBuiltInType(kind: BuiltInTypeKind) {
+    return this.addType({
+      Type: TypeBaseKind.BuiltInType,
+      Kind: kind,
+    });
+  }
+
+  public addUnionType(elements: TypeReference[]) {
+    return this.addType({
+      Type: TypeBaseKind.UnionType,
+      Elements: elements,
+    });
+  }
+
+  public addStringLiteralType(value: string) {
+    return this.addType({
+      Type: TypeBaseKind.StringLiteralType,
+      Value: value,
+    });
+  }
+
+  public addResourceType(name: string, scopeType: ScopeType, readOnlyScopes: ScopeType | undefined, body: TypeReference, flags: ResourceFlags) {
+    return this.addType({
+      Type: TypeBaseKind.ResourceType,
+      Name: name,
+      ScopeType: scopeType,
+      ReadOnlyScopes: readOnlyScopes,
+      Body: body,
+      Flags: flags,
+    });
+  }
+
+  public addResourceFunctionType(name: string, resourceType: string, apiVersion: string, output: TypeReference, input?: TypeReference) {
+    return this.addType({
+      Type: TypeBaseKind.ResourceFunctionType,
+      Name: name,
+      ResourceType: resourceType,
+      ApiVersion: apiVersion,
+      Output: output,
+      Input: input,
+    });
+  }
+
+  public addObjectType(name: string, properties: Record<string, ObjectProperty>, additionalProperties?: TypeReference) {
+    return this.addType({
+      Type: TypeBaseKind.ObjectType,
+      Name: name,
+      Properties: properties,
+      AdditionalProperties: additionalProperties,
+    });
+  }
+
+  public addDiscriminatedObjectType(name: string, discriminator: string, baseProperties: Record<string, ObjectProperty>, elements: Record<string, TypeReference>) {
+    return this.addType({
+      Type: TypeBaseKind.DiscriminatedObjectType,
+      Name: name,
+      Discriminator: discriminator,
+      BaseProperties: baseProperties,
+      Elements: elements,
+    });
+  }
+
+  public addArrayType(itemType: TypeReference) {
+    return this.addType({
+      Type: TypeBaseKind.ArrayType,
+      ItemType: itemType,
+    });
   }
 }
 
