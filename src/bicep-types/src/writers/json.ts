@@ -1,28 +1,29 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { TypeBase, TypeIndex, TypeReference } from '../types';
+import { BicepType, TypeBaseKind, TypeIndex } from '../types';
 
-export function writeJson(types: TypeBase[]) {
-  return JSON.stringify(types, replacer, 0);
+export function writeJson(types: BicepType[]) {
+  const output = types.map(t => {
+    const { Type, ...rest } = t;
+    return {
+      [`${Type}`]: rest,
+    };
+  });
+
+  return JSON.stringify(output, null, 0);
+}
+
+export function readJson(content: string) {
+  const input = JSON.parse(content) as any[];
+
+  return input.flatMap(t => 
+    Object.keys(t).map(k => ({
+      Type: parseInt(k) as TypeBaseKind,
+      ...t[k],
+    }))
+  ) as BicepType[];
 }
 
 export function writeIndexJson(index: TypeIndex) {
   return JSON.stringify(index, null, 0);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function replacer(this: any, key: string, value: any) {
-  if (value instanceof TypeReference) {
-    return value.Index;
-  }
-
-  if (value instanceof TypeBase) {
-    const { Type, ...rest } = value;
-
-    return {
-      [Type]: rest,
-    };
-  }
-
-  return value;
 }
