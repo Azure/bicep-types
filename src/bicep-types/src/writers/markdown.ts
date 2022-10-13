@@ -93,7 +93,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
           processTypeLinks(objectType.Properties[key].Type, false);
         }
 
-        if (objectType.AdditionalProperties) {
+        if (objectType.AdditionalProperties !== undefined) {
           processTypeLinks(objectType.AdditionalProperties, false);
         }
 
@@ -137,7 +137,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
         md.writeHeading(nesting, `Function ${resourceFunctionType.Name} (${resourceFunctionType.ResourceType}@${resourceFunctionType.ApiVersion})`);
         md.writeBullet("Resource", resourceFunctionType.ResourceType);
         md.writeBullet("ApiVersion", resourceFunctionType.ApiVersion);
-        if (resourceFunctionType.Input) {
+        if (resourceFunctionType.Input !== undefined) {
           md.writeBullet("Input", getTypeName(types, resourceFunctionType.Input));
         }
         md.writeBullet("Output", getTypeName(types, resourceFunctionType.Output));
@@ -156,7 +156,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
           writeTypeProperty(types, key, objectType.Properties[key]);
         }
 
-        if (objectType.AdditionalProperties) {
+        if (objectType.AdditionalProperties !== undefined) {
           md.writeHeading(nesting + 1, "Additional Properties");
           md.writeBullet("Additional Properties Type", getTypeName(types, objectType.AdditionalProperties));
         }
@@ -204,7 +204,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
     }
 
     for (const resourceFunctionType of resourceFunctionTypes) {
-      if (resourceFunctionType.Input)
+      if (resourceFunctionType.Input !== undefined)
       {
         typesToWrite.push(types[resourceFunctionType.Input]);
         findTypesToWrite(types, typesToWrite, resourceFunctionType.Input);
