@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { TypeBase, TypeBaseKind, TypeIndex } from '../types';
+import { BicepType, TypeBaseKind, TypeIndex } from '../types';
 
-export function writeJson(types: TypeBase[]) {
+export function writeJson(types: BicepType[]) {
   const output = types.map(t => {
     const { Type, ...rest } = t;
     return {
@@ -21,7 +21,7 @@ export function readJson(content: string) {
       Type: parseInt(k) as TypeBaseKind,
       ...t[k],
     }))
-  ) as TypeBase[];
+  ) as BicepType[];
 }
 
 export function writeIndexJson(index: TypeIndex) {

@@ -132,76 +132,66 @@ export function getResourceFlagsLabels(input: ResourceFlags) {
   return flags;
 }
 
-export interface TypeBase {
-  readonly Type: TypeBaseKind;
-}
+export type TypeReference = number
 
-export type TypeReference = number;
+type TypeBase<T extends TypeBaseKind, U extends object> = { Type: T } & U
 
-export interface BuiltInType extends TypeBase {
-  readonly Type: TypeBaseKind.BuiltInType;
-  readonly Kind: BuiltInTypeKind;
-}
+export type BuiltInType = TypeBase<TypeBaseKind.BuiltInType, {
+  Kind: BuiltInTypeKind;
+}>
 
-export interface UnionType extends TypeBase {
-  readonly Type: TypeBaseKind.UnionType;
-  readonly Elements: TypeReference[];
-}
+export type UnionType = TypeBase<TypeBaseKind.UnionType, {
+  Elements: TypeReference[];
+}>
 
-export interface StringLiteralType extends TypeBase {
-  readonly Type: TypeBaseKind.StringLiteralType;
-  readonly Value: string;
-}
+export type StringLiteralType = TypeBase<TypeBaseKind.StringLiteralType, {
+  Value: string;
+}>
 
-export interface ResourceType extends TypeBase {
-  readonly Type: TypeBaseKind.ResourceType;
-  readonly Name: string;
-  readonly ScopeType: ScopeType;
-  readonly ReadOnlyScopes?: ScopeType;
-  readonly Body: TypeReference;
-  readonly Flags: ResourceFlags;
-}
+export type ResourceType = TypeBase<TypeBaseKind.ResourceType, {
+  Name: string;
+  ScopeType: ScopeType;
+  ReadOnlyScopes?: ScopeType;
+  Body: TypeReference;
+  Flags: ResourceFlags;
+}>
 
-export interface ResourceFunctionType extends TypeBase {
-  readonly Type: TypeBaseKind.ResourceFunctionType;
-  readonly Name: string;
-  readonly ResourceType: string;
-  readonly ApiVersion: string;
-  readonly Output: TypeReference;
-  readonly Input?: TypeReference;
-}
+export type ResourceFunctionType = TypeBase<TypeBaseKind.ResourceFunctionType, {
+  Name: string;
+  ResourceType: string;
+  ApiVersion: string;
+  Output: TypeReference;
+  Input?: TypeReference;
+}>
 
-export interface ObjectType extends TypeBase {
-  readonly Type: TypeBaseKind.ObjectType;
-  readonly Name: string;
-  readonly Properties: Record<string, ObjectProperty>;
-  readonly AdditionalProperties?: TypeReference;
-}
+export type ObjectType = TypeBase<TypeBaseKind.ObjectType, {
+  Name: string;
+  Properties: Record<string, ObjectProperty>;
+  AdditionalProperties?: TypeReference;
+}>
 
-export interface DiscriminatedObjectType extends TypeBase {
-  readonly Type: TypeBaseKind.DiscriminatedObjectType;
-  readonly Name: string;
-  readonly Discriminator: string;
-  readonly BaseProperties: Record<string, ObjectProperty>;
-  readonly Elements: Record<string, TypeReference>;
-}
+export type DiscriminatedObjectType = TypeBase<TypeBaseKind.DiscriminatedObjectType, {
+  Name: string;
+  Discriminator: string;
+  BaseProperties: Record<string, ObjectProperty>;
+  Elements: Record<string, TypeReference>;
+}>
 
-export interface ArrayType extends TypeBase {
-  readonly Type: TypeBaseKind.ArrayType;
-  readonly ItemType: TypeReference;
-}
+export type ArrayType = TypeBase<TypeBaseKind.ArrayType, {
+  ItemType: TypeReference;
+}>
 
-export type Type = BuiltInType | UnionType | StringLiteralType | ResourceType | ResourceFunctionType | ObjectType | DiscriminatedObjectType | ArrayType;
+export type BicepType = BuiltInType | UnionType | StringLiteralType | ResourceType | ResourceFunctionType | ObjectType | DiscriminatedObjectType | ArrayType
 
-export interface ObjectProperty {
-  readonly Type: TypeReference;
-  readonly Flags: ObjectPropertyFlags;
-  readonly Description?: string;
+export type ObjectProperty = {
+  Type: TypeReference;
+  Flags: ObjectPropertyFlags;
+  Description?: string;
 }
 
 export class TypeFactory {
-  readonly types: Type[];
-  readonly builtInTypes: Record<BuiltInTypeKind, TypeReference>;
+  types: BicepType[];
+  builtInTypes: Record<BuiltInTypeKind, TypeReference>;
 
   constructor() {
     this.types = [];
@@ -217,14 +207,14 @@ export class TypeFactory {
     };
   }
 
-  public addType(type: Type): TypeReference {
+  public addType(type: BicepType): TypeReference {
     const index = this.types.length;
     this.types[index] = type;
 
     return index;
   }
 
-  public lookupType(reference: TypeReference): Type {
+  public lookupType(reference: TypeReference): BicepType {
     return this.types[reference];
   }
 
@@ -314,5 +304,5 @@ export interface TypeIndexEntry {
 
 export interface TypeFile {
   relativePath: string;
-  types: TypeBase[];
+  types: BicepType[];
 }

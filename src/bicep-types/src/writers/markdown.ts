@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectPropertyFlagsLabels, getResourceFlagsLabels, getScopeTypeLabels, ObjectProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, TypeBase, TypeBaseKind, TypeIndex, TypeReference, UnionType } from '../types';
+import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectPropertyFlagsLabels, getResourceFlagsLabels, getScopeTypeLabels, ObjectProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType } from '../types';
 import { groupBy, orderBy } from '../utils';
 
 class MarkdownFile {
@@ -29,10 +29,10 @@ class MarkdownFile {
   }
 }
 
-export function writeMarkdown(types: TypeBase[], fileHeading?: string) {
+export function writeMarkdown(types: BicepType[], fileHeading?: string) {
   const md = new MarkdownFile();
 
-  function getTypeName(types: TypeBase[], typeReference: TypeReference): string {
+  function getTypeName(types: BicepType[], typeReference: TypeReference): string {
     const type = types[typeReference];
     switch (type.Type) {
       case TypeBaseKind.BuiltInType:
@@ -60,13 +60,13 @@ export function writeMarkdown(types: TypeBase[], fileHeading?: string) {
     }
   }
 
-  function writeTypeProperty(types: TypeBase[], name: string, property: ObjectProperty) {
+  function writeTypeProperty(types: BicepType[], name: string, property: ObjectProperty) {
     const flagsString = property.Flags ? ` (${getObjectPropertyFlagsLabels(property.Flags).join(', ')})` : '';
     const descriptionString = property.Description ? `: ${property.Description}` : '';
     md.writeBullet(name, `${getTypeName(types, property.Type)}${flagsString}${descriptionString}`);
   }
 
-  function findTypesToWrite(types: TypeBase[], typesToWrite: TypeBase[], typeReference: TypeReference) {
+  function findTypesToWrite(types: BicepType[], typesToWrite: BicepType[], typeReference: TypeReference) {
     function processTypeLinks(typeReference: TypeReference, skipParent: boolean) {
       // this is needed to avoid circular type references causing stack overflows
       if (typesToWrite.indexOf(types[typeReference]) === -1) {
@@ -121,7 +121,7 @@ export function writeMarkdown(types: TypeBase[], fileHeading?: string) {
     return orderBy(Object.keys(dictionary), x => x.toLowerCase());
   }
 
-  function writeComplexType(types: TypeBase[], type: TypeBase, nesting: number, includeHeader: boolean) {
+  function writeComplexType(types: BicepType[], type: BicepType, nesting: number, includeHeader: boolean) {
     switch (type.Type) {
       case TypeBaseKind.ResourceType: {
         const resourceType = type as ResourceType;
@@ -191,13 +191,13 @@ export function writeMarkdown(types: TypeBase[], fileHeading?: string) {
     }
   }
 
-  function generateMarkdown(types: TypeBase[]) {
+  function generateMarkdown(types: BicepType[]) {
     md.writeHeading(1, fileHeading ?? 'Bicep Types');
     md.writeNewLine();
 
     const resourceTypes = orderBy(types.filter(t => t.Type == TypeBaseKind.ResourceType) as ResourceType[], x => x.Name.split('@')[0].toLowerCase());
     const resourceFunctionTypes = orderBy(types.filter(t => t.Type == TypeBaseKind.ResourceFunctionType) as ResourceFunctionType[], x => x.Name.split('@')[0].toLowerCase());
-    const typesToWrite: TypeBase[] = []
+    const typesToWrite: BicepType[] = []
 
     for (const resourceType of resourceTypes) {
       findTypesToWrite(types, typesToWrite, resourceType.Body);
@@ -225,7 +225,7 @@ export function writeMarkdown(types: TypeBase[], fileHeading?: string) {
       return 0;
     });
 
-    for (const type of (resourceTypes as TypeBase[]).concat(resourceFunctionTypes).concat(typesToWrite)) {
+    for (const type of (resourceTypes as BicepType[]).concat(resourceFunctionTypes).concat(typesToWrite)) {
       writeComplexType(types, type, 2, true);
     }
 
