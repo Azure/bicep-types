@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc -p .",
     "test": "jest",
+    "test:fix": "BASELINE_RECORD=true jest",
     "package": "nbgv-setversion && npm run build && npm pack && nbgv-setversion --reset",
     "lint": "eslint src --ext ts",
     "lint:fix": "eslint src --ext ts --fix"

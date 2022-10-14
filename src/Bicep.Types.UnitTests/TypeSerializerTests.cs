@@ -1,11 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Azure.Bicep.Types.Concrete;
+using Azure.Bicep.Types.Serialization;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -29,44 +32,46 @@ namespace Azure.Bicep.Types.UnitTests
                 new BuiltInType(BuiltInTypeKind.ResourceRef),
             };
 
-            var serialized = TypeSerializer.Serialize(builtIns);
-            var deserializedBuiltIns = TypeSerializer.Deserialize(serialized);
+            using var memoryStream = BuildStream(stream => TypeSerializer.Serialize(stream, builtIns));
+            var stream = TypeSerializer.Deserialize(memoryStream);
 
             for (var i = 0; i < builtIns.Length; i++)
             {
-                deserializedBuiltIns[i].Should().BeOfType<BuiltInType>();
-                var deserializedBuiltIn = (BuiltInType)deserializedBuiltIns[i];
+                stream[i].Should().BeOfType<BuiltInType>();
+                var deserializedBuiltIn = (BuiltInType)stream[i];
 
                 deserializedBuiltIn.Kind.Should().Be(builtIns[i].Kind);
             }
+        }
 
-            var serializedBytes = Encoding.UTF8.GetBytes(serialized);
-            using (var memoryStream = new MemoryStream(serializedBytes))
+        class DeferredReference : ITypeReference
+        {
+            private readonly Func<ITypeReference> typeFunc;
+
+            public DeferredReference(Func<ITypeReference> typeFunc)
             {
-                deserializedBuiltIns = TypeSerializer.Deserialize(memoryStream);
+                this.typeFunc = typeFunc;
             }
 
-            for (var i = 0; i < builtIns.Length; i++)
-            {
-                deserializedBuiltIns[i].Should().BeOfType<BuiltInType>();
-                var deserializedBuiltIn = (BuiltInType)deserializedBuiltIns[i];
-
-                deserializedBuiltIn.Kind.Should().Be(builtIns[i].Kind);
-            }
+            public TypeBase Type => typeFunc().Type;
         }
 
         [TestMethod]
         public void Circular_references_are_allowed()
         {
             var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
-            var typeA = factory.Create(() => new ObjectType("typeA", new Dictionary<string, ObjectProperty>(), null));
-            var typeB = factory.Create(() => new ObjectType("typeB", new Dictionary<string, ObjectProperty>(), null));
+            ObjectType? typeA = null;
+            ObjectType? typeB = null;
 
-            typeA.Properties!["typeB"] = new ObjectProperty(factory.GetReference(typeB), ObjectPropertyFlags.None, "hello!");
-            typeB.Properties!["typeA"] = new ObjectProperty(factory.GetReference(typeA), ObjectPropertyFlags.None, "");
+            typeA = factory.Create(() => new ObjectType("typeA", new Dictionary<string, ObjectProperty> {
+                ["typeB"] = new ObjectProperty(new DeferredReference(() => factory.GetReference(typeB!)), ObjectPropertyFlags.None, "hello!"),
+            }, null));
+            typeB = factory.Create(() => new ObjectType("typeB", new Dictionary<string, ObjectProperty> {
+                ["typeA"] = new ObjectProperty(factory.GetReference(typeA), ObjectPropertyFlags.None, ""),
+            }, null));
 
-            var serialized = TypeSerializer.Serialize(factory.GetTypes());
-            var deserialized = TypeSerializer.Deserialize(serialized);
+            using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
+            var deserialized = TypeSerializer.Deserialize(stream);
 
             deserialized[0].Should().BeOfType<ObjectType>();
             deserialized[1].Should().BeOfType<ObjectType>();
@@ -91,8 +96,9 @@ namespace Azure.Bicep.Types.UnitTests
             var stringLiteralType = factory.Create(() => new StringLiteralType("abcdef"));
             var discriminatedObjectType = factory.Create(() => new DiscriminatedObjectType("disctest", "disctest", new Dictionary<string, ObjectProperty>(), new Dictionary<string, ITypeReference>()));
             var resourceFunctionType = factory.Create(() => new ResourceFunctionType("listTest", "zona", "2020-01-01", factory.GetReference(objectType), factory.GetReference(objectType)));
-            var serialized = TypeSerializer.Serialize(factory.GetTypes());
-            var deserialized = TypeSerializer.Deserialize(serialized);
+
+            using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
+            var deserialized = TypeSerializer.Deserialize(stream);
 
             deserialized[0].Should().BeOfType<BuiltInType>();
             deserialized[1].Should().BeOfType<ObjectType>();
@@ -123,14 +129,14 @@ namespace Azure.Bicep.Types.UnitTests
             var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
             var objectType = factory.Create(() => new ObjectType("steven", new Dictionary<string, ObjectProperty>(), null));
             var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.ReadOnly));
-            var serialized = TypeSerializer.Serialize(factory.GetTypes());
 
-            var deserializedNode = JsonNode.Parse(serialized)!;
+            using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
+            var deserializedNode = JsonSerializer.Deserialize<JsonNode>(stream)!;
             deserializedNode.AsArray()[1]?.AsObject()["4"]?.AsObject().Remove("Flags").Should().BeTrue();
             deserializedNode.AsArray()[1]?.AsObject()["4"]?.AsObject().Remove("ReadOnlyScopes").Should().BeTrue();
-            serialized = deserializedNode.ToJsonString();
+            using var rewrittenStream = BuildStream(stream => JsonSerializer.Serialize(stream, deserializedNode));
 
-            var deserialized = TypeSerializer.Deserialize(serialized);
+            var deserialized = TypeSerializer.Deserialize(rewrittenStream);
 
             deserialized[0].Should().BeOfType<ObjectType>();
             deserialized[1].Should().BeOfType<ResourceType>();
@@ -139,6 +145,15 @@ namespace Azure.Bicep.Types.UnitTests
             ((ResourceType)deserialized[1]).Name.Should().Be(resourceType.Name);
             ((ResourceType)deserialized[1]).Flags.Should().Be(ResourceFlags.None);
             ((ResourceType)deserialized[1]).ReadOnlyScopes.HasValue.Should().Be(false);
+        }
+
+        private static Stream BuildStream(Action<Stream> writeFunc)
+        {
+            var memoryStream = new MemoryStream();
+            writeFunc(memoryStream);
+            memoryStream.Position = 0;
+
+            return memoryStream;
         }
     }
 }

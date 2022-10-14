@@ -1,5 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
+using System.Text.Json.Serialization;
+
 namespace Azure.Bicep.Types.Concrete
 {
     public enum BuiltInTypeKind
@@ -16,11 +18,10 @@ namespace Azure.Bicep.Types.Concrete
 
     public class BuiltInType : TypeBase
     {
+        [JsonConstructor]
         public BuiltInType(BuiltInTypeKind kind)
-        {
-            Kind = kind;
-        }
+            => (Kind) = (kind);
 
-        public BuiltInTypeKind Kind { get; set; }
+        public BuiltInTypeKind Kind { get; }
     }
 }

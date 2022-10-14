@@ -1,25 +1,22 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Azure.Bicep.Types.Concrete
 {
     public class DiscriminatedObjectType : TypeBase
     {
-        public DiscriminatedObjectType(string name, string discriminator, IDictionary<string, ObjectProperty> baseProperties, IDictionary<string, ITypeReference> elements)
-        {
-            Name = name;
-            Discriminator = discriminator;
-            BaseProperties = baseProperties;
-            Elements = elements;
-        }
+        [JsonConstructor]
+        public DiscriminatedObjectType(string name, string discriminator, IReadOnlyDictionary<string, ObjectProperty> baseProperties, IReadOnlyDictionary<string, ITypeReference> elements)
+            => (Name, Discriminator, BaseProperties, Elements) = (name, discriminator, baseProperties, elements);
 
-        public string Name { get; set; }
+        public string Name { get; }
 
-        public string Discriminator { get; set; }
+        public string Discriminator { get; }
 
-        public IDictionary<string, ObjectProperty> BaseProperties { get; set; }
+        public IReadOnlyDictionary<string, ObjectProperty> BaseProperties { get; }
 
-        public IDictionary<string, ITypeReference> Elements { get; set; }
+        public IReadOnlyDictionary<string, ITypeReference> Elements { get; }
     }
 }

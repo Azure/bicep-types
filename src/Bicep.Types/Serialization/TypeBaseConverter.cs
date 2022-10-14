@@ -7,7 +7,7 @@ using Azure.Bicep.Types.Concrete;
 
 namespace Azure.Bicep.Types.Serialization
 {
-    public class TypeBaseConverter : JsonConverter<TypeBase>
+    internal class TypeBaseConverter : JsonConverter<TypeBase>
     {
         private readonly JsonSerializerOptions serializerOptions;
 

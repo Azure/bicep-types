@@ -2,23 +2,21 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Azure.Bicep.Types.Concrete
 {
     public class ObjectType : TypeBase
     {
-        public ObjectType(string name, IDictionary<string, ObjectProperty> properties, ITypeReference? additionalProperties)
-        {
-            Name = name;
-            Properties = properties;
-            AdditionalProperties = additionalProperties;
-        }
+        [JsonConstructor]
+        public ObjectType(string name, IReadOnlyDictionary<string, ObjectProperty> properties, ITypeReference? additionalProperties)
+            => (Name, Properties, AdditionalProperties) = (name, properties, additionalProperties);
 
-        public string Name { get; set; }
+        public string Name { get; }
 
-        public IDictionary<string, ObjectProperty> Properties { get; set; }
+        public IReadOnlyDictionary<string, ObjectProperty> Properties { get; }
 
-        public ITypeReference? AdditionalProperties { get; set; }
+        public ITypeReference? AdditionalProperties { get; }
     }
 
     [Flags]
@@ -37,16 +35,14 @@ namespace Azure.Bicep.Types.Concrete
 
     public class ObjectProperty
     {
+
+        [JsonConstructor]
         public ObjectProperty(ITypeReference type, ObjectPropertyFlags flags, string? description)
-        {
-            Type = type;
-            Flags = flags;
-            Description = description;
-        }
+            => (Type, Flags, Description) = (type, flags, description);
 
-        public ITypeReference Type { get; set; }
+        public ITypeReference Type { get; }
 
-        public ObjectPropertyFlags Flags { get; set; }
+        public ObjectPropertyFlags Flags { get; }
 
         public string? Description { get; }
     }
