@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 using System;
+using System.Text.Json.Serialization;
 
 namespace Azure.Bicep.Types.Concrete
 {
@@ -13,23 +14,18 @@ namespace Azure.Bicep.Types.Concrete
 
     public class ResourceType : TypeBase
     {
+        [JsonConstructor]
         public ResourceType(string name, ScopeType scopeType, ScopeType? readOnlyScopes, ITypeReference body, ResourceFlags flags)
-        {
-            Name = name;
-            ScopeType = scopeType;
-            ReadOnlyScopes = readOnlyScopes;
-            Body = body;
-            Flags = flags;
-        }
+            => (Name, ScopeType, ReadOnlyScopes, Body, Flags) = (name, scopeType, readOnlyScopes, body, flags);
 
-        public string Name { get; set; }
+        public string Name { get; }
 
-        public ScopeType ScopeType { get; set; }
+        public ScopeType ScopeType { get; }
 
-        public ScopeType? ReadOnlyScopes { get; set; }
+        public ScopeType? ReadOnlyScopes { get; }
 
-        public ITypeReference Body { get; set; }
+        public ITypeReference Body { get; }
 
-        public ResourceFlags Flags { get; set; }
+        public ResourceFlags Flags { get; }
     }
 }

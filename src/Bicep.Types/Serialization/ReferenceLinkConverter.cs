@@ -7,7 +7,7 @@ using Azure.Bicep.Types.Concrete;
 
 namespace Azure.Bicep.Types.Serialization
 {
-    public class TypeReferenceConverter : JsonConverter<ITypeReference>
+    internal class TypeReferenceConverter : JsonConverter<ITypeReference>
     {
         private readonly TypeFactory factory;
 
