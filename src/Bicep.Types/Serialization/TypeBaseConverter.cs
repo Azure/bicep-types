@@ -13,11 +13,9 @@ namespace Azure.Bicep.Types.Serialization
 
         public TypeBaseConverter(TypeFactory factory)
         {
-            serializerOptions = new JsonSerializerOptions
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            };
+            serializerOptions = new JsonSerializerOptions();
             serializerOptions.Converters.Add(new TypeReferenceConverter(factory));
+            serializerOptions.AddContext<TypeJsonContext>();
         }
 
         public override bool CanConvert(Type typeToConvert) =>
