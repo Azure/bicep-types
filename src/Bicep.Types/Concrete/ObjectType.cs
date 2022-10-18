@@ -32,7 +32,7 @@ namespace Azure.Bicep.Types.Concrete
 
         DeployTimeConstant = 1 << 3,
         
-        ResourceIdentifier = 1 << 11,
+        Identifier = 1 << 11,
     }
 
     public class ObjectProperty
