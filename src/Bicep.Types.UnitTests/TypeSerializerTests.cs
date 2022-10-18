@@ -63,11 +63,11 @@ namespace Azure.Bicep.Types.UnitTests
             ObjectType? typeA = null;
             ObjectType? typeB = null;
 
-            typeA = factory.Create(() => new ObjectType("typeA", new Dictionary<string, ObjectProperty> {
-                ["typeB"] = new ObjectProperty(new DeferredReference(() => factory.GetReference(typeB!)), ObjectPropertyFlags.None, "hello!"),
+            typeA = factory.Create(() => new ObjectType("typeA", new Dictionary<string, ObjectTypeProperty> {
+                ["typeB"] = new ObjectTypeProperty(new DeferredReference(() => factory.GetReference(typeB!)), ObjectTypePropertyFlags.None, "hello!"),
             }, null));
-            typeB = factory.Create(() => new ObjectType("typeB", new Dictionary<string, ObjectProperty> {
-                ["typeA"] = new ObjectProperty(factory.GetReference(typeA), ObjectPropertyFlags.None, ""),
+            typeB = factory.Create(() => new ObjectType("typeB", new Dictionary<string, ObjectTypeProperty> {
+                ["typeA"] = new ObjectTypeProperty(factory.GetReference(typeA), ObjectTypePropertyFlags.None, ""),
             }, null));
 
             using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
@@ -89,12 +89,12 @@ namespace Azure.Bicep.Types.UnitTests
             var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
 
             var intType = factory.Create(() => new BuiltInType(BuiltInTypeKind.Int));
-            var objectType = factory.Create(() => new ObjectType("steven", new Dictionary<string, ObjectProperty>(), null));
+            var objectType = factory.Create(() => new ObjectType("steven", new Dictionary<string, ObjectTypeProperty>(), null));
             var arrayType = factory.Create(() => new ArrayType(factory.GetReference(objectType)));
             var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.None));
             var unionType = factory.Create(() => new UnionType(new [] { factory.GetReference(intType), factory.GetReference(objectType) }));
             var stringLiteralType = factory.Create(() => new StringLiteralType("abcdef"));
-            var discriminatedObjectType = factory.Create(() => new DiscriminatedObjectType("disctest", "disctest", new Dictionary<string, ObjectProperty>(), new Dictionary<string, ITypeReference>()));
+            var discriminatedObjectType = factory.Create(() => new DiscriminatedObjectType("disctest", "disctest", new Dictionary<string, ObjectTypeProperty>(), new Dictionary<string, ITypeReference>()));
             var resourceFunctionType = factory.Create(() => new ResourceFunctionType("listTest", "zona", "2020-01-01", factory.GetReference(objectType), factory.GetReference(objectType)));
 
             using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
@@ -127,7 +127,7 @@ namespace Azure.Bicep.Types.UnitTests
         public void Resources_without_flags_or_readonly_scopes_can_be_deserialized()
         {
             var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
-            var objectType = factory.Create(() => new ObjectType("steven", new Dictionary<string, ObjectProperty>(), null));
+            var objectType = factory.Create(() => new ObjectType("steven", new Dictionary<string, ObjectTypeProperty>(), null));
             var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.ReadOnly));
 
             using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
