@@ -8,6 +8,7 @@
 * **def**: object (ReadOnly): Def prop
 * **dictType**: [dictType](#dicttype): Dictionary of any
 * **ghi**: bool (WriteOnly): Ghi prop
+* **jkl**: object (Required, Identifier): Jkl prop
 
 ## dictType
 ### Properties

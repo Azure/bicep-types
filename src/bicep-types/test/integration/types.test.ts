@@ -18,11 +18,37 @@ describe('types tests', () => {
     const factory = new TypeFactory();
 
     const props = factory.addObjectType('foo', {
-      abc: { Type: factory.builtInTypes[BuiltInTypeKind.String], Flags: ObjectPropertyFlags.None, Description: 'Abc prop' },
-      def: { Type: factory.builtInTypes[BuiltInTypeKind.Object], Flags: ObjectPropertyFlags.ReadOnly, Description: 'Def prop' },
-      ghi: { Type: factory.builtInTypes[BuiltInTypeKind.Bool], Flags: ObjectPropertyFlags.WriteOnly, Description: 'Ghi prop' },
-      dictType: { Type: factory.addObjectType('dictType', {}, factory.builtInTypes[BuiltInTypeKind.Any]), Flags: ObjectPropertyFlags.None, Description: 'Dictionary of any' },
-      arrayType: { Type: factory.addArrayType(factory.builtInTypes[BuiltInTypeKind.Any]), Flags: ObjectPropertyFlags.None, Description: 'Array of any' },
+      abc: {
+        Type: factory.builtInTypes[BuiltInTypeKind.String],
+        Flags: ObjectPropertyFlags.None,
+        Description: 'Abc prop'
+      },
+      def: {
+        Type: factory.builtInTypes[BuiltInTypeKind.Object],
+        Flags: ObjectPropertyFlags.ReadOnly,
+        Description: 'Def prop'
+      },
+      ghi: {
+        Type: factory.builtInTypes[BuiltInTypeKind.Bool],
+        Flags: ObjectPropertyFlags.WriteOnly,
+        Description: 'Ghi prop'
+      },
+      jkl: {
+        Type: factory.builtInTypes[BuiltInTypeKind.Object],
+        Flags: ObjectPropertyFlags.Identifier | ObjectPropertyFlags.Required,
+        Description: 'Jkl prop'
+      },
+      dictType: {
+        Type: factory.addObjectType('dictType', {},
+          factory.builtInTypes[BuiltInTypeKind.Any]),
+        Flags: ObjectPropertyFlags.None,
+        Description: 'Dictionary of any'
+      },
+      arrayType: {
+        Type: factory.addArrayType(factory.builtInTypes[BuiltInTypeKind.Any]),
+        Flags: ObjectPropertyFlags.None,
+        Description: 'Array of any'
+      },
     });
     const res = factory.addResourceType('foo@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None);
 
@@ -36,7 +62,7 @@ describe('types tests', () => {
       factory.addStringLiteralType("raw"),
       factory.addStringLiteralType("json"),
     ]);
-  
+
     const props = factory.addObjectType('request@v1', {
       uri: { Type: factory.builtInTypes[BuiltInTypeKind.String], Flags: ObjectPropertyFlags.Required, Description: 'The HTTP request URI to submit a GET request to.' },
       format: { Type: formatType, Flags: ObjectPropertyFlags.None, Description: 'How to deserialize the response body.' },
@@ -74,7 +100,7 @@ async function expectFiles(testName: string, typeFiles: TypeFile[], index: TypeI
   await expectFileContents(`${baseDir}/index.md`, writeIndexMarkdown(index));
   for (const { types, relativePath } of typeFiles) {
     await expectFileContents(`${baseDir}/${relativePath}`, writeJson(types));
-    await expectFileContents(`${baseDir}/${relativePath.substring(0, relativePath.lastIndexOf('.'))}.md`, writeMarkdown(types)); 
+    await expectFileContents(`${baseDir}/${relativePath.substring(0, relativePath.lastIndexOf('.'))}.md`, writeMarkdown(types));
   }
 }
 
