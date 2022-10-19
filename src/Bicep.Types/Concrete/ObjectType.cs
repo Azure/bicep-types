@@ -31,6 +31,8 @@ namespace Azure.Bicep.Types.Concrete
         WriteOnly = 1 << 2,
 
         DeployTimeConstant = 1 << 3,
+        
+        Identifier = 1 << 4,
     }
 
     public class ObjectProperty
