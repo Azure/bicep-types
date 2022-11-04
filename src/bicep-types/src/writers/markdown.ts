@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectPropertyFlagsLabels, getResourceFlagsLabels, getScopeTypeLabels, ObjectProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType } from '../types';
+import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectTypePropertyFlagsLabels, getResourceFlagsLabels, getScopeTypeLabels, ObjectTypeProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType } from '../types';
 import { groupBy, orderBy } from '../utils';
 
 class MarkdownFile {
@@ -60,8 +60,8 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
     }
   }
 
-  function writeTypeProperty(types: BicepType[], name: string, property: ObjectProperty) {
-    const flagsString = property.Flags ? ` (${getObjectPropertyFlagsLabels(property.Flags).join(', ')})` : '';
+  function writeTypeProperty(types: BicepType[], name: string, property: ObjectTypeProperty) {
+    const flagsString = property.Flags ? ` (${getObjectTypePropertyFlagsLabels(property.Flags).join(', ')})` : '';
     const descriptionString = property.Description ? `: ${property.Description}` : '';
     md.writeBullet(name, `${getTypeName(types, property.Type)}${flagsString}${descriptionString}`);
   }

@@ -9,18 +9,18 @@ namespace Azure.Bicep.Types.Concrete
     public class ObjectType : TypeBase
     {
         [JsonConstructor]
-        public ObjectType(string name, IReadOnlyDictionary<string, ObjectProperty> properties, ITypeReference? additionalProperties)
+        public ObjectType(string name, IReadOnlyDictionary<string, ObjectTypeProperty> properties, ITypeReference? additionalProperties)
             => (Name, Properties, AdditionalProperties) = (name, properties, additionalProperties);
 
         public string Name { get; }
 
-        public IReadOnlyDictionary<string, ObjectProperty> Properties { get; }
+        public IReadOnlyDictionary<string, ObjectTypeProperty> Properties { get; }
 
         public ITypeReference? AdditionalProperties { get; }
     }
 
     [Flags]
-    public enum ObjectPropertyFlags
+    public enum ObjectTypePropertyFlags
     {
         None = 0,
 
@@ -35,16 +35,16 @@ namespace Azure.Bicep.Types.Concrete
         Identifier = 1 << 4,
     }
 
-    public class ObjectProperty
+    public class ObjectTypeProperty
     {
 
         [JsonConstructor]
-        public ObjectProperty(ITypeReference type, ObjectPropertyFlags flags, string? description)
+        public ObjectTypeProperty(ITypeReference type, ObjectTypePropertyFlags flags, string? description)
             => (Type, Flags, Description) = (type, flags, description);
 
         public ITypeReference Type { get; }
 
-        public ObjectPropertyFlags Flags { get; }
+        public ObjectTypePropertyFlags Flags { get; }
 
         public string? Description { get; }
     }

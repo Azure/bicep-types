@@ -61,7 +61,7 @@ export function getScopeTypeLabels(input: ScopeType, ...scopeLabels: [ScopeType 
   return types
 }
 
-export enum ObjectPropertyFlags {
+export enum ObjectTypePropertyFlags {
   None = 0,
   Required = 1 << 0,
   ReadOnly = 1 << 1,
@@ -70,17 +70,17 @@ export enum ObjectPropertyFlags {
   Identifier = 1 << 4
 }
 
-const ObjectPropertyFlagsLabel = new Map<ObjectPropertyFlags, string>([
-  [ObjectPropertyFlags.Required, 'Required'],
-  [ObjectPropertyFlags.ReadOnly, 'ReadOnly'],
-  [ObjectPropertyFlags.WriteOnly, 'WriteOnly'],
-  [ObjectPropertyFlags.DeployTimeConstant, 'DeployTimeConstant'],
-  [ObjectPropertyFlags.Identifier, 'Identifier'],
+const ObjectTypePropertyFlagsLabel = new Map<ObjectTypePropertyFlags, string>([
+  [ObjectTypePropertyFlags.Required, 'Required'],
+  [ObjectTypePropertyFlags.ReadOnly, 'ReadOnly'],
+  [ObjectTypePropertyFlags.WriteOnly, 'WriteOnly'],
+  [ObjectTypePropertyFlags.DeployTimeConstant, 'DeployTimeConstant'],
+  [ObjectTypePropertyFlags.Identifier, 'Identifier'],
 ]);
 
-export function getObjectPropertyFlagsLabels(input: ObjectPropertyFlags) {
+export function getObjectTypePropertyFlagsLabels(input: ObjectTypePropertyFlags) {
   const types = [];
-  for (const [key, value] of ObjectPropertyFlagsLabel) {
+  for (const [key, value] of ObjectTypePropertyFlagsLabel) {
     if ((key & input) === key) {
       types.push(value);
     }
@@ -168,14 +168,14 @@ export type ResourceFunctionType = TypeBase<TypeBaseKind.ResourceFunctionType, {
 
 export type ObjectType = TypeBase<TypeBaseKind.ObjectType, {
   Name: string;
-  Properties: Record<string, ObjectProperty>;
+  Properties: Record<string, ObjectTypeProperty>;
   AdditionalProperties?: TypeReference;
 }>
 
 export type DiscriminatedObjectType = TypeBase<TypeBaseKind.DiscriminatedObjectType, {
   Name: string;
   Discriminator: string;
-  BaseProperties: Record<string, ObjectProperty>;
+  BaseProperties: Record<string, ObjectTypeProperty>;
   Elements: Record<string, TypeReference>;
 }>
 
@@ -185,9 +185,9 @@ export type ArrayType = TypeBase<TypeBaseKind.ArrayType, {
 
 export type BicepType = BuiltInType | UnionType | StringLiteralType | ResourceType | ResourceFunctionType | ObjectType | DiscriminatedObjectType | ArrayType
 
-export type ObjectProperty = {
+export type ObjectTypeProperty = {
   Type: TypeReference;
-  Flags: ObjectPropertyFlags;
+  Flags: ObjectTypePropertyFlags;
   Description?: string;
 }
 
@@ -267,7 +267,7 @@ export class TypeFactory {
     });
   }
 
-  public addObjectType(name: string, properties: Record<string, ObjectProperty>, additionalProperties?: TypeReference) {
+  public addObjectType(name: string, properties: Record<string, ObjectTypeProperty>, additionalProperties?: TypeReference) {
     return this.addType({
       Type: TypeBaseKind.ObjectType,
       Name: name,
@@ -276,7 +276,7 @@ export class TypeFactory {
     });
   }
 
-  public addDiscriminatedObjectType(name: string, discriminator: string, baseProperties: Record<string, ObjectProperty>, elements: Record<string, TypeReference>) {
+  public addDiscriminatedObjectType(name: string, discriminator: string, baseProperties: Record<string, ObjectTypeProperty>, elements: Record<string, TypeReference>) {
     return this.addType({
       Type: TypeBaseKind.DiscriminatedObjectType,
       Name: name,
