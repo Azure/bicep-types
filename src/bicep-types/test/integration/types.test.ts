@@ -4,7 +4,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
-import { BuiltInTypeKind, ObjectProperty, ObjectTypePropertyFlags, ObjectType, ResourceFlags, ResourceType, ScopeType, TypeFactory, TypeFile, TypeIndex } from '../../src/types';
+import { BuiltInTypeKind, ObjectTypePropertyFlags, ObjectType, ResourceFlags, ResourceType, ScopeType, TypeFactory, TypeFile, TypeIndex } from '../../src/types';
 import { readJson, writeIndexJson, writeJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
 import { buildIndex } from '../../src/indexer';
