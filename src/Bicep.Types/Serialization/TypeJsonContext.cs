@@ -7,6 +7,7 @@ using Azure.Bicep.Types.Index;
 
 namespace Azure.Bicep.Types.Serialization;
 
+[JsonSerializable(typeof(TypeBase[]))]
 [JsonSerializable(typeof(TypeIndex))]
 [JsonSerializable(typeof(ArrayType))]
 [JsonSerializable(typeof(BuiltInType))]
