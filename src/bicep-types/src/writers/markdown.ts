@@ -140,7 +140,9 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
         if (resourceFunctionType.Input !== undefined) {
           md.writeBullet("Input", getTypeName(types, resourceFunctionType.Input));
         }
-        md.writeBullet("Output", getTypeName(types, resourceFunctionType.Output));
+        if (resourceFunctionType.Output !== undefined) {
+          md.writeBullet("Output", getTypeName(types, resourceFunctionType.Output));
+        }
 
         md.writeNewLine();
         return;
@@ -209,8 +211,10 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
         typesToWrite.push(types[resourceFunctionType.Input]);
         findTypesToWrite(types, typesToWrite, resourceFunctionType.Input);
       }
-      typesToWrite.push(types[resourceFunctionType.Output]);
-      findTypesToWrite(types, typesToWrite, resourceFunctionType.Output);
+      if (resourceFunctionType.Output !== undefined) {
+        typesToWrite.push(types[resourceFunctionType.Output]);
+        findTypesToWrite(types, typesToWrite, resourceFunctionType.Output);
+      }
     }
 
     typesToWrite.sort((a, b) => {
