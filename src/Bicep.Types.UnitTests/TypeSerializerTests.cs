@@ -105,6 +105,7 @@ namespace Azure.Bicep.Types.UnitTests
             var booleanType = factory.Create(() => new BooleanType());
             var intType = factory.Create(() => new IntegerType(-10, 10));
             var stringType = factory.Create(() => new StringType(true, 3, 10, "^foo"));
+            var secureObjectType = factory.Create(() => new ObjectType("larry", new Dictionary<string, ObjectTypeProperty>(), null, secure: true));
 
             using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
             var deserialized = TypeSerializer.Deserialize(stream);
@@ -122,9 +123,11 @@ namespace Azure.Bicep.Types.UnitTests
             deserialized[10].Should().BeOfType<BooleanType>();
             deserialized[11].Should().BeOfType<IntegerType>();
             deserialized[12].Should().BeOfType<StringType>();
+            deserialized[13].Should().BeOfType<ObjectType>();
 
             ((BuiltInType)deserialized[0]).Kind.Should().Be(builtInType.Kind);
             ((ObjectType)deserialized[1]).Name.Should().Be(objectType.Name);
+            ((ObjectType)deserialized[1]).Secure.Should().BeNull();
             ((ArrayType)deserialized[2]).ItemType!.Type.Should().Be(deserialized[1]);
             ((ResourceType)deserialized[3]).Name.Should().Be(resourceType.Name);
             ((ResourceType)deserialized[3]).Flags.Should().Be(resourceType.Flags);
@@ -141,6 +144,8 @@ namespace Azure.Bicep.Types.UnitTests
             ((StringType)deserialized[12]).MinLength.Should().Be(3);
             ((StringType)deserialized[12]).MaxLength.Should().Be(10);
             ((StringType)deserialized[12]).Pattern.Should().Be("^foo");
+            ((ObjectType)deserialized[13]).Name.Should().Be(secureObjectType.Name);
+            ((ObjectType)deserialized[13]).Secure.Should().BeTrue();
         }
 
         [TestMethod]
