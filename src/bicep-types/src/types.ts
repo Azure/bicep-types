@@ -147,7 +147,7 @@ export function getResourceFlagsLabels(input: ResourceFlags) {
 
 export type TypeReference = number
 
-type TypeBase<T extends TypeBaseKind, U extends object> = { Type: T } & U
+type TypeBase<T extends TypeBaseKind, U extends object = Record<string, unknown>> = { Type: T } & U
 
 export type BuiltInType = TypeBase<TypeBaseKind.BuiltInType, {
   Kind: BuiltInTypeKind;
@@ -197,11 +197,11 @@ export type ArrayType = TypeBase<TypeBaseKind.ArrayType, {
   MaxLength?: number;
 }>
 
-export type AnyType = TypeBase<TypeBaseKind.AnyType, {}>
+export type AnyType = TypeBase<TypeBaseKind.AnyType>
 
-export type NullType = TypeBase<TypeBaseKind.NullType, {}>
+export type NullType = TypeBase<TypeBaseKind.NullType>
 
-export type BooleanType = TypeBase<TypeBaseKind.BooleanType, {}>
+export type BooleanType = TypeBase<TypeBaseKind.BooleanType>
 
 export type IntegerType = TypeBase<TypeBaseKind.IntegerType, {
   MinValue?: number;

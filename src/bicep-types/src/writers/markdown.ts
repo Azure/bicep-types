@@ -40,12 +40,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       case TypeBaseKind.ObjectType:
         return md.generateAnchorLink((type as ObjectType).Name);
       case TypeBaseKind.ArrayType:
-        let itemTypeName = getTypeName(types, (type as ArrayType).ItemType);
-        if (itemTypeName.indexOf(' ') != -1)
-        {
-          itemTypeName = `(${itemTypeName})`;
-        }
-        return `${itemTypeName}[]`;
+        return getArrayTypeName(types, (type as ArrayType));
       case TypeBaseKind.ResourceType:
         return (type as ResourceType).Name;
       case TypeBaseKind.ResourceFunctionType: {
@@ -75,6 +70,16 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
     }
   }
 
+  function getArrayTypeName(types: BicepType[], type: ArrayType): string
+  {
+    let itemTypeName = getTypeName(types, type.ItemType);
+    if (itemTypeName.indexOf(' ') != -1)
+    {
+      itemTypeName = `(${itemTypeName})`;
+    }
+    return `${itemTypeName}[]`;
+  }
+
   function getIntegerModifiers(type: IntegerType): string
   {
     return formatModifiers(type.MinValue !== undefined ? `minValue: ${type.MinValue}` : undefined,
@@ -86,12 +91,12 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
     return formatModifiers(type.Secure ? 'secure' : undefined,
       type.MinLength !== undefined ? `minLength: ${type.MinLength}` : undefined,
       type.MaxLength !== undefined ? `maxLength: ${type.MaxLength}` : undefined,
-      type.Pattern !== undefined ? `pattern: "${type.Pattern.replace('"', '\"')}"` : undefined);
+      type.Pattern !== undefined ? `pattern: "${type.Pattern.replace('"', '\\"')}"` : undefined);
   }
 
   function formatModifiers(...modifiers: Array<string | undefined>): string
   {
-    let modifierString = modifiers.filter(modifier => !!modifier).join(', ');
+    const modifierString = modifiers.filter(modifier => !!modifier).join(', ');
     return modifierString.length > 0 ? ` {${modifierString}}` : modifierString;
   }
 
