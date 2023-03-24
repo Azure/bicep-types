@@ -92,7 +92,7 @@ namespace Azure.Bicep.Types.UnitTests
 
             #pragma warning disable 618
             var builtInType = factory.Create(() => new BuiltInType(BuiltInTypeKind.Int));
-            #pragma warning disable
+            #pragma warning restore 618
             var objectType = factory.Create(() => new ObjectType("steven", new Dictionary<string, ObjectTypeProperty>(), null));
             var arrayType = factory.Create(() => new ArrayType(factory.GetReference(objectType)));
             var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.None));
