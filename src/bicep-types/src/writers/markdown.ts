@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectTypePropertyFlagsLabels, getResourceFlagsLabels, getScopeTypeLabels, ObjectTypeProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType } from '../types';
+import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectTypePropertyFlagsLabels, getResourceFlagsLabels, getScopeTypeLabels, ObjectTypeProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, StringType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType, IntegerType } from '../types';
 import { groupBy, orderBy } from '../utils';
 
 class MarkdownFile {
@@ -40,7 +40,12 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       case TypeBaseKind.ObjectType:
         return md.generateAnchorLink((type as ObjectType).Name);
       case TypeBaseKind.ArrayType:
-        return `${getTypeName(types, (type as ArrayType).ItemType)}[]`;
+        let itemTypeName = getTypeName(types, (type as ArrayType).ItemType);
+        if (itemTypeName.indexOf(' ') != -1)
+        {
+          itemTypeName = `(${itemTypeName})`;
+        }
+        return `${itemTypeName}[]`;
       case TypeBaseKind.ResourceType:
         return (type as ResourceType).Name;
       case TypeBaseKind.ResourceFunctionType: {
@@ -55,9 +60,39 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
         return `'${(type as StringLiteralType).Value}'`;
       case TypeBaseKind.DiscriminatedObjectType:
         return md.generateAnchorLink((type as DiscriminatedObjectType).Name);
+      case TypeBaseKind.AnyType:
+        return 'any';
+      case TypeBaseKind.NullType:
+        return 'null';
+      case TypeBaseKind.BooleanType:
+        return 'bool';
+      case TypeBaseKind.IntegerType:
+        return `int${getIntegerModifiers(type as IntegerType)}`;
+      case TypeBaseKind.StringType:
+        return `string${getStringModifiers(type as StringType)}`;
       default:
         throw `Unrecognized type`;
     }
+  }
+
+  function getIntegerModifiers(type: IntegerType): string
+  {
+    return formatModifiers(type.MinValue !== undefined ? `minValue: ${type.MinValue}` : undefined,
+      type.MaxValue !== undefined ? `maxValue: ${type.MaxValue}` : undefined);
+  }
+
+  function getStringModifiers(type: StringType): string
+  {
+    return formatModifiers(type.Secure ? 'secure' : undefined,
+      type.MinLength !== undefined ? `minLength: ${type.MinLength}` : undefined,
+      type.MaxLength !== undefined ? `maxLength: ${type.MaxLength}` : undefined,
+      type.Pattern !== undefined ? `pattern: "${type.Pattern.replace('"', '\"')}"` : undefined);
+  }
+
+  function formatModifiers(...modifiers: Array<string | undefined>): string
+  {
+    let modifierString = modifiers.filter(modifier => !!modifier).join(', ');
+    return modifierString.length > 0 ? ` {${modifierString}}` : modifierString;
   }
 
   function writeTypeProperty(types: BicepType[], name: string, property: ObjectTypeProperty) {

@@ -5,13 +5,19 @@
 ### Properties
 * **abc**: string: Abc prop
 * **arrayType**: any[]: Array of any
-* **def**: object (ReadOnly): Def prop
+* **def**: [def](#def) (ReadOnly): Def prop
 * **dictType**: [dictType](#dicttype): Dictionary of any
 * **ghi**: bool (WriteOnly): Ghi prop
-* **jkl**: object (Required, Identifier): Jkl prop
+* **jkl**: [jkl](#jkl) (Required, Identifier): Jkl prop
+
+## def
+### Properties
 
 ## dictType
 ### Properties
 ### Additional Properties
 * **Additional Properties Type**: any
+
+## jkl
+### Properties
 

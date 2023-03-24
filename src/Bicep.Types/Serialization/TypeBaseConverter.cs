@@ -34,6 +34,11 @@ namespace Azure.Bicep.Types.Serialization
             StringLiteralType = 6,
             DiscriminatedObjectType = 7,
             ResourceFunctionType = 8,
+            AnyType = 9,
+            NullType = 10,
+            BooleanType = 11,
+            IntegerType = 12,
+            StringType = 13,
         }
 
         public override TypeBase Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -64,6 +69,11 @@ namespace Azure.Bicep.Types.Serialization
                 TypeBaseKind.StringLiteralType => JsonSerializer.Deserialize<StringLiteralType>(ref reader, serializerOptions),
                 TypeBaseKind.DiscriminatedObjectType => JsonSerializer.Deserialize<DiscriminatedObjectType>(ref reader, serializerOptions),
                 TypeBaseKind.ResourceFunctionType => JsonSerializer.Deserialize<ResourceFunctionType>(ref reader, serializerOptions),
+                TypeBaseKind.AnyType => JsonSerializer.Deserialize<AnyType>(ref reader, serializerOptions),
+                TypeBaseKind.NullType => JsonSerializer.Deserialize<NullType>(ref reader, serializerOptions),
+                TypeBaseKind.BooleanType => JsonSerializer.Deserialize<BooleanType>(ref reader, serializerOptions),
+                TypeBaseKind.IntegerType => JsonSerializer.Deserialize<IntegerType>(ref reader, serializerOptions),
+                TypeBaseKind.StringType => JsonSerializer.Deserialize<StringType>(ref reader, serializerOptions),
                 _ => throw new JsonException("Found unknown TypeBaseKind"),
             };
 
@@ -90,6 +100,11 @@ namespace Azure.Bicep.Types.Serialization
                 StringLiteralType _ => TypeBaseKind.StringLiteralType,
                 DiscriminatedObjectType _ => TypeBaseKind.DiscriminatedObjectType,
                 ResourceFunctionType _ => TypeBaseKind.ResourceFunctionType,
+                AnyType => TypeBaseKind.AnyType,
+                NullType => TypeBaseKind.NullType,
+                BooleanType => TypeBaseKind.BooleanType,
+                IntegerType => TypeBaseKind.IntegerType,
+                StringType => TypeBaseKind.StringType,
                 _ => throw new JsonException(),
             };
 
@@ -120,6 +135,21 @@ namespace Azure.Bicep.Types.Serialization
                     break;
                 case ResourceFunctionType resourceFunctionType:
                     JsonSerializer.Serialize(writer, resourceFunctionType, serializerOptions);
+                    break;
+                case AnyType anyType:
+                    JsonSerializer.Serialize(writer, anyType, serializerOptions);
+                    break;
+                case NullType nullType:
+                    JsonSerializer.Serialize(writer, nullType, serializerOptions);
+                    break;
+                case BooleanType booleanType:
+                    JsonSerializer.Serialize(writer, booleanType, serializerOptions);
+                    break;
+                case IntegerType integerType:
+                    JsonSerializer.Serialize(writer, integerType, serializerOptions);
+                    break;
+                case StringType stringType:
+                    JsonSerializer.Serialize(writer, stringType, serializerOptions);
                     break;
                 default:
                     throw new JsonException();

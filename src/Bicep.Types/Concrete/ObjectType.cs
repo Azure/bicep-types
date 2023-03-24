@@ -31,7 +31,7 @@ namespace Azure.Bicep.Types.Concrete
         WriteOnly = 1 << 2,
 
         DeployTimeConstant = 1 << 3,
-        
+
         Identifier = 1 << 4,
     }
 
@@ -39,13 +39,15 @@ namespace Azure.Bicep.Types.Concrete
     {
 
         [JsonConstructor]
-        public ObjectTypeProperty(ITypeReference type, ObjectTypePropertyFlags flags, string? description)
-            => (Type, Flags, Description) = (type, flags, description);
+        public ObjectTypeProperty(ITypeReference type, ObjectTypePropertyFlags flags, string? description, bool? secure = null)
+            => (Type, Flags, Description, Secure) = (type, flags, description, secure);
 
         public ITypeReference Type { get; }
 
         public ObjectTypePropertyFlags Flags { get; }
 
         public string? Description { get; }
+
+        public bool? Secure { get; }
     }
 }

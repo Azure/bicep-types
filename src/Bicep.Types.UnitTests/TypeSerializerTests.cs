@@ -22,6 +22,7 @@ namespace Azure.Bicep.Types.UnitTests
         {
             var builtIns = new []
             {
+                #pragma warning disable 618
                 new BuiltInType(BuiltInTypeKind.Any),
                 new BuiltInType(BuiltInTypeKind.Null),
                 new BuiltInType(BuiltInTypeKind.Bool),
@@ -30,6 +31,7 @@ namespace Azure.Bicep.Types.UnitTests
                 new BuiltInType(BuiltInTypeKind.Object),
                 new BuiltInType(BuiltInTypeKind.Array),
                 new BuiltInType(BuiltInTypeKind.ResourceRef),
+                #pragma warning restore 618
             };
 
             using var memoryStream = BuildStream(stream => TypeSerializer.Serialize(stream, builtIns));
@@ -88,14 +90,21 @@ namespace Azure.Bicep.Types.UnitTests
         {
             var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
 
-            var intType = factory.Create(() => new BuiltInType(BuiltInTypeKind.Int));
+            #pragma warning disable 618
+            var builtInType = factory.Create(() => new BuiltInType(BuiltInTypeKind.Int));
+            #pragma warning disable
             var objectType = factory.Create(() => new ObjectType("steven", new Dictionary<string, ObjectTypeProperty>(), null));
             var arrayType = factory.Create(() => new ArrayType(factory.GetReference(objectType)));
             var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.None));
-            var unionType = factory.Create(() => new UnionType(new [] { factory.GetReference(intType), factory.GetReference(objectType) }));
+            var unionType = factory.Create(() => new UnionType(new [] { factory.GetReference(builtInType), factory.GetReference(objectType) }));
             var stringLiteralType = factory.Create(() => new StringLiteralType("abcdef"));
             var discriminatedObjectType = factory.Create(() => new DiscriminatedObjectType("disctest", "disctest", new Dictionary<string, ObjectTypeProperty>(), new Dictionary<string, ITypeReference>()));
             var resourceFunctionType = factory.Create(() => new ResourceFunctionType("listTest", "zona", "2020-01-01", factory.GetReference(objectType), factory.GetReference(objectType)));
+            var anyType = factory.Create(() => new AnyType());
+            var nullType = factory.Create(() => new NullType());
+            var booleanType = factory.Create(() => new BooleanType());
+            var intType = factory.Create(() => new IntegerType(-10, 10));
+            var stringType = factory.Create(() => new StringType(true, 3, 10, "^foo"));
 
             using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
             var deserialized = TypeSerializer.Deserialize(stream);
@@ -108,8 +117,13 @@ namespace Azure.Bicep.Types.UnitTests
             deserialized[5].Should().BeOfType<StringLiteralType>();
             deserialized[6].Should().BeOfType<DiscriminatedObjectType>();
             deserialized[7].Should().BeOfType<ResourceFunctionType>();
+            deserialized[8].Should().BeOfType<AnyType>();
+            deserialized[9].Should().BeOfType<NullType>();
+            deserialized[10].Should().BeOfType<BooleanType>();
+            deserialized[11].Should().BeOfType<IntegerType>();
+            deserialized[12].Should().BeOfType<StringType>();
 
-            ((BuiltInType)deserialized[0]).Kind.Should().Be(intType.Kind);
+            ((BuiltInType)deserialized[0]).Kind.Should().Be(builtInType.Kind);
             ((ObjectType)deserialized[1]).Name.Should().Be(objectType.Name);
             ((ArrayType)deserialized[2]).ItemType!.Type.Should().Be(deserialized[1]);
             ((ResourceType)deserialized[3]).Name.Should().Be(resourceType.Name);
@@ -121,6 +135,12 @@ namespace Azure.Bicep.Types.UnitTests
             ((StringLiteralType)deserialized[5]).Value.Should().Be(stringLiteralType.Value);
             ((DiscriminatedObjectType)deserialized[6]).Name.Should().Be(discriminatedObjectType.Name);
             ((ResourceFunctionType)deserialized[7]).Name.Should().Be(resourceFunctionType.Name);
+            ((IntegerType)deserialized[11]).MinValue.Should().Be(-10);
+            ((IntegerType)deserialized[11]).MaxValue.Should().Be(10);
+            ((StringType)deserialized[12]).Secure.Should().BeTrue();
+            ((StringType)deserialized[12]).MinLength.Should().Be(3);
+            ((StringType)deserialized[12]).MaxLength.Should().Be(10);
+            ((StringType)deserialized[12]).Pattern.Should().Be("^foo");
         }
 
         [TestMethod]

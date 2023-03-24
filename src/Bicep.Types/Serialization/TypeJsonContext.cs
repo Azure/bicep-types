@@ -17,6 +17,11 @@ namespace Azure.Bicep.Types.Serialization;
 [JsonSerializable(typeof(ResourceType))]
 [JsonSerializable(typeof(StringLiteralType))]
 [JsonSerializable(typeof(UnionType))]
+[JsonSerializable(typeof(AnyType))]
+[JsonSerializable(typeof(NullType))]
+[JsonSerializable(typeof(BooleanType))]
+[JsonSerializable(typeof(IntegerType))]
+[JsonSerializable(typeof(StringType))]
 [JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 internal partial class TypeJsonContext : JsonSerializerContext
 {
