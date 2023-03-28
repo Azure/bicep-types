@@ -20,6 +20,11 @@ class MarkdownFile {
     this.writeNewLine();
   }
 
+  writeNotaBene(content: string) {
+    this.output += `*${content}*`;
+    this.writeNewLine();
+  }
+
   writeNewLine() {
     this.output += '\n';
   }
@@ -77,7 +82,8 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
     {
       itemTypeName = `(${itemTypeName})`;
     }
-    return `${itemTypeName}[]`;
+
+    return `${itemTypeName}[]${formatModifiers(type.MinLength !== undefined ? `minLength: ${type.MinLength}` : undefined, type.MaxLength !== undefined ? `maxLength: ${type.MaxLength}` : undefined)}`;
   }
 
   function getIntegerModifiers(type: IntegerType): string
@@ -189,6 +195,10 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
         const objectType = type as ObjectType;
         if (includeHeader) {
           md.writeHeading(nesting, objectType.Name);
+        }
+
+        if (objectType.Secure) {
+          md.writeNotaBene("Secure")
         }
 
         md.writeHeading(nesting + 1, "Properties");

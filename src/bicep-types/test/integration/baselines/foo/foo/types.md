@@ -4,7 +4,7 @@
 * **Valid Scope(s)**: Unknown
 ### Properties
 * **abc**: string: Abc prop
-* **arrayType**: any[]: Array of any
+* **arrayType**: any[] {minLength: 1, maxLength: 10}: Array of any
 * **def**: [def](#def) (ReadOnly): Def prop
 * **dictType**: [dictType](#dicttype): Dictionary of any
 * **ghi**: bool (WriteOnly): Ghi prop
@@ -14,6 +14,7 @@
 ### Properties
 
 ## dictType
+*Secure*
 ### Properties
 ### Additional Properties
 * **Additional Properties Type**: any

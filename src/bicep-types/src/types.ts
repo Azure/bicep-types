@@ -349,12 +349,13 @@ export class TypeFactory {
     });
   }
 
-  public addObjectType(name: string, properties: Record<string, ObjectTypeProperty>, additionalProperties?: TypeReference) {
+  public addObjectType(name: string, properties: Record<string, ObjectTypeProperty>, additionalProperties?: TypeReference, secure?: boolean) {
     return this.addType({
       Type: TypeBaseKind.ObjectType,
       Name: name,
       Properties: properties,
       AdditionalProperties: additionalProperties,
+      Secure: secure,
     });
   }
 
@@ -368,10 +369,12 @@ export class TypeFactory {
     });
   }
 
-  public addArrayType(itemType: TypeReference) {
+  public addArrayType(itemType: TypeReference, minLength?: number, maxLength?: number) {
     return this.addType({
       Type: TypeBaseKind.ArrayType,
       ItemType: itemType,
+      MinLength: minLength,
+      MaxLength: maxLength,
     });
   }
 }

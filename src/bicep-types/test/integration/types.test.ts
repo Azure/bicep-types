@@ -40,12 +40,13 @@ describe('types tests', () => {
       },
       dictType: {
         Type: factory.addObjectType('dictType', {},
-          factory.addAnyType()),
+          factory.addAnyType(),
+          true),
         Flags: ObjectTypePropertyFlags.None,
         Description: 'Dictionary of any'
       },
       arrayType: {
-        Type: factory.addArrayType(factory.addAnyType()),
+        Type: factory.addArrayType(factory.addAnyType(), 1, 10),
         Flags: ObjectTypePropertyFlags.None,
         Description: 'Array of any'
       },
