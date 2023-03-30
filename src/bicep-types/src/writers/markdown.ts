@@ -94,7 +94,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
 
   function getStringModifiers(type: StringType): string
   {
-    return formatModifiers(type.Secure ? 'secure' : undefined,
+    return formatModifiers(type.Sensitive ? 'sensitive' : undefined,
       type.MinLength !== undefined ? `minLength: ${type.MinLength}` : undefined,
       type.MaxLength !== undefined ? `maxLength: ${type.MaxLength}` : undefined,
       type.Pattern !== undefined ? `pattern: "${type.Pattern.replace('"', '\\"')}"` : undefined);
@@ -197,8 +197,8 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
           md.writeHeading(nesting, objectType.Name);
         }
 
-        if (objectType.Secure) {
-          md.writeNotaBene("Secure")
+        if (objectType.Sensitive) {
+          md.writeNotaBene("Sensitive")
         }
 
         md.writeHeading(nesting + 1, "Properties");

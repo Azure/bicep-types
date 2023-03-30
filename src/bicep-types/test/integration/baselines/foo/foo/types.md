@@ -14,7 +14,7 @@
 ### Properties
 
 ## dictType
-*Secure*
+*Sensitive*
 ### Properties
 ### Additional Properties
 * **Additional Properties Type**: any

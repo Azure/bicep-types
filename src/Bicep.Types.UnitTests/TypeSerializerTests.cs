@@ -105,7 +105,7 @@ namespace Azure.Bicep.Types.UnitTests
             var booleanType = factory.Create(() => new BooleanType());
             var intType = factory.Create(() => new IntegerType(-10, 10));
             var stringType = factory.Create(() => new StringType(true, 3, 10, "^foo"));
-            var secureObjectType = factory.Create(() => new ObjectType("larry", new Dictionary<string, ObjectTypeProperty>(), null, secure: true));
+            var sensitiveObjectType = factory.Create(() => new ObjectType("larry", new Dictionary<string, ObjectTypeProperty>(), null, sensitive: true));
 
             using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
             var deserialized = TypeSerializer.Deserialize(stream);
@@ -127,7 +127,7 @@ namespace Azure.Bicep.Types.UnitTests
 
             ((BuiltInType)deserialized[0]).Kind.Should().Be(builtInType.Kind);
             ((ObjectType)deserialized[1]).Name.Should().Be(objectType.Name);
-            ((ObjectType)deserialized[1]).Secure.Should().BeNull();
+            ((ObjectType)deserialized[1]).Sensitive.Should().BeNull();
             ((ArrayType)deserialized[2]).ItemType!.Type.Should().Be(deserialized[1]);
             ((ResourceType)deserialized[3]).Name.Should().Be(resourceType.Name);
             ((ResourceType)deserialized[3]).Flags.Should().Be(resourceType.Flags);
@@ -140,12 +140,12 @@ namespace Azure.Bicep.Types.UnitTests
             ((ResourceFunctionType)deserialized[7]).Name.Should().Be(resourceFunctionType.Name);
             ((IntegerType)deserialized[11]).MinValue.Should().Be(-10);
             ((IntegerType)deserialized[11]).MaxValue.Should().Be(10);
-            ((StringType)deserialized[12]).Secure.Should().BeTrue();
+            ((StringType)deserialized[12]).Sensitive.Should().BeTrue();
             ((StringType)deserialized[12]).MinLength.Should().Be(3);
             ((StringType)deserialized[12]).MaxLength.Should().Be(10);
             ((StringType)deserialized[12]).Pattern.Should().Be("^foo");
-            ((ObjectType)deserialized[13]).Name.Should().Be(secureObjectType.Name);
-            ((ObjectType)deserialized[13]).Secure.Should().BeTrue();
+            ((ObjectType)deserialized[13]).Name.Should().Be(sensitiveObjectType.Name);
+            ((ObjectType)deserialized[13]).Sensitive.Should().BeTrue();
         }
 
         [TestMethod]

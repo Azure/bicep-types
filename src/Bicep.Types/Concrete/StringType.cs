@@ -7,15 +7,15 @@ namespace Azure.Bicep.Types.Concrete;
 public class StringType : TypeBase
 {
     [JsonConstructor]
-    public StringType(bool? secure = null, long? minLength = null, long? maxLength = null, string? pattern = null)
+    public StringType(bool? sensitive = null, long? minLength = null, long? maxLength = null, string? pattern = null)
     {
-        Secure = secure;
+        Sensitive = sensitive;
         MinLength = minLength;
         MaxLength = maxLength;
         Pattern = pattern;
     }
 
-    public bool? Secure { get; }
+    public bool? Sensitive { get; }
 
     public long? MinLength { get; }
 

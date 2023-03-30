@@ -181,7 +181,7 @@ export type ObjectType = TypeBase<TypeBaseKind.ObjectType, {
   Name: string;
   Properties: Record<string, ObjectTypeProperty>;
   AdditionalProperties?: TypeReference;
-  Secure?: boolean;
+  Sensitive?: boolean;
 }>
 
 export type DiscriminatedObjectType = TypeBase<TypeBaseKind.DiscriminatedObjectType, {
@@ -209,7 +209,7 @@ export type IntegerType = TypeBase<TypeBaseKind.IntegerType, {
 }>
 
 export type StringType = TypeBase<TypeBaseKind.StringType, {
-  Secure?: boolean;
+  Sensitive?: boolean;
   MinLength?: number;
   MaxLength?: number;
   Pattern?: string;
@@ -280,8 +280,8 @@ export class TypeFactory {
     });
   }
 
-  public addStringType(secure?: true, minLength?: number, maxLength?: number, pattern?: string): TypeReference {
-    const cacheKey = `secure:${secure}|minLength:${minLength}|maxLength:${maxLength}|pattern:${pattern}`;
+  public addStringType(sensitive?: true, minLength?: number, maxLength?: number, pattern?: string): TypeReference {
+    const cacheKey = `secure:${sensitive}|minLength:${minLength}|maxLength:${maxLength}|pattern:${pattern}`;
     const preexisting = this.stringTypeCache.get(cacheKey);
     if (preexisting !== undefined) {
       return preexisting;
@@ -289,7 +289,7 @@ export class TypeFactory {
 
     const added = this.addType({
       Type: TypeBaseKind.StringType,
-      Secure: secure,
+      Sensitive: sensitive,
       MinLength: minLength,
       MaxLength: maxLength,
       Pattern: pattern,
@@ -349,13 +349,13 @@ export class TypeFactory {
     });
   }
 
-  public addObjectType(name: string, properties: Record<string, ObjectTypeProperty>, additionalProperties?: TypeReference, secure?: boolean) {
+  public addObjectType(name: string, properties: Record<string, ObjectTypeProperty>, additionalProperties?: TypeReference, sensitive?: boolean) {
     return this.addType({
       Type: TypeBaseKind.ObjectType,
       Name: name,
       Properties: properties,
       AdditionalProperties: additionalProperties,
-      Secure: secure,
+      Sensitive: sensitive,
     });
   }
 
