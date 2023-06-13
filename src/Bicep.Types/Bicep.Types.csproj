@@ -7,9 +7,12 @@
     <RootNamespace>Azure.Bicep.Types</RootNamespace>
     <Description>Shared contracts for Bicep types</Description>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="7.0.1" />
   </ItemGroup>
+
+  <!-- Need to sign the assembly with a strong name in Official Build. -->
+  <Import Project="$(EnlistmentRoot)\StrongName.props" />
 
 </Project>
