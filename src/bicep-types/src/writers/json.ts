@@ -14,6 +14,7 @@ export function writeJson(types: BicepType[]) {
 }
 
 export function readJson(content: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const input = JSON.parse(content) as any[];
 
   return input.flatMap(t => 
