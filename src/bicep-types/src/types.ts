@@ -98,6 +98,11 @@ export enum TypeBaseKind {
   StringLiteralType = 6,
   DiscriminatedObjectType = 7,
   ResourceFunctionType = 8,
+  AnyType = 9,
+  NullType = 10,
+  BooleanType = 11,
+  IntegerType = 12,
+  StringType = 13,
 }
 
 const TypeBaseKindLabel = new Map<TypeBaseKind, string>([
@@ -108,6 +113,12 @@ const TypeBaseKindLabel = new Map<TypeBaseKind, string>([
   [TypeBaseKind.UnionType, 'UnionType'],
   [TypeBaseKind.StringLiteralType, 'StringLiteralType'],
   [TypeBaseKind.DiscriminatedObjectType, 'DiscriminatedObjectType'],
+  [TypeBaseKind.ResourceFunctionType, 'ResourceFunctionType'],
+  [TypeBaseKind.AnyType, 'AnyType'],
+  [TypeBaseKind.NullType, 'NullType'],
+  [TypeBaseKind.BooleanType, 'BooleanType'],
+  [TypeBaseKind.IntegerType, 'IntegerType'],
+  [TypeBaseKind.StringType, 'StringType'],
 ]);
 
 export function getTypeBaseKindLabel(input: TypeBaseKind) {
@@ -136,7 +147,7 @@ export function getResourceFlagsLabels(input: ResourceFlags) {
 
 export type TypeReference = number
 
-type TypeBase<T extends TypeBaseKind, U extends object> = { Type: T } & U
+type TypeBase<T extends TypeBaseKind, U extends object = Record<string, unknown>> = { Type: T } & U
 
 export type BuiltInType = TypeBase<TypeBaseKind.BuiltInType, {
   Kind: BuiltInTypeKind;
@@ -170,6 +181,7 @@ export type ObjectType = TypeBase<TypeBaseKind.ObjectType, {
   Name: string;
   Properties: Record<string, ObjectTypeProperty>;
   AdditionalProperties?: TypeReference;
+  Sensitive?: boolean;
 }>
 
 export type DiscriminatedObjectType = TypeBase<TypeBaseKind.DiscriminatedObjectType, {
@@ -181,9 +193,41 @@ export type DiscriminatedObjectType = TypeBase<TypeBaseKind.DiscriminatedObjectT
 
 export type ArrayType = TypeBase<TypeBaseKind.ArrayType, {
   ItemType: TypeReference;
+  MinLength?: number;
+  MaxLength?: number;
 }>
 
-export type BicepType = BuiltInType | UnionType | StringLiteralType | ResourceType | ResourceFunctionType | ObjectType | DiscriminatedObjectType | ArrayType
+export type AnyType = TypeBase<TypeBaseKind.AnyType>
+
+export type NullType = TypeBase<TypeBaseKind.NullType>
+
+export type BooleanType = TypeBase<TypeBaseKind.BooleanType>
+
+export type IntegerType = TypeBase<TypeBaseKind.IntegerType, {
+  MinValue?: number;
+  MaxValue?: number;
+}>
+
+export type StringType = TypeBase<TypeBaseKind.StringType, {
+  Sensitive?: boolean;
+  MinLength?: number;
+  MaxLength?: number;
+  Pattern?: string;
+}>
+
+export type BicepType = BuiltInType |
+  UnionType |
+  StringType |
+  StringLiteralType |
+  IntegerType |
+  BooleanType |
+  NullType |
+  AnyType |
+  ResourceType |
+  ResourceFunctionType |
+  ObjectType |
+  DiscriminatedObjectType |
+  ArrayType
 
 export type ObjectTypeProperty = {
   Type: TypeReference;
@@ -193,42 +237,33 @@ export type ObjectTypeProperty = {
 
 export class TypeFactory {
   types: BicepType[];
-  builtInTypes: Record<BuiltInTypeKind, TypeReference>;
+  private readonly typeToTypeReference: Map<BicepType, TypeReference> = new Map();
+  private readonly stringTypeCache: Map<string, TypeReference> = new Map();
+  private readonly integerTypeCache: Map<string, TypeReference> = new Map();
+  private readonly anyType: AnyType = {Type: TypeBaseKind.AnyType};
+  private readonly nullType: NullType = {Type: TypeBaseKind.NullType};
+  private readonly booleanType: BooleanType = {Type: TypeBaseKind.BooleanType};
 
   constructor() {
     this.types = [];
-    this.builtInTypes = {
-      [BuiltInTypeKind.Any]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Any }),
-      [BuiltInTypeKind.Null]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Null }),
-      [BuiltInTypeKind.Bool]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Bool }),
-      [BuiltInTypeKind.Int]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Int }),
-      [BuiltInTypeKind.String]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.String }),
-      [BuiltInTypeKind.Object]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Object }),
-      [BuiltInTypeKind.Array]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.Array }),
-      [BuiltInTypeKind.ResourceRef]: this.addType({ Type: TypeBaseKind.BuiltInType, Kind: BuiltInTypeKind.ResourceRef }),
-    };
   }
 
   public addType(type: BicepType): TypeReference {
+    const preexisting = this.typeToTypeReference.get(type);
+    if (preexisting !== undefined)
+    {
+      return preexisting;
+    }
+
     const index = this.types.length;
     this.types[index] = type;
+    this.typeToTypeReference.set(type, index);
 
     return index;
   }
 
   public lookupType(reference: TypeReference): BicepType {
     return this.types[reference];
-  }
-
-  public lookupBuiltInType(kind: BuiltInTypeKind): TypeReference {
-    return this.builtInTypes[kind];
-  }
-
-  public addBuiltInType(kind: BuiltInTypeKind) {
-    return this.addType({
-      Type: TypeBaseKind.BuiltInType,
-      Kind: kind,
-    });
   }
 
   public addUnionType(elements: TypeReference[]) {
@@ -243,6 +278,53 @@ export class TypeFactory {
       Type: TypeBaseKind.StringLiteralType,
       Value: value,
     });
+  }
+
+  public addStringType(sensitive?: true, minLength?: number, maxLength?: number, pattern?: string): TypeReference {
+    const cacheKey = `secure:${sensitive}|minLength:${minLength}|maxLength:${maxLength}|pattern:${pattern}`;
+    const preexisting = this.stringTypeCache.get(cacheKey);
+    if (preexisting !== undefined) {
+      return preexisting;
+    }
+
+    const added = this.addType({
+      Type: TypeBaseKind.StringType,
+      Sensitive: sensitive,
+      MinLength: minLength,
+      MaxLength: maxLength,
+      Pattern: pattern,
+    });
+    this.stringTypeCache.set(cacheKey, added);
+    return added;
+  }
+
+  public addIntegerType(minValue?: number, maxValue?: number): TypeReference {
+    const cacheKey = `minValue:${minValue}|maxValue:${maxValue}`;
+    const preexisting = this.integerTypeCache.get(cacheKey);
+    if (preexisting !== undefined)
+    {
+      return preexisting;
+    }
+
+    const added = this.addType({
+      Type: TypeBaseKind.IntegerType,
+      MinValue: minValue,
+      MaxValue: maxValue,
+    });
+    this.integerTypeCache.set(cacheKey, added);
+    return added;
+  }
+
+  public addAnyType(): TypeReference {
+    return this.addType(this.anyType);
+  }
+
+  public addNullType(): TypeReference {
+    return this.addType(this.nullType);
+  }
+
+  public addBooleanType(): TypeReference {
+    return this.addType(this.booleanType);
   }
 
   public addResourceType(name: string, scopeType: ScopeType, readOnlyScopes: ScopeType | undefined, body: TypeReference, flags: ResourceFlags) {
@@ -267,12 +349,13 @@ export class TypeFactory {
     });
   }
 
-  public addObjectType(name: string, properties: Record<string, ObjectTypeProperty>, additionalProperties?: TypeReference) {
+  public addObjectType(name: string, properties: Record<string, ObjectTypeProperty>, additionalProperties?: TypeReference, sensitive?: boolean) {
     return this.addType({
       Type: TypeBaseKind.ObjectType,
       Name: name,
       Properties: properties,
       AdditionalProperties: additionalProperties,
+      Sensitive: sensitive,
     });
   }
 
@@ -286,10 +369,12 @@ export class TypeFactory {
     });
   }
 
-  public addArrayType(itemType: TypeReference) {
+  public addArrayType(itemType: TypeReference, minLength?: number, maxLength?: number) {
     return this.addType({
       Type: TypeBaseKind.ArrayType,
       ItemType: itemType,
+      MinLength: minLength,
+      MaxLength: maxLength,
     });
   }
 }

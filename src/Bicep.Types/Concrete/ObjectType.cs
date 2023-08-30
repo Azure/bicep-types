@@ -9,14 +9,16 @@ namespace Azure.Bicep.Types.Concrete
     public class ObjectType : TypeBase
     {
         [JsonConstructor]
-        public ObjectType(string name, IReadOnlyDictionary<string, ObjectTypeProperty> properties, ITypeReference? additionalProperties)
-            => (Name, Properties, AdditionalProperties) = (name, properties, additionalProperties);
+        public ObjectType(string name, IReadOnlyDictionary<string, ObjectTypeProperty> properties, ITypeReference? additionalProperties, bool? sensitive = null)
+            => (Name, Properties, AdditionalProperties, Sensitive) = (name, properties, additionalProperties, sensitive);
 
         public string Name { get; }
 
         public IReadOnlyDictionary<string, ObjectTypeProperty> Properties { get; }
 
         public ITypeReference? AdditionalProperties { get; }
+
+        public bool? Sensitive { get; }
     }
 
     [Flags]
@@ -31,7 +33,7 @@ namespace Azure.Bicep.Types.Concrete
         WriteOnly = 1 << 2,
 
         DeployTimeConstant = 1 << 3,
-        
+
         Identifier = 1 << 4,
     }
 

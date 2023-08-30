@@ -4,7 +4,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
-import { BuiltInTypeKind, ObjectTypePropertyFlags, ObjectType, ResourceFlags, ResourceType, ScopeType, TypeFactory, TypeFile, TypeIndex } from '../../src/types';
+import { ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex } from '../../src/types';
 import { readJson, writeIndexJson, writeJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
 import { buildIndex } from '../../src/indexer';
@@ -19,33 +19,34 @@ describe('types tests', () => {
 
     const props = factory.addObjectType('foo', {
       abc: {
-        Type: factory.builtInTypes[BuiltInTypeKind.String],
+        Type: factory.addStringType(),
         Flags: ObjectTypePropertyFlags.None,
         Description: 'Abc prop'
       },
       def: {
-        Type: factory.builtInTypes[BuiltInTypeKind.Object],
+        Type: factory.addObjectType("def", {}),
         Flags: ObjectTypePropertyFlags.ReadOnly,
         Description: 'Def prop'
       },
       ghi: {
-        Type: factory.builtInTypes[BuiltInTypeKind.Bool],
+        Type: factory.addBooleanType(),
         Flags: ObjectTypePropertyFlags.WriteOnly,
         Description: 'Ghi prop'
       },
       jkl: {
-        Type: factory.builtInTypes[BuiltInTypeKind.Object],
+        Type: factory.addObjectType("jkl", {}),
         Flags: ObjectTypePropertyFlags.Identifier | ObjectTypePropertyFlags.Required,
         Description: 'Jkl prop'
       },
       dictType: {
         Type: factory.addObjectType('dictType', {},
-          factory.builtInTypes[BuiltInTypeKind.Any]),
+          factory.addAnyType(),
+          true),
         Flags: ObjectTypePropertyFlags.None,
         Description: 'Dictionary of any'
       },
       arrayType: {
-        Type: factory.addArrayType(factory.builtInTypes[BuiltInTypeKind.Any]),
+        Type: factory.addArrayType(factory.addAnyType(), 1, 10),
         Flags: ObjectTypePropertyFlags.None,
         Description: 'Array of any'
       },
@@ -64,11 +65,11 @@ describe('types tests', () => {
     ]);
 
     const props = factory.addObjectType('request@v1', {
-      uri: { Type: factory.builtInTypes[BuiltInTypeKind.String], Flags: ObjectTypePropertyFlags.Required, Description: 'The HTTP request URI to submit a GET request to.' },
+      uri: { Type: factory.addStringType(), Flags: ObjectTypePropertyFlags.Required, Description: 'The HTTP request URI to submit a GET request to.' },
       format: { Type: formatType, Flags: ObjectTypePropertyFlags.None, Description: 'How to deserialize the response body.' },
-      method: { Type: factory.builtInTypes[BuiltInTypeKind.String], Flags: ObjectTypePropertyFlags.None, Description: 'The HTTP method to submit request to the given URI.' },
-      statusCode: { Type: factory.builtInTypes[BuiltInTypeKind.Int], Flags: ObjectTypePropertyFlags.ReadOnly, Description: 'The status code of the HTTP request.' },
-      body: { Type: factory.builtInTypes[BuiltInTypeKind.Any], Flags: ObjectTypePropertyFlags.ReadOnly, Description: 'The parsed request body.' },
+      method: { Type: factory.addStringType(undefined, 3), Flags: ObjectTypePropertyFlags.None, Description: 'The HTTP method to submit request to the given URI.' },
+      statusCode: { Type: factory.addIntegerType(100, 599), Flags: ObjectTypePropertyFlags.ReadOnly, Description: 'The status code of the HTTP request.' },
+      body: { Type: factory.addAnyType(), Flags: ObjectTypePropertyFlags.ReadOnly, Description: 'The parsed request body.' },
     });
     factory.addResourceType('request@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None);
 
