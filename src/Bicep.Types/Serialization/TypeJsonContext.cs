@@ -29,7 +29,7 @@ internal partial class TypeJsonContext : JsonSerializerContext
     {
         var options = new JsonSerializerOptions();
         options.Converters.Add(new TypeBaseConverter(factory));
-        options.AddContext<TypeJsonContext>();
+        options.TypeInfoResolver = TypeJsonContext.Default;
 
         return options;
     }

@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
       
       - name: Build
         run: dotnet build --configuration release
@@ -37,7 +37,7 @@ jobs:
         run: dotnet pack --configuration release
 
       - name: Upload Nuget packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bicep-types-packages
           path: ./out/*
@@ -88,7 +88,7 @@ jobs:
         working-directory: ./src/bicep-types
 
       - name: Upload NPM package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bicep-types.tgz
           path: ./src/bicep-types/bicep-types.tgz
