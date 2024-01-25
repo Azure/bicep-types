@@ -15,7 +15,7 @@ namespace Azure.Bicep.Types.Serialization
         {
             serializerOptions = new JsonSerializerOptions();
             serializerOptions.Converters.Add(new TypeReferenceConverter(factory));
-            serializerOptions.AddContext<TypeJsonContext>();
+            serializerOptions.TypeInfoResolver = TypeJsonContext.Default;
         }
 
         public override bool CanConvert(Type typeToConvert) =>
