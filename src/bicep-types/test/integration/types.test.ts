@@ -4,7 +4,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
-import { ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex } from '../../src/types';
+import { ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeIndexEntry, TypeSettings } from '../../src/types';
 import { readJson, writeIndexJson, writeJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
 import { buildIndex } from '../../src/indexer';
@@ -53,7 +53,38 @@ describe('types tests', () => {
     });
     const res = factory.addResourceType('foo@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None);
 
-    await verifyBaselines(factory, 'foo', 'foo');
+    const configFactory = new TypeFactory();
+    const configLocation = configFactory.addObjectType('config', {
+      configProp: {
+        Type: factory.addStringType(),
+        Flags: ObjectTypePropertyFlags.Required,
+        Description: 'Config property',
+      },
+    });
+    const fallbackTypeLocation = configFactory.addResourceType('fallback', ScopeType.Unknown, undefined, configFactory.addObjectType('fallback body', {
+      bodyProp: {
+        Type: factory.addStringType(),
+        Flags: ObjectTypePropertyFlags.Required,
+        Description: 'Body property',
+      },
+    }), ResourceFlags.None);
+    
+    const settings: TypeSettings = {
+      Name: 'Foo',
+      IsSingleton: true,
+      Version: '0.1.2',
+      Configuration: {
+        Index: configLocation,
+        RelativePath: 'config/types.json',
+      },
+    };
+
+    const fallbackResourceType: TypeIndexEntry = {
+      Index: fallbackTypeLocation,
+      RelativePath: 'config/types.json',
+    };
+
+    await verifyBaselines(factory, 'foo', 'foo', configFactory, settings, fallbackResourceType);
   });
 
   it('should generated http types', async () => {
@@ -82,7 +113,7 @@ describe('types tests', () => {
   });
 });
 
-async function verifyBaselines(factory: TypeFactory, typesPath: string, testName: string) {
+async function verifyBaselines(factory: TypeFactory, typesPath: string, testName: string, configFactory?: TypeFactory, settings?: TypeSettings, fallbackResourceType?: TypeIndexEntry) {
   const deserializedTypes = readJson(writeJson(factory.types));
   expect(deserializedTypes).toEqual(factory.types);
 
@@ -90,7 +121,18 @@ async function verifyBaselines(factory: TypeFactory, typesPath: string, testName
     relativePath: `${typesPath}/types.json`,
     types: factory.types,
   }];
-  const index = buildIndex(typeFiles, console.log);
+
+  const index = buildIndex(typeFiles, console.log, settings, fallbackResourceType);
+
+  if (configFactory) {
+    const deserializedTypes = readJson(writeJson(configFactory.types));
+    expect(deserializedTypes).toEqual(configFactory.types);
+
+    typeFiles.push({
+      relativePath: `${typesPath}/config.json`,
+      types: configFactory.types,
+    });
+  }
 
   expectFiles(testName, typeFiles, index);
 }
