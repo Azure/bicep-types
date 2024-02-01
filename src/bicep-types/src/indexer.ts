@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ResourceFunctionType, ResourceType, TypeBaseKind, TypeFile, TypeIndex, TypeIndexEntry } from "./types";
+import { ResourceFunctionType, ResourceType, TypeBaseKind, TypeFile, TypeIndex, TypeIndexEntry, TypeSettings } from "./types";
 import { orderBy } from "./utils";
 
-export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void): TypeIndex {
+export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void, settings?: TypeSettings, fallbackResourceType?: TypeIndexEntry): TypeIndex {
   const resourceTypes = new Set<string>();
   const resourceFunctions = new Set<string>();
   const resDictionary: Record<string, TypeIndexEntry> = {};
@@ -57,5 +57,7 @@ export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void
   return {
     Resources: resDictionary,
     Functions: funcDictionary,
+    Settings: settings,
+    FallbackResourceType: fallbackResourceType,
   }
 }

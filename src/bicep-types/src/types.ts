@@ -382,6 +382,8 @@ export class TypeFactory {
 export interface TypeIndex {
   Resources: Record<string, TypeIndexEntry>;
   Functions: Record<string, Record<string, TypeIndexEntry[]>>;
+  Settings?: TypeSettings;
+  FallbackResourceType?: TypeIndexEntry;
 }
 
 export interface TypeIndexEntry {
@@ -392,4 +394,11 @@ export interface TypeIndexEntry {
 export interface TypeFile {
   relativePath: string;
   types: BicepType[];
+}
+
+export interface TypeSettings {
+  Name: string;
+  Version: string;
+  IsSingleton: boolean;
+  Configuration?: TypeIndexEntry;
 }
