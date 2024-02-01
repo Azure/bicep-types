@@ -18,6 +18,6 @@ namespace Azure.Bicep.Types.Index
 
         public bool IsSingleton { get; }
 
-        public TypeLocation Configuration { get; }
+        public TypeLocation? Configuration { get; }
     }
 }
