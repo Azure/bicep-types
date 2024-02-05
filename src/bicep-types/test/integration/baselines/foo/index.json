@@ -1,1 +1,1 @@
-{"Resources":{"foo@v1":{"RelativePath":"foo/types.json","Index":8}},"Functions":{},"Settings":{"Name":"Foo","IsSingleton":true,"Version":"0.1.2","Configuration":{"Index":0,"RelativePath":"config/types.json"}},"FallbackResourceType":{"Index":2,"RelativePath":"config/types.json"}}
+{"Resources":{"foo@v1":{"RelativePath":"foo/types.json","Index":8}},"Functions":{},"Settings":{"Name":"Foo","IsSingleton":true,"Version":"0.1.2","ConfigurationType":{"Index":0,"RelativePath":"config/types.json"}},"FallbackResourceType":{"Index":2,"RelativePath":"config/types.json"}}

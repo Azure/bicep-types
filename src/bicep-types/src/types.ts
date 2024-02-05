@@ -400,5 +400,5 @@ export interface TypeSettings {
   Name: string;
   Version: string;
   IsSingleton: boolean;
-  Configuration?: TypeIndexEntry;
+  ConfigurationType?: TypeIndexEntry;
 }
