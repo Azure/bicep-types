@@ -73,7 +73,7 @@ describe('types tests', () => {
       Name: 'Foo',
       IsSingleton: true,
       Version: '0.1.2',
-      Configuration: {
+      ConfigurationType: {
         Index: configLocation,
         RelativePath: 'config/types.json',
       },
