@@ -29,7 +29,7 @@ namespace Azure.Bicep.Types.Index
         public IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<TypeLocation>>> Functions { get; }
 
         /// <summary>
-        /// Provider settings such as name, version, isSingleton and configuration.
+        /// Provider settings such as name, version, isSingleton and configurationType.
         /// </summary>
         public TypeSettings? Settings { get; }
 
