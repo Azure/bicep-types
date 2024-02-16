@@ -90,39 +90,23 @@ export function getObjectTypePropertyFlagsLabels(input: ObjectTypePropertyFlags)
 }
 
 export enum TypeBaseKind {
-  BuiltInType = 1,
-  ObjectType = 2,
-  ArrayType = 3,
-  ResourceType = 4,
-  UnionType = 5,
-  StringLiteralType = 6,
-  DiscriminatedObjectType = 7,
-  ResourceFunctionType = 8,
-  AnyType = 9,
-  NullType = 10,
-  BooleanType = 11,
-  IntegerType = 12,
-  StringType = 13,
+  BuiltInType = 'BuiltInType',
+  ObjectType = 'ObjectType',
+  ArrayType = 'ArrayType',
+  ResourceType = 'ResourceType',
+  UnionType = 'UnionType',
+  StringLiteralType = 'StringLiteralType',
+  DiscriminatedObjectType = 'DiscriminatedObjectType',
+  ResourceFunctionType = 'ResourceFunctionType',
+  AnyType = 'AnyType',
+  NullType = 'NullType',
+  BooleanType = 'BooleanType',
+  IntegerType = 'IntegerType',
+  StringType = 'StringType',
 }
 
-const TypeBaseKindLabel = new Map<TypeBaseKind, string>([
-  [TypeBaseKind.BuiltInType, 'BuiltInType'],
-  [TypeBaseKind.ObjectType, 'ObjectType'],
-  [TypeBaseKind.ArrayType, 'ArrayType'],
-  [TypeBaseKind.ResourceType, 'ResourceType'],
-  [TypeBaseKind.UnionType, 'UnionType'],
-  [TypeBaseKind.StringLiteralType, 'StringLiteralType'],
-  [TypeBaseKind.DiscriminatedObjectType, 'DiscriminatedObjectType'],
-  [TypeBaseKind.ResourceFunctionType, 'ResourceFunctionType'],
-  [TypeBaseKind.AnyType, 'AnyType'],
-  [TypeBaseKind.NullType, 'NullType'],
-  [TypeBaseKind.BooleanType, 'BooleanType'],
-  [TypeBaseKind.IntegerType, 'IntegerType'],
-  [TypeBaseKind.StringType, 'StringType'],
-]);
-
-export function getTypeBaseKindLabel(input: TypeBaseKind) {
-  return TypeBaseKindLabel.get(input) ?? '';
+export function getTypeBaseKindLabel(input: TypeBaseKind): string {
+  return input;
 }
 
 export enum ResourceFlags {
@@ -380,13 +364,13 @@ export class TypeFactory {
 }
 
 export interface TypeIndex {
-  Resources: Record<string, TypeIndexEntry>;
-  Functions: Record<string, Record<string, TypeIndexEntry[]>>;
+  Resources: Record<string, TypeLocation>;
+  Functions: Record<string, Record<string, TypeLocation[]>>;
   Settings?: TypeSettings;
-  FallbackResourceType?: TypeIndexEntry;
+  FallbackResourceType?: TypeLocation;
 }
 
-export interface TypeIndexEntry {
+export interface TypeLocation {
   RelativePath: string;
   Index: number;
 }
@@ -400,5 +384,5 @@ export interface TypeSettings {
   Name: string;
   Version: string;
   IsSingleton: boolean;
-  ConfigurationType?: TypeIndexEntry;
+  ConfigurationType?: TypeLocation;
 }

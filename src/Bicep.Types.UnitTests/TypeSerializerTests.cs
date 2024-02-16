@@ -157,8 +157,8 @@ namespace Azure.Bicep.Types.UnitTests
 
             using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
             var deserializedNode = JsonSerializer.Deserialize<JsonNode>(stream)!;
-            deserializedNode.AsArray()[1]?.AsObject()["4"]?.AsObject().Remove("Flags").Should().BeTrue();
-            deserializedNode.AsArray()[1]?.AsObject()["4"]?.AsObject().Remove("ReadOnlyScopes").Should().BeTrue();
+            deserializedNode.AsArray()[1]?.AsObject().Remove("Flags").Should().BeTrue();
+            deserializedNode.AsArray()[1]?.AsObject().Remove("ReadOnlyScopes").Should().BeTrue();
             using var rewrittenStream = BuildStream(stream => JsonSerializer.Serialize(stream, deserializedNode));
 
             var deserialized = TypeSerializer.Deserialize(rewrittenStream);

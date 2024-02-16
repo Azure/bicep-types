@@ -4,7 +4,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
-import { ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeIndexEntry, TypeSettings } from '../../src/types';
+import { ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeLocation, TypeSettings } from '../../src/types';
 import { readJson, writeIndexJson, writeJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
 import { buildIndex } from '../../src/indexer';
@@ -79,7 +79,7 @@ describe('types tests', () => {
       },
     };
 
-    const fallbackResourceType: TypeIndexEntry = {
+    const fallbackResourceType: TypeLocation = {
       Index: fallbackTypeLocation,
       RelativePath: 'config/types.json',
     };
@@ -113,7 +113,7 @@ describe('types tests', () => {
   });
 });
 
-async function verifyBaselines(factory: TypeFactory, typesPath: string, testName: string, configFactory?: TypeFactory, settings?: TypeSettings, fallbackResourceType?: TypeIndexEntry) {
+async function verifyBaselines(factory: TypeFactory, typesPath: string, testName: string, configFactory?: TypeFactory, settings?: TypeSettings, fallbackResourceType?: TypeLocation) {
   const deserializedTypes = readJson(writeJson(factory.types));
   expect(deserializedTypes).toEqual(factory.types);
 

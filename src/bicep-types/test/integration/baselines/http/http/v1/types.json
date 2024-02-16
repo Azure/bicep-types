@@ -1,1 +1,70 @@
-[{"6":{"Value":"raw"}},{"6":{"Value":"json"}},{"5":{"Elements":[0,1]}},{"13":{}},{"13":{"MinLength":3}},{"12":{"MinValue":100,"MaxValue":599}},{"9":{}},{"2":{"Name":"request@v1","Properties":{"uri":{"Type":3,"Flags":1,"Description":"The HTTP request URI to submit a GET request to."},"format":{"Type":2,"Flags":0,"Description":"How to deserialize the response body."},"method":{"Type":4,"Flags":0,"Description":"The HTTP method to submit request to the given URI."},"statusCode":{"Type":5,"Flags":2,"Description":"The status code of the HTTP request."},"body":{"Type":6,"Flags":2,"Description":"The parsed request body."}}}},{"4":{"Name":"request@v1","ScopeType":0,"Body":7,"Flags":0}}]
+[
+  {
+    "$type": "StringLiteralType",
+    "Value": "raw"
+  },
+  {
+    "$type": "StringLiteralType",
+    "Value": "json"
+  },
+  {
+    "$type": "UnionType",
+    "Elements": [
+      0,
+      1
+    ]
+  },
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "StringType",
+    "MinLength": 3
+  },
+  {
+    "$type": "IntegerType",
+    "MinValue": 100,
+    "MaxValue": 599
+  },
+  {
+    "$type": "AnyType"
+  },
+  {
+    "$type": "ObjectType",
+    "Name": "request@v1",
+    "Properties": {
+      "uri": {
+        "Type": 3,
+        "Flags": 1,
+        "Description": "The HTTP request URI to submit a GET request to."
+      },
+      "format": {
+        "Type": 2,
+        "Flags": 0,
+        "Description": "How to deserialize the response body."
+      },
+      "method": {
+        "Type": 4,
+        "Flags": 0,
+        "Description": "The HTTP method to submit request to the given URI."
+      },
+      "statusCode": {
+        "Type": 5,
+        "Flags": 2,
+        "Description": "The status code of the HTTP request."
+      },
+      "body": {
+        "Type": 6,
+        "Flags": 2,
+        "Description": "The parsed request body."
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "Name": "request@v1",
+    "ScopeType": 0,
+    "Body": 7,
+    "Flags": 0
+  }
+]

@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ResourceFunctionType, ResourceType, TypeBaseKind, TypeFile, TypeIndex, TypeIndexEntry, TypeSettings } from "./types";
+import { ResourceFunctionType, ResourceType, TypeBaseKind, TypeFile, TypeIndex, TypeLocation, TypeSettings } from "./types";
 import { orderBy } from "./utils";
 
-export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void, settings?: TypeSettings, fallbackResourceType?: TypeIndexEntry): TypeIndex {
+export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void, settings?: TypeSettings, fallbackResourceType?: TypeLocation): TypeIndex {
   const resourceTypes = new Set<string>();
   const resourceFunctions = new Set<string>();
-  const resDictionary: Record<string, TypeIndexEntry> = {};
-  const funcDictionary: Record<string, Record<string, TypeIndexEntry[]>> = {};
+  const resDictionary: Record<string, TypeLocation> = {};
+  const funcDictionary: Record<string, Record<string, TypeLocation[]>> = {};
 
   // Use a consistent sort order so that file system differences don't generate changes
   for (const typeFile of orderBy(typeFiles, f => f.relativePath.toLowerCase())) {
