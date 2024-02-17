@@ -4,7 +4,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
-import { CrossFileTypeReference, ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings } from '../../src/types';
+import { CrossFileTypeReference, FunctionTypeParameter, ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings } from '../../src/types';
 import { readTypesJson, writeIndexJson, writeTypesJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
 import { buildIndex } from '../../src/indexer';
@@ -51,7 +51,11 @@ describe('types tests', () => {
         description: 'Array of any'
       },
     });
-    const res = factory.addResourceType('foo@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None);
+
+    const funcArg: FunctionTypeParameter = { name: 'arg', type: factory.addStringType() };
+    const func = factory.addFunctionType('doSomething', factory.addBooleanType(), [funcArg]);
+
+    const res = factory.addResourceType('foo@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None, [func]);
 
     const configFactory = new TypeFactory();
     const configLocation = configFactory.addObjectType('config', {
@@ -73,10 +77,10 @@ describe('types tests', () => {
       name: 'Foo',
       isSingleton: true,
       version: '0.1.2',
-      configurationType: new CrossFileTypeReference('config/types.json', configLocation.index),
+      configurationType: new CrossFileTypeReference('foo/config.json', configLocation.index),
     };
 
-    const fallbackResourceType = new CrossFileTypeReference('config/types.json', fallbackRef.index);
+    const fallbackResourceType = new CrossFileTypeReference('foo/config.json', fallbackRef.index);
 
     await verifyBaselines(factory, 'foo', 'foo', configFactory, settings, fallbackResourceType);
   });

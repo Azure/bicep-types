@@ -1,7 +1,7 @@
 {
   "resources": {
     "foo@v1": {
-      "$ref": "foo/types.json#/8"
+      "$ref": "foo/types.json#/9"
     }
   },
   "resourceFunctions": {},
@@ -10,10 +10,10 @@
     "isSingleton": true,
     "version": "0.1.2",
     "configurationType": {
-      "$ref": "config/types.json#/0"
+      "$ref": "foo/config.json#/0"
     }
   },
   "fallbackResourceType": {
-    "$ref": "config/types.json#/2"
+    "$ref": "foo/config.json#/2"
   }
 }

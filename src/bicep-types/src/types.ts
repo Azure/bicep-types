@@ -103,6 +103,7 @@ export enum TypeBaseKind {
   BooleanType = 'BooleanType',
   IntegerType = 'IntegerType',
   StringType = 'StringType',
+  FunctionType = 'FunctionType',
 }
 
 export function getTypeBaseKindLabel(input: TypeBaseKind): string {
@@ -159,6 +160,7 @@ export type ResourceType = TypeBase<TypeBaseKind.ResourceType, {
   readOnlyScopes?: ScopeType;
   body: TypeReference;
   flags: ResourceFlags;
+  functions?: TypeReference[];
 }>
 
 export type ResourceFunctionType = TypeBase<TypeBaseKind.ResourceFunctionType, {
@@ -174,6 +176,19 @@ export type ObjectType = TypeBase<TypeBaseKind.ObjectType, {
   properties: Record<string, ObjectTypeProperty>;
   additionalProperties?: TypeReference;
   sensitive?: boolean;
+}>
+
+export type FunctionTypeParameter = {
+  name: string;
+  type: TypeReference;
+  description?: string;
+}
+
+export type FunctionType = TypeBase<TypeBaseKind.FunctionType, {
+  name: string;
+  output: TypeReference;
+  parameters: FunctionTypeParameter[];
+  description?: string;
 }>
 
 export type DiscriminatedObjectType = TypeBase<TypeBaseKind.DiscriminatedObjectType, {
@@ -219,7 +234,8 @@ export type BicepType = BuiltInType |
   ResourceFunctionType |
   ObjectType |
   DiscriminatedObjectType |
-  ArrayType
+  ArrayType |
+  FunctionType;
 
 export type ObjectTypeProperty = {
   type: TypeReference;
@@ -320,7 +336,7 @@ export class TypeFactory {
     return this.addType(this.booleanType);
   }
 
-  public addResourceType(name: string, scopeType: ScopeType, readOnlyScopes: ScopeType | undefined, body: TypeReference, flags: ResourceFlags) {
+  public addResourceType(name: string, scopeType: ScopeType, readOnlyScopes: ScopeType | undefined, body: TypeReference, flags: ResourceFlags, functions?: TypeReference[]) {
     return this.addType({
       type: TypeBaseKind.ResourceType,
       name: name,
@@ -328,6 +344,7 @@ export class TypeFactory {
       readOnlyScopes: readOnlyScopes,
       body: body,
       flags: flags,
+      functions,
     });
   }
 
@@ -368,6 +385,15 @@ export class TypeFactory {
       itemType: itemType,
       minLength: minLength,
       maxLength: maxLength,
+    });
+  }
+
+  public addFunctionType(name: string, output: TypeReference, parameters: FunctionTypeParameter[]) {
+    return this.addType({
+      type: TypeBaseKind.FunctionType,
+      name,
+      output,
+      parameters,
     });
   }
 }

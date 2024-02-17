@@ -13,6 +13,7 @@ namespace Azure.Bicep.Types.Serialization;
 [JsonSerializable(typeof(BuiltInType))]
 [JsonSerializable(typeof(DiscriminatedObjectType))]
 [JsonSerializable(typeof(ObjectType))]
+[JsonSerializable(typeof(FunctionType))]
 [JsonSerializable(typeof(ResourceFunctionType))]
 [JsonSerializable(typeof(ResourceType))]
 [JsonSerializable(typeof(StringLiteralType))]

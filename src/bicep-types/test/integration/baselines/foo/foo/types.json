@@ -84,12 +84,32 @@
     }
   },
   {
+    "$type": "FunctionType",
+    "name": "doSomething",
+    "output": {
+      "$ref": "#/2"
+    },
+    "parameters": [
+      {
+        "name": "arg",
+        "type": {
+          "$ref": "#/0"
+        }
+      }
+    ]
+  },
+  {
     "$type": "ResourceType",
     "name": "foo@v1",
     "scopeType": 0,
     "body": {
       "$ref": "#/7"
     },
-    "flags": 0
+    "flags": 0,
+    "functions": [
+      {
+        "$ref": "#/8"
+      }
+    ]
   }
 ]
