@@ -4,92 +4,92 @@
   },
   {
     "$type": "ObjectType",
-    "Name": "def",
-    "Properties": {}
+    "name": "def",
+    "properties": {}
   },
   {
     "$type": "BooleanType"
   },
   {
     "$type": "ObjectType",
-    "Name": "jkl",
-    "Properties": {}
+    "name": "jkl",
+    "properties": {}
   },
   {
     "$type": "AnyType"
   },
   {
     "$type": "ObjectType",
-    "Name": "dictType",
-    "Properties": {},
-    "AdditionalProperties": {
+    "name": "dictType",
+    "properties": {},
+    "additionalProperties": {
       "$ref": "#/4"
     },
-    "Sensitive": true
+    "sensitive": true
   },
   {
     "$type": "ArrayType",
-    "ItemType": {
+    "itemType": {
       "$ref": "#/4"
     },
-    "MinLength": 1,
-    "MaxLength": 10
+    "minLength": 1,
+    "maxLength": 10
   },
   {
     "$type": "ObjectType",
-    "Name": "foo",
-    "Properties": {
+    "name": "foo",
+    "properties": {
       "abc": {
-        "Type": {
+        "type": {
           "$ref": "#/0"
         },
-        "Flags": 0,
-        "Description": "Abc prop"
+        "flags": 0,
+        "description": "Abc prop"
       },
       "def": {
-        "Type": {
+        "type": {
           "$ref": "#/1"
         },
-        "Flags": 2,
-        "Description": "Def prop"
+        "flags": 2,
+        "description": "Def prop"
       },
       "ghi": {
-        "Type": {
+        "type": {
           "$ref": "#/2"
         },
-        "Flags": 4,
-        "Description": "Ghi prop"
+        "flags": 4,
+        "description": "Ghi prop"
       },
       "jkl": {
-        "Type": {
+        "type": {
           "$ref": "#/3"
         },
-        "Flags": 17,
-        "Description": "Jkl prop"
+        "flags": 17,
+        "description": "Jkl prop"
       },
       "dictType": {
-        "Type": {
+        "type": {
           "$ref": "#/5"
         },
-        "Flags": 0,
-        "Description": "Dictionary of any"
+        "flags": 0,
+        "description": "Dictionary of any"
       },
       "arrayType": {
-        "Type": {
+        "type": {
           "$ref": "#/6"
         },
-        "Flags": 0,
-        "Description": "Array of any"
+        "flags": 0,
+        "description": "Array of any"
       }
     }
   },
   {
     "$type": "ResourceType",
-    "Name": "foo@v1",
-    "ScopeType": 0,
-    "Body": {
+    "name": "foo@v1",
+    "scopeType": 0,
+    "body": {
       "$ref": "#/7"
     },
-    "Flags": 0
+    "flags": 0
   }
 ]

@@ -39,27 +39,27 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
 
   function getTypeName(types: BicepType[], typeReference: TypeReference): string {
     const type = types[typeReference.index];
-    switch (type.Type) {
+    switch (type.type) {
       case TypeBaseKind.BuiltInType:
-        return getBuiltInTypeKindLabel((type as BuiltInType).Kind).toLowerCase();
+        return getBuiltInTypeKindLabel((type as BuiltInType).kind).toLowerCase();
       case TypeBaseKind.ObjectType:
-        return md.generateAnchorLink((type as ObjectType).Name);
+        return md.generateAnchorLink((type as ObjectType).name);
       case TypeBaseKind.ArrayType:
         return getArrayTypeName(types, (type as ArrayType));
       case TypeBaseKind.ResourceType:
-        return (type as ResourceType).Name;
+        return (type as ResourceType).name;
       case TypeBaseKind.ResourceFunctionType: {
         const functionType = type as ResourceFunctionType;
-        return `${functionType.Name} (${functionType.ResourceType}@${functionType.ApiVersion})`;
+        return `${functionType.name} (${functionType.resourceType}@${functionType.apiVersion})`;
       }
       case TypeBaseKind.UnionType: {
-        const elements = (type as UnionType).Elements.map(x => getTypeName(types, x));
+        const elements = (type as UnionType).elements.map(x => getTypeName(types, x));
         return elements.sort().join(' | ');
       }
       case TypeBaseKind.StringLiteralType:
-        return `'${(type as StringLiteralType).Value}'`;
+        return `'${(type as StringLiteralType).value}'`;
       case TypeBaseKind.DiscriminatedObjectType:
-        return md.generateAnchorLink((type as DiscriminatedObjectType).Name);
+        return md.generateAnchorLink((type as DiscriminatedObjectType).name);
       case TypeBaseKind.AnyType:
         return 'any';
       case TypeBaseKind.NullType:
@@ -77,27 +77,27 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
 
   function getArrayTypeName(types: BicepType[], type: ArrayType): string
   {
-    let itemTypeName = getTypeName(types, type.ItemType);
+    let itemTypeName = getTypeName(types, type.itemType);
     if (itemTypeName.indexOf(' ') != -1)
     {
       itemTypeName = `(${itemTypeName})`;
     }
 
-    return `${itemTypeName}[]${formatModifiers(type.MinLength !== undefined ? `minLength: ${type.MinLength}` : undefined, type.MaxLength !== undefined ? `maxLength: ${type.MaxLength}` : undefined)}`;
+    return `${itemTypeName}[]${formatModifiers(type.minLength !== undefined ? `minLength: ${type.minLength}` : undefined, type.maxLength !== undefined ? `maxLength: ${type.maxLength}` : undefined)}`;
   }
 
   function getIntegerModifiers(type: IntegerType): string
   {
-    return formatModifiers(type.MinValue !== undefined ? `minValue: ${type.MinValue}` : undefined,
-      type.MaxValue !== undefined ? `maxValue: ${type.MaxValue}` : undefined);
+    return formatModifiers(type.minValue !== undefined ? `minValue: ${type.minValue}` : undefined,
+      type.maxValue !== undefined ? `maxValue: ${type.maxValue}` : undefined);
   }
 
   function getStringModifiers(type: StringType): string
   {
-    return formatModifiers(type.Sensitive ? 'sensitive' : undefined,
-      type.MinLength !== undefined ? `minLength: ${type.MinLength}` : undefined,
-      type.MaxLength !== undefined ? `maxLength: ${type.MaxLength}` : undefined,
-      type.Pattern !== undefined ? `pattern: "${type.Pattern.replace('"', '\\"')}"` : undefined);
+    return formatModifiers(type.sensitive ? 'sensitive' : undefined,
+      type.minLength !== undefined ? `minLength: ${type.minLength}` : undefined,
+      type.maxLength !== undefined ? `maxLength: ${type.maxLength}` : undefined,
+      type.pattern !== undefined ? `pattern: "${type.pattern.replace('"', '\\"')}"` : undefined);
   }
 
   function formatModifiers(...modifiers: Array<string | undefined>): string
@@ -107,9 +107,9 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
   }
 
   function writeTypeProperty(types: BicepType[], name: string, property: ObjectTypeProperty) {
-    const flagsString = property.Flags ? ` (${getObjectTypePropertyFlagsLabels(property.Flags).join(', ')})` : '';
-    const descriptionString = property.Description ? `: ${property.Description}` : '';
-    md.writeBullet(name, `${getTypeName(types, property.Type)}${flagsString}${descriptionString}`);
+    const flagsString = property.flags ? ` (${getObjectTypePropertyFlagsLabels(property.flags).join(', ')})` : '';
+    const descriptionString = property.description ? `: ${property.description}` : '';
+    md.writeBullet(name, `${getTypeName(types, property.type)}${flagsString}${descriptionString}`);
   }
 
   function findTypesToWrite(types: BicepType[], typesToWrite: BicepType[], typeReference: TypeReference) {
@@ -125,22 +125,22 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
     }
 
     const type = types[typeReference.index];
-    switch (type.Type) {
+    switch (type.type) {
       case TypeBaseKind.ArrayType: {
         const arrayType = type as ArrayType;
-        processTypeLinks(arrayType.ItemType, false);
+        processTypeLinks(arrayType.itemType, false);
 
         return;
       }
       case TypeBaseKind.ObjectType: {
         const objectType = type as ObjectType;
 
-        for (const key of sortedKeys(objectType.Properties)) {
-          processTypeLinks(objectType.Properties[key].Type, false);
+        for (const key of sortedKeys(objectType.properties)) {
+          processTypeLinks(objectType.properties[key].type, false);
         }
 
-        if (objectType.AdditionalProperties !== undefined) {
-          processTypeLinks(objectType.AdditionalProperties, false);
+        if (objectType.additionalProperties !== undefined) {
+          processTypeLinks(objectType.additionalProperties, false);
         }
 
         return;
@@ -148,12 +148,12 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       case TypeBaseKind.DiscriminatedObjectType: {
         const discriminatedObjectType = type as DiscriminatedObjectType;
 
-        for (const key of sortedKeys(discriminatedObjectType.BaseProperties)) {
-          processTypeLinks(discriminatedObjectType.BaseProperties[key].Type, false);
+        for (const key of sortedKeys(discriminatedObjectType.baseProperties)) {
+          processTypeLinks(discriminatedObjectType.baseProperties[key].type, false);
         }
 
-        for (const key of sortedKeys(discriminatedObjectType.Elements)) {
-          const element = discriminatedObjectType.Elements[key];
+        for (const key of sortedKeys(discriminatedObjectType.elements)) {
+          const element = discriminatedObjectType.elements[key];
           // Don't display discriminated object elements as individual types
           processTypeLinks(element, true);
         }
@@ -168,25 +168,25 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
   }
 
   function writeComplexType(types: BicepType[], type: BicepType, nesting: number, includeHeader: boolean) {
-    switch (type.Type) {
+    switch (type.type) {
       case TypeBaseKind.ResourceType: {
         const resourceType = type as ResourceType;
-        const flagsString = resourceType.Flags ? ` (${getResourceFlagsLabels(resourceType.Flags).join(', ')})` : '';
-        md.writeHeading(nesting, `Resource ${resourceType.Name}${flagsString}`);
-        md.writeBullet("Valid Scope(s)", `${getScopeTypeLabels(resourceType.ScopeType, [resourceType.ReadOnlyScopes, 'ReadOnly']).join(', ') || 'Unknown'}`);
-        writeComplexType(types, types[resourceType.Body.index], nesting, false);
+        const flagsString = resourceType.flags ? ` (${getResourceFlagsLabels(resourceType.flags).join(', ')})` : '';
+        md.writeHeading(nesting, `Resource ${resourceType.name}${flagsString}`);
+        md.writeBullet("Valid Scope(s)", `${getScopeTypeLabels(resourceType.scopeType, [resourceType.readOnlyScopes, 'ReadOnly']).join(', ') || 'Unknown'}`);
+        writeComplexType(types, types[resourceType.body.index], nesting, false);
 
         return;
       }
       case TypeBaseKind.ResourceFunctionType: {
         const resourceFunctionType = type as ResourceFunctionType;
-        md.writeHeading(nesting, `Function ${resourceFunctionType.Name} (${resourceFunctionType.ResourceType}@${resourceFunctionType.ApiVersion})`);
-        md.writeBullet("Resource", resourceFunctionType.ResourceType);
-        md.writeBullet("ApiVersion", resourceFunctionType.ApiVersion);
-        if (resourceFunctionType.Input !== undefined) {
-          md.writeBullet("Input", getTypeName(types, resourceFunctionType.Input));
+        md.writeHeading(nesting, `Function ${resourceFunctionType.name} (${resourceFunctionType.resourceType}@${resourceFunctionType.apiVersion})`);
+        md.writeBullet("Resource", resourceFunctionType.resourceType);
+        md.writeBullet("ApiVersion", resourceFunctionType.apiVersion);
+        if (resourceFunctionType.input !== undefined) {
+          md.writeBullet("Input", getTypeName(types, resourceFunctionType.input));
         }
-        md.writeBullet("Output", getTypeName(types, resourceFunctionType.Output));
+        md.writeBullet("Output", getTypeName(types, resourceFunctionType.output));
 
         md.writeNewLine();
         return;
@@ -194,21 +194,21 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       case TypeBaseKind.ObjectType: {
         const objectType = type as ObjectType;
         if (includeHeader) {
-          md.writeHeading(nesting, objectType.Name);
+          md.writeHeading(nesting, objectType.name);
         }
 
-        if (objectType.Sensitive) {
+        if (objectType.sensitive) {
           md.writeNotaBene("Sensitive")
         }
 
         md.writeHeading(nesting + 1, "Properties");
-        for (const key of sortedKeys(objectType.Properties)) {
-          writeTypeProperty(types, key, objectType.Properties[key]);
+        for (const key of sortedKeys(objectType.properties)) {
+          writeTypeProperty(types, key, objectType.properties[key]);
         }
 
-        if (objectType.AdditionalProperties !== undefined) {
+        if (objectType.additionalProperties !== undefined) {
           md.writeHeading(nesting + 1, "Additional Properties");
-          md.writeBullet("Additional Properties Type", getTypeName(types, objectType.AdditionalProperties));
+          md.writeBullet("Additional Properties Type", getTypeName(types, objectType.additionalProperties));
         }
 
         md.writeNewLine();
@@ -217,21 +217,21 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       case TypeBaseKind.DiscriminatedObjectType: {
         const discriminatedObjectType = type as DiscriminatedObjectType;
         if (includeHeader) {
-          md.writeHeading(nesting, discriminatedObjectType.Name);
+          md.writeHeading(nesting, discriminatedObjectType.name);
         }
 
-        md.writeBullet("Discriminator", discriminatedObjectType.Discriminator);
+        md.writeBullet("Discriminator", discriminatedObjectType.discriminator);
         md.writeNewLine();
 
         md.writeHeading(nesting + 1, "Base Properties");
-        for (const propertyName of sortedKeys(discriminatedObjectType.BaseProperties)) {
-          writeTypeProperty(types, propertyName, discriminatedObjectType.BaseProperties[propertyName]);
+        for (const propertyName of sortedKeys(discriminatedObjectType.baseProperties)) {
+          writeTypeProperty(types, propertyName, discriminatedObjectType.baseProperties[propertyName]);
         }
 
         md.writeNewLine();
 
-        for (const key of sortedKeys(discriminatedObjectType.Elements)) {
-          const element = discriminatedObjectType.Elements[key];
+        for (const key of sortedKeys(discriminatedObjectType.elements)) {
+          const element = discriminatedObjectType.elements[key];
           writeComplexType(types, types[element.index], nesting + 1, true);
         }
 
@@ -245,27 +245,27 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
     md.writeHeading(1, fileHeading ?? 'Bicep Types');
     md.writeNewLine();
 
-    const resourceTypes = orderBy(types.filter(t => t.Type == TypeBaseKind.ResourceType) as ResourceType[], x => x.Name.split('@')[0].toLowerCase());
-    const resourceFunctionTypes = orderBy(types.filter(t => t.Type == TypeBaseKind.ResourceFunctionType) as ResourceFunctionType[], x => x.Name.split('@')[0].toLowerCase());
+    const resourceTypes = orderBy(types.filter(t => t.type == TypeBaseKind.ResourceType) as ResourceType[], x => x.name.split('@')[0].toLowerCase());
+    const resourceFunctionTypes = orderBy(types.filter(t => t.type == TypeBaseKind.ResourceFunctionType) as ResourceFunctionType[], x => x.name.split('@')[0].toLowerCase());
     const typesToWrite: BicepType[] = []
 
     for (const resourceType of resourceTypes) {
-      findTypesToWrite(types, typesToWrite, resourceType.Body);
+      findTypesToWrite(types, typesToWrite, resourceType.body);
     }
 
     for (const resourceFunctionType of resourceFunctionTypes) {
-      if (resourceFunctionType.Input !== undefined)
+      if (resourceFunctionType.input !== undefined)
       {
-        typesToWrite.push(types[resourceFunctionType.Input.index]);
-        findTypesToWrite(types, typesToWrite, resourceFunctionType.Input);
+        typesToWrite.push(types[resourceFunctionType.input.index]);
+        findTypesToWrite(types, typesToWrite, resourceFunctionType.input);
       }
-      typesToWrite.push(types[resourceFunctionType.Output.index]);
-      findTypesToWrite(types, typesToWrite, resourceFunctionType.Output);
+      typesToWrite.push(types[resourceFunctionType.output.index]);
+      findTypesToWrite(types, typesToWrite, resourceFunctionType.output);
     }
 
     typesToWrite.sort((a, b) => {
-      const aName = (a as ObjectType).Name?.toLowerCase();
-      const bName = (b as ObjectType).Name?.toLowerCase();
+      const aName = (a as ObjectType).name?.toLowerCase();
+      const bName = (b as ObjectType).name?.toLowerCase();
 
       if (aName === undefined) {
         return bName === undefined ? 0 : 1;
@@ -289,7 +289,7 @@ export function writeIndexMarkdown(index: TypeIndex) {
   const md = new MarkdownFile();
   md.writeHeading(1, 'Bicep Types');
 
-  const byProvider = groupBy(Object.keys(index.Resources), x => x.split('/')[0].toLowerCase());
+  const byProvider = groupBy(Object.keys(index.resources), x => x.split('/')[0].toLowerCase());
   for (const namespace of orderBy(Object.keys(byProvider), x => x.toLowerCase())) {
     md.writeHeading(2, namespace);
 
@@ -299,7 +299,7 @@ export function writeIndexMarkdown(index: TypeIndex) {
 
       for (const typeString of orderBy(byResourceType[resourceType], x => x.toLowerCase())) {
         const version = typeString.split('@')[1];
-        const jsonPath = index.Resources[typeString].relativePath;
+        const jsonPath = index.resources[typeString].relativePath;
         const anchor = `resource-${typeString.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase()}`;
 
         const mdPath = jsonPath.substring(0, jsonPath.toLowerCase().lastIndexOf('.json')) + '.md';

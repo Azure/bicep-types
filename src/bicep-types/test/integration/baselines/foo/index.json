@@ -1,19 +1,19 @@
 {
-  "Resources": {
+  "resources": {
     "foo@v1": {
       "$ref": "foo/types.json#/8"
     }
   },
-  "Functions": {},
-  "Settings": {
-    "Name": "Foo",
-    "IsSingleton": true,
-    "Version": "0.1.2",
-    "ConfigurationType": {
+  "functions": {},
+  "settings": {
+    "name": "Foo",
+    "isSingleton": true,
+    "version": "0.1.2",
+    "configurationType": {
       "$ref": "config/types.json#/0"
     }
   },
-  "FallbackResourceType": {
+  "fallbackResourceType": {
     "$ref": "config/types.json#/2"
   }
 }

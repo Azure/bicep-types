@@ -22,6 +22,7 @@ public static class TypeSerializer
                 new TypeReferenceConverter(factory),
                 new CrossFileTypeReferenceConverter(),
             },
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true,
             TypeInfoResolver = TypeJsonContext.Default,
         };

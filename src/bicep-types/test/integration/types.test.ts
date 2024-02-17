@@ -19,36 +19,36 @@ describe('types tests', () => {
 
     const props = factory.addObjectType('foo', {
       abc: {
-        Type: factory.addStringType(),
-        Flags: ObjectTypePropertyFlags.None,
-        Description: 'Abc prop'
+        type: factory.addStringType(),
+        flags: ObjectTypePropertyFlags.None,
+        description: 'Abc prop'
       },
       def: {
-        Type: factory.addObjectType("def", {}),
-        Flags: ObjectTypePropertyFlags.ReadOnly,
-        Description: 'Def prop'
+        type: factory.addObjectType("def", {}),
+        flags: ObjectTypePropertyFlags.ReadOnly,
+        description: 'Def prop'
       },
       ghi: {
-        Type: factory.addBooleanType(),
-        Flags: ObjectTypePropertyFlags.WriteOnly,
-        Description: 'Ghi prop'
+        type: factory.addBooleanType(),
+        flags: ObjectTypePropertyFlags.WriteOnly,
+        description: 'Ghi prop'
       },
       jkl: {
-        Type: factory.addObjectType("jkl", {}),
-        Flags: ObjectTypePropertyFlags.Identifier | ObjectTypePropertyFlags.Required,
-        Description: 'Jkl prop'
+        type: factory.addObjectType("jkl", {}),
+        flags: ObjectTypePropertyFlags.Identifier | ObjectTypePropertyFlags.Required,
+        description: 'Jkl prop'
       },
       dictType: {
-        Type: factory.addObjectType('dictType', {},
+        type: factory.addObjectType('dictType', {},
           factory.addAnyType(),
           true),
-        Flags: ObjectTypePropertyFlags.None,
-        Description: 'Dictionary of any'
+        flags: ObjectTypePropertyFlags.None,
+        description: 'Dictionary of any'
       },
       arrayType: {
-        Type: factory.addArrayType(factory.addAnyType(), 1, 10),
-        Flags: ObjectTypePropertyFlags.None,
-        Description: 'Array of any'
+        type: factory.addArrayType(factory.addAnyType(), 1, 10),
+        flags: ObjectTypePropertyFlags.None,
+        description: 'Array of any'
       },
     });
     const res = factory.addResourceType('foo@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None);
@@ -56,24 +56,24 @@ describe('types tests', () => {
     const configFactory = new TypeFactory();
     const configLocation = configFactory.addObjectType('config', {
       configProp: {
-        Type: factory.addStringType(),
-        Flags: ObjectTypePropertyFlags.Required,
-        Description: 'Config property',
+        type: factory.addStringType(),
+        flags: ObjectTypePropertyFlags.Required,
+        description: 'Config property',
       },
     });
     const fallbackRef = configFactory.addResourceType('fallback', ScopeType.Unknown, undefined, configFactory.addObjectType('fallback body', {
       bodyProp: {
-        Type: factory.addStringType(),
-        Flags: ObjectTypePropertyFlags.Required,
-        Description: 'Body property',
+        type: factory.addStringType(),
+        flags: ObjectTypePropertyFlags.Required,
+        description: 'Body property',
       },
     }), ResourceFlags.None);
     
     const settings: TypeSettings = {
-      Name: 'Foo',
-      IsSingleton: true,
-      Version: '0.1.2',
-      ConfigurationType: new CrossFileTypeReference('config/types.json', configLocation.index),
+      name: 'Foo',
+      isSingleton: true,
+      version: '0.1.2',
+      configurationType: new CrossFileTypeReference('config/types.json', configLocation.index),
     };
 
     const fallbackResourceType = new CrossFileTypeReference('config/types.json', fallbackRef.index);
@@ -90,11 +90,11 @@ describe('types tests', () => {
     ]);
 
     const props = factory.addObjectType('request@v1', {
-      uri: { Type: factory.addStringType(), Flags: ObjectTypePropertyFlags.Required, Description: 'The HTTP request URI to submit a GET request to.' },
-      format: { Type: formatType, Flags: ObjectTypePropertyFlags.None, Description: 'How to deserialize the response body.' },
-      method: { Type: factory.addStringType(undefined, 3), Flags: ObjectTypePropertyFlags.None, Description: 'The HTTP method to submit request to the given URI.' },
-      statusCode: { Type: factory.addIntegerType(100, 599), Flags: ObjectTypePropertyFlags.ReadOnly, Description: 'The status code of the HTTP request.' },
-      body: { Type: factory.addAnyType(), Flags: ObjectTypePropertyFlags.ReadOnly, Description: 'The parsed request body.' },
+      uri: { type: factory.addStringType(), flags: ObjectTypePropertyFlags.Required, description: 'The HTTP request URI to submit a GET request to.' },
+      format: { type: formatType, flags: ObjectTypePropertyFlags.None, description: 'How to deserialize the response body.' },
+      method: { type: factory.addStringType(undefined, 3), flags: ObjectTypePropertyFlags.None, description: 'The HTTP method to submit request to the given URI.' },
+      statusCode: { type: factory.addIntegerType(100, 599), flags: ObjectTypePropertyFlags.ReadOnly, description: 'The status code of the HTTP request.' },
+      body: { type: factory.addAnyType(), flags: ObjectTypePropertyFlags.ReadOnly, description: 'The parsed request body.' },
     });
     factory.addResourceType('request@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None);
 

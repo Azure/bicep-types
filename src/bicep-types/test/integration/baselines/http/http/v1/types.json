@@ -1,15 +1,15 @@
 [
   {
     "$type": "StringLiteralType",
-    "Value": "raw"
+    "value": "raw"
   },
   {
     "$type": "StringLiteralType",
-    "Value": "json"
+    "value": "json"
   },
   {
     "$type": "UnionType",
-    "Elements": [
+    "elements": [
       {
         "$ref": "#/0"
       },
@@ -23,64 +23,64 @@
   },
   {
     "$type": "StringType",
-    "MinLength": 3
+    "minLength": 3
   },
   {
     "$type": "IntegerType",
-    "MinValue": 100,
-    "MaxValue": 599
+    "minValue": 100,
+    "maxValue": 599
   },
   {
     "$type": "AnyType"
   },
   {
     "$type": "ObjectType",
-    "Name": "request@v1",
-    "Properties": {
+    "name": "request@v1",
+    "properties": {
       "uri": {
-        "Type": {
+        "type": {
           "$ref": "#/3"
         },
-        "Flags": 1,
-        "Description": "The HTTP request URI to submit a GET request to."
+        "flags": 1,
+        "description": "The HTTP request URI to submit a GET request to."
       },
       "format": {
-        "Type": {
+        "type": {
           "$ref": "#/2"
         },
-        "Flags": 0,
-        "Description": "How to deserialize the response body."
+        "flags": 0,
+        "description": "How to deserialize the response body."
       },
       "method": {
-        "Type": {
+        "type": {
           "$ref": "#/4"
         },
-        "Flags": 0,
-        "Description": "The HTTP method to submit request to the given URI."
+        "flags": 0,
+        "description": "The HTTP method to submit request to the given URI."
       },
       "statusCode": {
-        "Type": {
+        "type": {
           "$ref": "#/5"
         },
-        "Flags": 2,
-        "Description": "The status code of the HTTP request."
+        "flags": 2,
+        "description": "The status code of the HTTP request."
       },
       "body": {
-        "Type": {
+        "type": {
           "$ref": "#/6"
         },
-        "Flags": 2,
-        "Description": "The parsed request body."
+        "flags": 2,
+        "description": "The parsed request body."
       }
     }
   },
   {
     "$type": "ResourceType",
-    "Name": "request@v1",
-    "ScopeType": 0,
-    "Body": {
+    "name": "request@v1",
+    "scopeType": 0,
+    "body": {
       "$ref": "#/7"
     },
-    "Flags": 0
+    "flags": 0
   }
 ]

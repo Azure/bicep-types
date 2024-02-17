@@ -139,54 +139,54 @@ export class CrossFileTypeReference {
     public readonly index: number) {}
 }
 
-type TypeBase<T extends TypeBaseKind, U extends object = Record<string, unknown>> = { Type: T } & U
+type TypeBase<T extends TypeBaseKind, U extends object = Record<string, unknown>> = { type: T } & U
 
 export type BuiltInType = TypeBase<TypeBaseKind.BuiltInType, {
-  Kind: BuiltInTypeKind;
+  kind: BuiltInTypeKind;
 }>
 
 export type UnionType = TypeBase<TypeBaseKind.UnionType, {
-  Elements: TypeReference[];
+  elements: TypeReference[];
 }>
 
 export type StringLiteralType = TypeBase<TypeBaseKind.StringLiteralType, {
-  Value: string;
+  value: string;
 }>
 
 export type ResourceType = TypeBase<TypeBaseKind.ResourceType, {
-  Name: string;
-  ScopeType: ScopeType;
-  ReadOnlyScopes?: ScopeType;
-  Body: TypeReference;
-  Flags: ResourceFlags;
+  name: string;
+  scopeType: ScopeType;
+  readOnlyScopes?: ScopeType;
+  body: TypeReference;
+  flags: ResourceFlags;
 }>
 
 export type ResourceFunctionType = TypeBase<TypeBaseKind.ResourceFunctionType, {
-  Name: string;
-  ResourceType: string;
-  ApiVersion: string;
-  Output: TypeReference;
-  Input?: TypeReference;
+  name: string;
+  resourceType: string;
+  apiVersion: string;
+  output: TypeReference;
+  input?: TypeReference;
 }>
 
 export type ObjectType = TypeBase<TypeBaseKind.ObjectType, {
-  Name: string;
-  Properties: Record<string, ObjectTypeProperty>;
-  AdditionalProperties?: TypeReference;
-  Sensitive?: boolean;
+  name: string;
+  properties: Record<string, ObjectTypeProperty>;
+  additionalProperties?: TypeReference;
+  sensitive?: boolean;
 }>
 
 export type DiscriminatedObjectType = TypeBase<TypeBaseKind.DiscriminatedObjectType, {
-  Name: string;
-  Discriminator: string;
-  BaseProperties: Record<string, ObjectTypeProperty>;
-  Elements: Record<string, TypeReference>;
+  name: string;
+  discriminator: string;
+  baseProperties: Record<string, ObjectTypeProperty>;
+  elements: Record<string, TypeReference>;
 }>
 
 export type ArrayType = TypeBase<TypeBaseKind.ArrayType, {
-  ItemType: TypeReference;
-  MinLength?: number;
-  MaxLength?: number;
+  itemType: TypeReference;
+  minLength?: number;
+  maxLength?: number;
 }>
 
 export type AnyType = TypeBase<TypeBaseKind.AnyType>
@@ -196,15 +196,15 @@ export type NullType = TypeBase<TypeBaseKind.NullType>
 export type BooleanType = TypeBase<TypeBaseKind.BooleanType>
 
 export type IntegerType = TypeBase<TypeBaseKind.IntegerType, {
-  MinValue?: number;
-  MaxValue?: number;
+  minValue?: number;
+  maxValue?: number;
 }>
 
 export type StringType = TypeBase<TypeBaseKind.StringType, {
-  Sensitive?: boolean;
-  MinLength?: number;
-  MaxLength?: number;
-  Pattern?: string;
+  sensitive?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
 }>
 
 export type BicepType = BuiltInType |
@@ -222,9 +222,9 @@ export type BicepType = BuiltInType |
   ArrayType
 
 export type ObjectTypeProperty = {
-  Type: TypeReference;
-  Flags: ObjectTypePropertyFlags;
-  Description?: string;
+  type: TypeReference;
+  flags: ObjectTypePropertyFlags;
+  description?: string;
 }
 
 export class TypeFactory {
@@ -232,9 +232,9 @@ export class TypeFactory {
   private readonly typeToTypeReference: Map<BicepType, TypeReference> = new Map();
   private readonly stringTypeCache: Map<string, TypeReference> = new Map();
   private readonly integerTypeCache: Map<string, TypeReference> = new Map();
-  private readonly anyType: AnyType = {Type: TypeBaseKind.AnyType};
-  private readonly nullType: NullType = {Type: TypeBaseKind.NullType};
-  private readonly booleanType: BooleanType = {Type: TypeBaseKind.BooleanType};
+  private readonly anyType: AnyType = {type: TypeBaseKind.AnyType};
+  private readonly nullType: NullType = {type: TypeBaseKind.NullType};
+  private readonly booleanType: BooleanType = {type: TypeBaseKind.BooleanType};
 
   constructor() {
     this.types = [];
@@ -261,15 +261,15 @@ export class TypeFactory {
 
   public addUnionType(elements: TypeReference[]) {
     return this.addType({
-      Type: TypeBaseKind.UnionType,
-      Elements: elements,
+      type: TypeBaseKind.UnionType,
+      elements: elements,
     });
   }
 
   public addStringLiteralType(value: string) {
     return this.addType({
-      Type: TypeBaseKind.StringLiteralType,
-      Value: value,
+      type: TypeBaseKind.StringLiteralType,
+      value: value,
     });
   }
 
@@ -281,11 +281,11 @@ export class TypeFactory {
     }
 
     const added = this.addType({
-      Type: TypeBaseKind.StringType,
-      Sensitive: sensitive,
-      MinLength: minLength,
-      MaxLength: maxLength,
-      Pattern: pattern,
+      type: TypeBaseKind.StringType,
+      sensitive: sensitive,
+      minLength: minLength,
+      maxLength: maxLength,
+      pattern: pattern,
     });
     this.stringTypeCache.set(cacheKey, added);
     return added;
@@ -300,9 +300,9 @@ export class TypeFactory {
     }
 
     const added = this.addType({
-      Type: TypeBaseKind.IntegerType,
-      MinValue: minValue,
-      MaxValue: maxValue,
+      type: TypeBaseKind.IntegerType,
+      minValue: minValue,
+      maxValue: maxValue,
     });
     this.integerTypeCache.set(cacheKey, added);
     return added;
@@ -322,61 +322,61 @@ export class TypeFactory {
 
   public addResourceType(name: string, scopeType: ScopeType, readOnlyScopes: ScopeType | undefined, body: TypeReference, flags: ResourceFlags) {
     return this.addType({
-      Type: TypeBaseKind.ResourceType,
-      Name: name,
-      ScopeType: scopeType,
-      ReadOnlyScopes: readOnlyScopes,
-      Body: body,
-      Flags: flags,
+      type: TypeBaseKind.ResourceType,
+      name: name,
+      scopeType: scopeType,
+      readOnlyScopes: readOnlyScopes,
+      body: body,
+      flags: flags,
     });
   }
 
   public addResourceFunctionType(name: string, resourceType: string, apiVersion: string, output: TypeReference, input?: TypeReference) {
     return this.addType({
-      Type: TypeBaseKind.ResourceFunctionType,
-      Name: name,
-      ResourceType: resourceType,
-      ApiVersion: apiVersion,
-      Output: output,
-      Input: input,
+      type: TypeBaseKind.ResourceFunctionType,
+      name: name,
+      resourceType: resourceType,
+      apiVersion: apiVersion,
+      output: output,
+      input: input,
     });
   }
 
   public addObjectType(name: string, properties: Record<string, ObjectTypeProperty>, additionalProperties?: TypeReference, sensitive?: boolean) {
     return this.addType({
-      Type: TypeBaseKind.ObjectType,
-      Name: name,
-      Properties: properties,
-      AdditionalProperties: additionalProperties,
-      Sensitive: sensitive,
+      type: TypeBaseKind.ObjectType,
+      name: name,
+      properties: properties,
+      additionalProperties: additionalProperties,
+      sensitive: sensitive,
     });
   }
 
   public addDiscriminatedObjectType(name: string, discriminator: string, baseProperties: Record<string, ObjectTypeProperty>, elements: Record<string, TypeReference>) {
     return this.addType({
-      Type: TypeBaseKind.DiscriminatedObjectType,
-      Name: name,
-      Discriminator: discriminator,
-      BaseProperties: baseProperties,
-      Elements: elements,
+      type: TypeBaseKind.DiscriminatedObjectType,
+      name: name,
+      discriminator: discriminator,
+      baseProperties: baseProperties,
+      elements: elements,
     });
   }
 
   public addArrayType(itemType: TypeReference, minLength?: number, maxLength?: number) {
     return this.addType({
-      Type: TypeBaseKind.ArrayType,
-      ItemType: itemType,
-      MinLength: minLength,
-      MaxLength: maxLength,
+      type: TypeBaseKind.ArrayType,
+      itemType: itemType,
+      minLength: minLength,
+      maxLength: maxLength,
     });
   }
 }
 
 export interface TypeIndex {
-  Resources: Record<string, CrossFileTypeReference>;
-  Functions: Record<string, Record<string, CrossFileTypeReference[]>>;
-  Settings?: TypeSettings;
-  FallbackResourceType?: CrossFileTypeReference;
+  resources: Record<string, CrossFileTypeReference>;
+  functions: Record<string, Record<string, CrossFileTypeReference[]>>;
+  settings?: TypeSettings;
+  fallbackResourceType?: CrossFileTypeReference;
 }
 
 export interface TypeFile {
@@ -385,8 +385,8 @@ export interface TypeFile {
 }
 
 export interface TypeSettings {
-  Name: string;
-  Version: string;
-  IsSingleton: boolean;
-  ConfigurationType?: CrossFileTypeReference;
+  name: string;
+  version: string;
+  isSingleton: boolean;
+  configurationType?: CrossFileTypeReference;
 }

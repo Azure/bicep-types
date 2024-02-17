@@ -1,37 +1,37 @@
 [
   {
     "$type": "ObjectType",
-    "Name": "config",
-    "Properties": {
+    "name": "config",
+    "properties": {
       "configProp": {
-        "Type": {
+        "type": {
           "$ref": "#/0"
         },
-        "Flags": 1,
-        "Description": "Config property"
+        "flags": 1,
+        "description": "Config property"
       }
     }
   },
   {
     "$type": "ObjectType",
-    "Name": "fallback body",
-    "Properties": {
+    "name": "fallback body",
+    "properties": {
       "bodyProp": {
-        "Type": {
+        "type": {
           "$ref": "#/0"
         },
-        "Flags": 1,
-        "Description": "Body property"
+        "flags": 1,
+        "description": "Body property"
       }
     }
   },
   {
     "$type": "ResourceType",
-    "Name": "fallback",
-    "ScopeType": 0,
-    "Body": {
+    "name": "fallback",
+    "scopeType": 0,
+    "body": {
       "$ref": "#/1"
     },
-    "Flags": 0
+    "flags": 0
   }
 ]

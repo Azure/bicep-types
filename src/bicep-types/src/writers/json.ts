@@ -15,11 +15,11 @@ function writeTypesJsonReplacer(key: any, value: any) {
 
 function writeTypesJsonMapper(types: BicepType[]) {
   return types.map(t => {
-    const { Type, ...rest } = t;
+    const { type, ...rest } = t;
     return {
       // System.Text.Json uses this as the polymorphic discriminator
       // https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism
-      '$type': Type,
+      '$type': type,
       ...rest,
     };
   });
@@ -47,9 +47,9 @@ function readTypesJsonReviver(key: any, value: any) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function readTypesJsonMapper(input: any[]) {
   return input.map(t => {
-    const { '$type': Type, ...rest } = t;
+    const { '$type': type, ...rest } = t;
     return {
-      Type: Type,
+      type: type,
       ...rest,
     } as BicepType;
   });
