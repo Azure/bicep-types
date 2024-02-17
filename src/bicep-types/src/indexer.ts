@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ResourceFunctionType, ResourceType, TypeBaseKind, TypeFile, TypeIndex, TypeLocation, TypeSettings } from "./types";
+import { ResourceFunctionType, ResourceType, TypeBaseKind, TypeFile, TypeIndex, CrossFileTypeReference, TypeSettings } from "./types";
 import { orderBy } from "./utils";
 
-export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void, settings?: TypeSettings, fallbackResourceType?: TypeLocation): TypeIndex {
+export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void, settings?: TypeSettings, fallbackResourceType?: CrossFileTypeReference): TypeIndex {
   const resourceTypes = new Set<string>();
   const resourceFunctions = new Set<string>();
-  const resDictionary: Record<string, TypeLocation> = {};
-  const funcDictionary: Record<string, Record<string, TypeLocation[]>> = {};
+  const resDictionary: Record<string, CrossFileTypeReference> = {};
+  const funcDictionary: Record<string, Record<string, CrossFileTypeReference[]>> = {};
 
   // Use a consistent sort order so that file system differences don't generate changes
   for (const typeFile of orderBy(typeFiles, f => f.relativePath.toLowerCase())) {
@@ -21,10 +21,7 @@ export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void
         }
         resourceTypes.add(resourceType.Name.toLowerCase());
 
-        resDictionary[resourceType.Name] = {
-          RelativePath: typeFile.relativePath,
-          Index: types.indexOf(type),
-        };
+        resDictionary[resourceType.Name] = new CrossFileTypeReference(typeFile.relativePath, types.indexOf(type));
 
         continue;
       }
@@ -44,10 +41,8 @@ export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void
         funcDictionary[resourceTypeLower] = funcDictionary[resourceTypeLower] || {};
         funcDictionary[resourceTypeLower][apiVersionLower] = funcDictionary[resourceTypeLower][apiVersionLower] || [];
 
-        funcDictionary[resourceTypeLower][apiVersionLower].push({
-          RelativePath: typeFile.relativePath,
-          Index: types.indexOf(type),
-        });
+        funcDictionary[resourceTypeLower][apiVersionLower].push(
+          new CrossFileTypeReference(typeFile.relativePath, types.indexOf(type)));
 
         continue;
       }

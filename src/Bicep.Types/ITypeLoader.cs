@@ -8,9 +8,9 @@ namespace Azure.Bicep.Types
 {
     public interface ITypeLoader
     {
-        ResourceType LoadResourceType(TypeLocation location);
+        ResourceType LoadResourceType(CrossFileTypeReference reference);
 
-        ResourceFunctionType LoadResourceFunctionType(TypeLocation location);
+        ResourceFunctionType LoadResourceFunctionType(CrossFileTypeReference reference);
 
         TypeIndex LoadTypeIndex();
     }

@@ -4,7 +4,9 @@
     "Name": "config",
     "Properties": {
       "configProp": {
-        "Type": 0,
+        "Type": {
+          "$ref": "#/0"
+        },
         "Flags": 1,
         "Description": "Config property"
       }
@@ -15,7 +17,9 @@
     "Name": "fallback body",
     "Properties": {
       "bodyProp": {
-        "Type": 0,
+        "Type": {
+          "$ref": "#/0"
+        },
         "Flags": 1,
         "Description": "Body property"
       }
@@ -25,7 +29,9 @@
     "$type": "ResourceType",
     "Name": "fallback",
     "ScopeType": 0,
-    "Body": 1,
+    "Body": {
+      "$ref": "#/1"
+    },
     "Flags": 0
   }
 ]

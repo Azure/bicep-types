@@ -1,8 +1,7 @@
 {
   "Resources": {
     "foo@v1": {
-      "RelativePath": "foo/types.json",
-      "Index": 8
+      "$ref": "foo/types.json#/8"
     }
   },
   "Functions": {},
@@ -11,12 +10,10 @@
     "IsSingleton": true,
     "Version": "0.1.2",
     "ConfigurationType": {
-      "Index": 0,
-      "RelativePath": "config/types.json"
+      "$ref": "config/types.json#/0"
     }
   },
   "FallbackResourceType": {
-    "Index": 2,
-    "RelativePath": "config/types.json"
+    "$ref": "config/types.json#/2"
   }
 }

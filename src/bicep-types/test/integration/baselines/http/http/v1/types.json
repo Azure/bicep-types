@@ -10,8 +10,12 @@
   {
     "$type": "UnionType",
     "Elements": [
-      0,
-      1
+      {
+        "$ref": "#/0"
+      },
+      {
+        "$ref": "#/1"
+      }
     ]
   },
   {
@@ -34,27 +38,37 @@
     "Name": "request@v1",
     "Properties": {
       "uri": {
-        "Type": 3,
+        "Type": {
+          "$ref": "#/3"
+        },
         "Flags": 1,
         "Description": "The HTTP request URI to submit a GET request to."
       },
       "format": {
-        "Type": 2,
+        "Type": {
+          "$ref": "#/2"
+        },
         "Flags": 0,
         "Description": "How to deserialize the response body."
       },
       "method": {
-        "Type": 4,
+        "Type": {
+          "$ref": "#/4"
+        },
         "Flags": 0,
         "Description": "The HTTP method to submit request to the given URI."
       },
       "statusCode": {
-        "Type": 5,
+        "Type": {
+          "$ref": "#/5"
+        },
         "Flags": 2,
         "Description": "The status code of the HTTP request."
       },
       "body": {
-        "Type": 6,
+        "Type": {
+          "$ref": "#/6"
+        },
         "Flags": 2,
         "Description": "The parsed request body."
       }
@@ -64,7 +78,9 @@
     "$type": "ResourceType",
     "Name": "request@v1",
     "ScopeType": 0,
-    "Body": 7,
+    "Body": {
+      "$ref": "#/7"
+    },
     "Flags": 0
   }
 ]

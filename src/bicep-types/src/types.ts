@@ -129,7 +129,15 @@ export function getResourceFlagsLabels(input: ResourceFlags) {
   return flags;
 }
 
-export type TypeReference = number
+export class TypeReference {
+  constructor(public readonly index: number) {}
+}
+
+export class CrossFileTypeReference {
+  constructor(
+    public readonly relativePath: string,
+    public readonly index: number) {}
+}
 
 type TypeBase<T extends TypeBaseKind, U extends object = Record<string, unknown>> = { Type: T } & U
 
@@ -240,14 +248,15 @@ export class TypeFactory {
     }
 
     const index = this.types.length;
+    const reference = new TypeReference(index);
     this.types[index] = type;
-    this.typeToTypeReference.set(type, index);
+    this.typeToTypeReference.set(type, reference);
 
-    return index;
+    return reference;
   }
 
   public lookupType(reference: TypeReference): BicepType {
-    return this.types[reference];
+    return this.types[reference.index];
   }
 
   public addUnionType(elements: TypeReference[]) {
@@ -364,15 +373,10 @@ export class TypeFactory {
 }
 
 export interface TypeIndex {
-  Resources: Record<string, TypeLocation>;
-  Functions: Record<string, Record<string, TypeLocation[]>>;
+  Resources: Record<string, CrossFileTypeReference>;
+  Functions: Record<string, Record<string, CrossFileTypeReference[]>>;
   Settings?: TypeSettings;
-  FallbackResourceType?: TypeLocation;
-}
-
-export interface TypeLocation {
-  RelativePath: string;
-  Index: number;
+  FallbackResourceType?: CrossFileTypeReference;
 }
 
 export interface TypeFile {
@@ -384,5 +388,5 @@ export interface TypeSettings {
   Name: string;
   Version: string;
   IsSingleton: boolean;
-  ConfigurationType?: TypeLocation;
+  ConfigurationType?: CrossFileTypeReference;
 }

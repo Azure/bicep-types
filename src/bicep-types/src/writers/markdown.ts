@@ -38,7 +38,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
   const md = new MarkdownFile();
 
   function getTypeName(types: BicepType[], typeReference: TypeReference): string {
-    const type = types[typeReference];
+    const type = types[typeReference.index];
     switch (type.Type) {
       case TypeBaseKind.BuiltInType:
         return getBuiltInTypeKindLabel((type as BuiltInType).Kind).toLowerCase();
@@ -115,16 +115,16 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
   function findTypesToWrite(types: BicepType[], typesToWrite: BicepType[], typeReference: TypeReference) {
     function processTypeLinks(typeReference: TypeReference, skipParent: boolean) {
       // this is needed to avoid circular type references causing stack overflows
-      if (typesToWrite.indexOf(types[typeReference]) === -1) {
+      if (typesToWrite.indexOf(types[typeReference.index]) === -1) {
         if (!skipParent) {
-          typesToWrite.push(types[typeReference]);
+          typesToWrite.push(types[typeReference.index]);
         }
 
         findTypesToWrite(types, typesToWrite, typeReference);
       }
     }
 
-    const type = types[typeReference];
+    const type = types[typeReference.index];
     switch (type.Type) {
       case TypeBaseKind.ArrayType: {
         const arrayType = type as ArrayType;
@@ -174,7 +174,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
         const flagsString = resourceType.Flags ? ` (${getResourceFlagsLabels(resourceType.Flags).join(', ')})` : '';
         md.writeHeading(nesting, `Resource ${resourceType.Name}${flagsString}`);
         md.writeBullet("Valid Scope(s)", `${getScopeTypeLabels(resourceType.ScopeType, [resourceType.ReadOnlyScopes, 'ReadOnly']).join(', ') || 'Unknown'}`);
-        writeComplexType(types, types[resourceType.Body], nesting, false);
+        writeComplexType(types, types[resourceType.Body.index], nesting, false);
 
         return;
       }
@@ -232,7 +232,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
 
         for (const key of sortedKeys(discriminatedObjectType.Elements)) {
           const element = discriminatedObjectType.Elements[key];
-          writeComplexType(types, types[element], nesting + 1, true);
+          writeComplexType(types, types[element.index], nesting + 1, true);
         }
 
         md.writeNewLine();
@@ -256,10 +256,10 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
     for (const resourceFunctionType of resourceFunctionTypes) {
       if (resourceFunctionType.Input !== undefined)
       {
-        typesToWrite.push(types[resourceFunctionType.Input]);
+        typesToWrite.push(types[resourceFunctionType.Input.index]);
         findTypesToWrite(types, typesToWrite, resourceFunctionType.Input);
       }
-      typesToWrite.push(types[resourceFunctionType.Output]);
+      typesToWrite.push(types[resourceFunctionType.Output.index]);
       findTypesToWrite(types, typesToWrite, resourceFunctionType.Output);
     }
 
@@ -299,7 +299,7 @@ export function writeIndexMarkdown(index: TypeIndex) {
 
       for (const typeString of orderBy(byResourceType[resourceType], x => x.toLowerCase())) {
         const version = typeString.split('@')[1];
-        const jsonPath = index.Resources[typeString].RelativePath;
+        const jsonPath = index.Resources[typeString].relativePath;
         const anchor = `resource-${typeString.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase()}`;
 
         const mdPath = jsonPath.substring(0, jsonPath.toLowerCase().lastIndexOf('.json')) + '.md';

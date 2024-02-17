@@ -4,8 +4,8 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
-import { ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeLocation, TypeSettings } from '../../src/types';
-import { readJson, writeIndexJson, writeJson } from '../../src/writers/json';
+import { CrossFileTypeReference, ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings } from '../../src/types';
+import { readTypesJson, writeIndexJson, writeTypesJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
 import { buildIndex } from '../../src/indexer';
 
@@ -61,7 +61,7 @@ describe('types tests', () => {
         Description: 'Config property',
       },
     });
-    const fallbackTypeLocation = configFactory.addResourceType('fallback', ScopeType.Unknown, undefined, configFactory.addObjectType('fallback body', {
+    const fallbackRef = configFactory.addResourceType('fallback', ScopeType.Unknown, undefined, configFactory.addObjectType('fallback body', {
       bodyProp: {
         Type: factory.addStringType(),
         Flags: ObjectTypePropertyFlags.Required,
@@ -73,16 +73,10 @@ describe('types tests', () => {
       Name: 'Foo',
       IsSingleton: true,
       Version: '0.1.2',
-      ConfigurationType: {
-        Index: configLocation,
-        RelativePath: 'config/types.json',
-      },
+      ConfigurationType: new CrossFileTypeReference('config/types.json', configLocation.index),
     };
 
-    const fallbackResourceType: TypeLocation = {
-      Index: fallbackTypeLocation,
-      RelativePath: 'config/types.json',
-    };
+    const fallbackResourceType = new CrossFileTypeReference('config/types.json', fallbackRef.index);
 
     await verifyBaselines(factory, 'foo', 'foo', configFactory, settings, fallbackResourceType);
   });
@@ -113,8 +107,8 @@ describe('types tests', () => {
   });
 });
 
-async function verifyBaselines(factory: TypeFactory, typesPath: string, testName: string, configFactory?: TypeFactory, settings?: TypeSettings, fallbackResourceType?: TypeLocation) {
-  const deserializedTypes = readJson(writeJson(factory.types));
+async function verifyBaselines(factory: TypeFactory, typesPath: string, testName: string, configFactory?: TypeFactory, settings?: TypeSettings, fallbackResourceType?: CrossFileTypeReference) {
+  const deserializedTypes = readTypesJson(writeTypesJson(factory.types));
   expect(deserializedTypes).toEqual(factory.types);
 
   const typeFiles = [{
@@ -125,7 +119,7 @@ async function verifyBaselines(factory: TypeFactory, typesPath: string, testName
   const index = buildIndex(typeFiles, console.log, settings, fallbackResourceType);
 
   if (configFactory) {
-    const deserializedTypes = readJson(writeJson(configFactory.types));
+    const deserializedTypes = readTypesJson(writeTypesJson(configFactory.types));
     expect(deserializedTypes).toEqual(configFactory.types);
 
     typeFiles.push({
@@ -142,7 +136,7 @@ async function expectFiles(testName: string, typeFiles: TypeFile[], index: TypeI
   await expectFileContents(`${baseDir}/index.json`, writeIndexJson(index));
   await expectFileContents(`${baseDir}/index.md`, writeIndexMarkdown(index));
   for (const { types, relativePath } of typeFiles) {
-    await expectFileContents(`${baseDir}/${relativePath}`, writeJson(types));
+    await expectFileContents(`${baseDir}/${relativePath}`, writeTypesJson(types));
     await expectFileContents(`${baseDir}/${relativePath.substring(0, relativePath.lastIndexOf('.'))}.md`, writeMarkdown(types));
   }
 }

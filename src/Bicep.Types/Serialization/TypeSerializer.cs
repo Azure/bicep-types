@@ -20,6 +20,7 @@ public static class TypeSerializer
         {
             Converters = {
                 new TypeReferenceConverter(factory),
+                new CrossFileTypeReferenceConverter(),
             },
             WriteIndented = true,
             TypeInfoResolver = TypeJsonContext.Default,

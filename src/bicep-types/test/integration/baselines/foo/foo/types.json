@@ -22,12 +22,16 @@
     "$type": "ObjectType",
     "Name": "dictType",
     "Properties": {},
-    "AdditionalProperties": 4,
+    "AdditionalProperties": {
+      "$ref": "#/4"
+    },
     "Sensitive": true
   },
   {
     "$type": "ArrayType",
-    "ItemType": 4,
+    "ItemType": {
+      "$ref": "#/4"
+    },
     "MinLength": 1,
     "MaxLength": 10
   },
@@ -36,32 +40,44 @@
     "Name": "foo",
     "Properties": {
       "abc": {
-        "Type": 0,
+        "Type": {
+          "$ref": "#/0"
+        },
         "Flags": 0,
         "Description": "Abc prop"
       },
       "def": {
-        "Type": 1,
+        "Type": {
+          "$ref": "#/1"
+        },
         "Flags": 2,
         "Description": "Def prop"
       },
       "ghi": {
-        "Type": 2,
+        "Type": {
+          "$ref": "#/2"
+        },
         "Flags": 4,
         "Description": "Ghi prop"
       },
       "jkl": {
-        "Type": 3,
+        "Type": {
+          "$ref": "#/3"
+        },
         "Flags": 17,
         "Description": "Jkl prop"
       },
       "dictType": {
-        "Type": 5,
+        "Type": {
+          "$ref": "#/5"
+        },
         "Flags": 0,
         "Description": "Dictionary of any"
       },
       "arrayType": {
-        "Type": 6,
+        "Type": {
+          "$ref": "#/6"
+        },
         "Flags": 0,
         "Description": "Array of any"
       }
@@ -71,7 +87,9 @@
     "$type": "ResourceType",
     "Name": "foo@v1",
     "ScopeType": 0,
-    "Body": 7,
+    "Body": {
+      "$ref": "#/7"
+    },
     "Flags": 0
   }
 ]
