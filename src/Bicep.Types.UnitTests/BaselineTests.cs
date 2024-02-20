@@ -65,13 +65,13 @@ public class BaselineTests
             var resourceType = typeLoader.LoadResourceType(kvp.Value);
         }
 
-        foreach (var (resourceType, functionsByApiVersion) in index.Functions)
+        foreach (var (resourceType, functionsByApiVersion) in index.ResourceFunctions)
         {
-            foreach (var (apiVersion, functions) in functionsByApiVersion)
+            foreach (var (apiVersion, resourceFunctions) in functionsByApiVersion)
             {
-                foreach (var functionLocation in functions)
+                foreach (var reference in resourceFunctions)
                 {
-                    var resourceFunctionType = typeLoader.LoadResourceFunctionType(functionLocation);
+                    var resourceFunctionType = typeLoader.LoadResourceFunctionType(reference);
                 }
             }
         }

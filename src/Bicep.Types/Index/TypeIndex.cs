@@ -8,12 +8,12 @@ namespace Azure.Bicep.Types.Index
     {
         public TypeIndex(
             IReadOnlyDictionary<string, CrossFileTypeReference> resources,
-            IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<CrossFileTypeReference>>> functions,
+            IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<CrossFileTypeReference>>> resourceFunctions,
             TypeSettings settings,
             CrossFileTypeReference fallbackResourceType)
         {
             Resources = resources;
-            Functions = functions;
+            ResourceFunctions = resourceFunctions;
             Settings = settings;
             FallbackResourceType = fallbackResourceType;
         }
@@ -26,7 +26,7 @@ namespace Azure.Bicep.Types.Index
         /// <summary>
         /// Available resource function types, indexed by resource type -> api version.
         /// </summary>
-        public IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<CrossFileTypeReference>>> Functions { get; }
+        public IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<CrossFileTypeReference>>> ResourceFunctions { get; }
 
         /// <summary>
         /// Provider settings such as name, version, isSingleton and configurationType.

@@ -374,7 +374,7 @@ export class TypeFactory {
 
 export interface TypeIndex {
   resources: Record<string, CrossFileTypeReference>;
-  functions: Record<string, Record<string, CrossFileTypeReference[]>>;
+  resourceFunctions: Record<string, Record<string, CrossFileTypeReference[]>>;
   settings?: TypeSettings;
   fallbackResourceType?: CrossFileTypeReference;
 }

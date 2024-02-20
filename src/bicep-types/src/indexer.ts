@@ -51,7 +51,7 @@ export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void
 
   return {
     resources: resDictionary,
-    functions: funcDictionary,
+    resourceFunctions: funcDictionary,
     settings: settings,
     fallbackResourceType: fallbackResourceType,
   }

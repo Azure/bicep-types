@@ -4,7 +4,7 @@
       "$ref": "foo/types.json#/8"
     }
   },
-  "functions": {},
+  "resourceFunctions": {},
   "settings": {
     "name": "Foo",
     "isSingleton": true,
