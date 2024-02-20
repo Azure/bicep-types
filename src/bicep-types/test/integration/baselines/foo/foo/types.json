@@ -85,10 +85,6 @@
   },
   {
     "$type": "FunctionType",
-    "name": "doSomething",
-    "output": {
-      "$ref": "#/2"
-    },
     "parameters": [
       {
         "name": "arg",
@@ -96,7 +92,10 @@
           "$ref": "#/0"
         }
       }
-    ]
+    ],
+    "output": {
+      "$ref": "#/2"
+    }
   },
   {
     "$type": "ResourceType",
@@ -106,10 +105,12 @@
       "$ref": "#/7"
     },
     "flags": 0,
-    "functions": [
-      {
-        "$ref": "#/8"
+    "functions": {
+      "doSomething": {
+        "type": {
+          "$ref": "#/8"
+        }
       }
-    ]
+    }
   }
 ]

@@ -98,8 +98,8 @@ namespace Azure.Bicep.Types.UnitTests
             var arrayType = factory.Create(() => new ArrayType(factory.GetReference(objectType)));
             var stringType = factory.Create(() => new StringType(true, 3, 10, "^foo"));
             var functionParam = new FunctionTypeParameter("arg", factory.GetReference(stringType), null);
-            var resourceMethodType = factory.Create(() => new FunctionType("sayHi", factory.GetReference(stringType), new [] { functionParam }, null));
-            var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.None, new [] { factory.GetReference(resourceMethodType) }));
+            var resourceMethodType = factory.Create(() => new FunctionType(new [] { functionParam }, factory.GetReference(stringType)));
+            var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.None, new Dictionary<string, ResourceTypeFunction> { ["sayHi"] = new(factory.GetReference(resourceMethodType), null) }));
             var unionType = factory.Create(() => new UnionType(new [] { factory.GetReference(builtInType), factory.GetReference(objectType) }));
             var stringLiteralType = factory.Create(() => new StringLiteralType("abcdef"));
             var discriminatedObjectType = factory.Create(() => new DiscriminatedObjectType("disctest", "disctest", new Dictionary<string, ObjectTypeProperty>(), new Dictionary<string, ITypeReference>()));
@@ -137,12 +137,11 @@ namespace Azure.Bicep.Types.UnitTests
             stringTypeDeserialized.MinLength.Should().Be(3);
             stringTypeDeserialized.MaxLength.Should().Be(10);
             stringTypeDeserialized.Pattern.Should().Be("^foo");
-            resourceMethodTypeDeserialized.Name.Should().Be(resourceMethodType.Name);
             resourceTypeDeserialized.Name.Should().Be(resourceType.Name);
             resourceTypeDeserialized.Flags.Should().Be(resourceType.Flags);
             resourceTypeDeserialized.ReadOnlyScopes.HasValue.Should().Be(true);
             resourceTypeDeserialized.ReadOnlyScopes.Should().Be(resourceType.ReadOnlyScopes);
-            resourceTypeDeserialized.Functions![0].Type.Should().Be(resourceMethodTypeDeserialized);
+            resourceTypeDeserialized.Functions!["sayHi"].Type.Type.Should().Be(resourceMethodTypeDeserialized);
             unionTypeDeserialized.Elements![0].Type.Should().Be(builtInTypeDeserialized);
             unionTypeDeserialized.Elements![1].Type.Should().Be(objectTypeDeserialized);
             stringLiteralTypeDeserialized.Value.Should().Be(stringLiteralType.Value);
@@ -159,7 +158,7 @@ namespace Azure.Bicep.Types.UnitTests
         {
             var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
             var objectType = factory.Create(() => new ObjectType("steven", new Dictionary<string, ObjectTypeProperty>(), null));
-            var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.ReadOnly, Array.Empty<ITypeReference>()));
+            var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.ReadOnly, null));
 
             using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
             var deserializedNode = JsonSerializer.Deserialize<JsonNode>(stream)!;

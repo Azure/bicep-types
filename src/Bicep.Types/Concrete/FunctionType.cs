@@ -9,16 +9,12 @@ namespace Azure.Bicep.Types.Concrete;
 public class FunctionType : TypeBase
 {
     [JsonConstructor]
-    public FunctionType(string name, ITypeReference output, IReadOnlyList<FunctionTypeParameter> parameters, string? description)
-        => (Name, Output, Parameters, Description) = (name, output, parameters, description);
-
-    public string Name { get; }
-
-    public ITypeReference Output { get; }
+    public FunctionType(IReadOnlyList<FunctionTypeParameter> parameters, ITypeReference output)
+        => (Parameters, Output) = (parameters, output);
 
     public IReadOnlyList<FunctionTypeParameter> Parameters { get; }
 
-    public string? Description { get; }
+    public ITypeReference Output { get; }
 }
 
 public class FunctionTypeParameter

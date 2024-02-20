@@ -53,9 +53,9 @@ describe('types tests', () => {
     });
 
     const funcArg: FunctionTypeParameter = { name: 'arg', type: factory.addStringType() };
-    const func = factory.addFunctionType('doSomething', factory.addBooleanType(), [funcArg]);
+    const func = factory.addFunctionType([funcArg], factory.addBooleanType());
 
-    const res = factory.addResourceType('foo@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None, [func]);
+    const res = factory.addResourceType('foo@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None, { doSomething: { type: func } });
 
     const configFactory = new TypeFactory();
     const configLocation = configFactory.addObjectType('config', {

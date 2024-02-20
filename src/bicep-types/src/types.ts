@@ -160,7 +160,7 @@ export type ResourceType = TypeBase<TypeBaseKind.ResourceType, {
   readOnlyScopes?: ScopeType;
   body: TypeReference;
   flags: ResourceFlags;
-  functions?: TypeReference[];
+  functions?: Record<string, ResourceTypeFunction>;
 }>
 
 export type ResourceFunctionType = TypeBase<TypeBaseKind.ResourceFunctionType, {
@@ -185,10 +185,8 @@ export type FunctionTypeParameter = {
 }
 
 export type FunctionType = TypeBase<TypeBaseKind.FunctionType, {
-  name: string;
-  output: TypeReference;
   parameters: FunctionTypeParameter[];
-  description?: string;
+  output: TypeReference;
 }>
 
 export type DiscriminatedObjectType = TypeBase<TypeBaseKind.DiscriminatedObjectType, {
@@ -240,6 +238,11 @@ export type BicepType = BuiltInType |
 export type ObjectTypeProperty = {
   type: TypeReference;
   flags: ObjectTypePropertyFlags;
+  description?: string;
+}
+
+export type ResourceTypeFunction = {
+  type: TypeReference;
   description?: string;
 }
 
@@ -336,7 +339,7 @@ export class TypeFactory {
     return this.addType(this.booleanType);
   }
 
-  public addResourceType(name: string, scopeType: ScopeType, readOnlyScopes: ScopeType | undefined, body: TypeReference, flags: ResourceFlags, functions?: TypeReference[]) {
+  public addResourceType(name: string, scopeType: ScopeType, readOnlyScopes: ScopeType | undefined, body: TypeReference, flags: ResourceFlags, functions?: Record<string, ResourceTypeFunction>) {
     return this.addType({
       type: TypeBaseKind.ResourceType,
       name: name,
@@ -388,12 +391,11 @@ export class TypeFactory {
     });
   }
 
-  public addFunctionType(name: string, output: TypeReference, parameters: FunctionTypeParameter[]) {
+  public addFunctionType(parameters: FunctionTypeParameter[], output: TypeReference) {
     return this.addType({
       type: TypeBaseKind.FunctionType,
-      name,
-      output,
       parameters,
+      output,
     });
   }
 }
