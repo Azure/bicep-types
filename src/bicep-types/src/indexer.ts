@@ -1,42 +1,39 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ResourceFunctionType, ResourceType, TypeBaseKind, TypeFile, TypeIndex, TypeIndexEntry, TypeSettings } from "./types";
+import { ResourceFunctionType, ResourceType, TypeBaseKind, TypeFile, TypeIndex, CrossFileTypeReference, TypeSettings } from "./types";
 import { orderBy } from "./utils";
 
-export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void, settings?: TypeSettings, fallbackResourceType?: TypeIndexEntry): TypeIndex {
+export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void, settings?: TypeSettings, fallbackResourceType?: CrossFileTypeReference): TypeIndex {
   const resourceTypes = new Set<string>();
   const resourceFunctions = new Set<string>();
-  const resDictionary: Record<string, TypeIndexEntry> = {};
-  const funcDictionary: Record<string, Record<string, TypeIndexEntry[]>> = {};
+  const resDictionary: Record<string, CrossFileTypeReference> = {};
+  const funcDictionary: Record<string, Record<string, CrossFileTypeReference[]>> = {};
 
   // Use a consistent sort order so that file system differences don't generate changes
   for (const typeFile of orderBy(typeFiles, f => f.relativePath.toLowerCase())) {
     const types = typeFile.types;
     for (const type of types) {
-      if (type.Type == TypeBaseKind.ResourceType) {
+      if (type.type == TypeBaseKind.ResourceType) {
         const resourceType = type as ResourceType;
-        if (resourceTypes.has(resourceType.Name.toLowerCase())) {
-          logFunc(`WARNING: Found duplicate type "${resourceType.Name}"`);
+        if (resourceTypes.has(resourceType.name.toLowerCase())) {
+          logFunc(`WARNING: Found duplicate type "${resourceType.name}"`);
           continue;
         }
-        resourceTypes.add(resourceType.Name.toLowerCase());
+        resourceTypes.add(resourceType.name.toLowerCase());
 
-        resDictionary[resourceType.Name] = {
-          RelativePath: typeFile.relativePath,
-          Index: types.indexOf(type),
-        };
+        resDictionary[resourceType.name] = new CrossFileTypeReference(typeFile.relativePath, types.indexOf(type));
 
         continue;
       }
 
-      if (type.Type == TypeBaseKind.ResourceFunctionType) {
+      if (type.type == TypeBaseKind.ResourceFunctionType) {
         const resourceFunction = type as ResourceFunctionType;
-        const funcKey = `${resourceFunction.ResourceType}@${resourceFunction.ApiVersion}:${resourceFunction.Name}`.toLowerCase();
+        const funcKey = `${resourceFunction.resourceType}@${resourceFunction.apiVersion}:${resourceFunction.name}`.toLowerCase();
 
-        const resourceTypeLower = resourceFunction.ResourceType.toLowerCase();
-        const apiVersionLower = resourceFunction.ApiVersion.toLowerCase();
+        const resourceTypeLower = resourceFunction.resourceType.toLowerCase();
+        const apiVersionLower = resourceFunction.apiVersion.toLowerCase();
         if (resourceFunctions.has(funcKey)) {
-          logFunc(`WARNING: Found duplicate function "${resourceFunction.Name}" for resource type "${resourceFunction.ResourceType}@${resourceFunction.ApiVersion}"`);
+          logFunc(`WARNING: Found duplicate function "${resourceFunction.name}" for resource type "${resourceFunction.resourceType}@${resourceFunction.apiVersion}"`);
           continue;
         }
         resourceFunctions.add(funcKey);
@@ -44,10 +41,8 @@ export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void
         funcDictionary[resourceTypeLower] = funcDictionary[resourceTypeLower] || {};
         funcDictionary[resourceTypeLower][apiVersionLower] = funcDictionary[resourceTypeLower][apiVersionLower] || [];
 
-        funcDictionary[resourceTypeLower][apiVersionLower].push({
-          RelativePath: typeFile.relativePath,
-          Index: types.indexOf(type),
-        });
+        funcDictionary[resourceTypeLower][apiVersionLower].push(
+          new CrossFileTypeReference(typeFile.relativePath, types.indexOf(type)));
 
         continue;
       }
@@ -55,9 +50,9 @@ export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void
   }
 
   return {
-    Resources: resDictionary,
-    Functions: funcDictionary,
-    Settings: settings,
-    FallbackResourceType: fallbackResourceType,
+    resources: resDictionary,
+    resourceFunctions: funcDictionary,
+    settings: settings,
+    fallbackResourceType: fallbackResourceType,
   }
 }

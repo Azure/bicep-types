@@ -1,1 +1,95 @@
-[{"13":{}},{"2":{"Name":"def","Properties":{}}},{"11":{}},{"2":{"Name":"jkl","Properties":{}}},{"9":{}},{"2":{"Name":"dictType","Properties":{},"AdditionalProperties":4,"Sensitive":true}},{"3":{"ItemType":4,"MinLength":1,"MaxLength":10}},{"2":{"Name":"foo","Properties":{"abc":{"Type":0,"Flags":0,"Description":"Abc prop"},"def":{"Type":1,"Flags":2,"Description":"Def prop"},"ghi":{"Type":2,"Flags":4,"Description":"Ghi prop"},"jkl":{"Type":3,"Flags":17,"Description":"Jkl prop"},"dictType":{"Type":5,"Flags":0,"Description":"Dictionary of any"},"arrayType":{"Type":6,"Flags":0,"Description":"Array of any"}}}},{"4":{"Name":"foo@v1","ScopeType":0,"Body":7,"Flags":0}}]
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "def",
+    "properties": {}
+  },
+  {
+    "$type": "BooleanType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "jkl",
+    "properties": {}
+  },
+  {
+    "$type": "AnyType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "dictType",
+    "properties": {},
+    "additionalProperties": {
+      "$ref": "#/4"
+    },
+    "sensitive": true
+  },
+  {
+    "$type": "ArrayType",
+    "itemType": {
+      "$ref": "#/4"
+    },
+    "minLength": 1,
+    "maxLength": 10
+  },
+  {
+    "$type": "ObjectType",
+    "name": "foo",
+    "properties": {
+      "abc": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 0,
+        "description": "Abc prop"
+      },
+      "def": {
+        "type": {
+          "$ref": "#/1"
+        },
+        "flags": 2,
+        "description": "Def prop"
+      },
+      "ghi": {
+        "type": {
+          "$ref": "#/2"
+        },
+        "flags": 4,
+        "description": "Ghi prop"
+      },
+      "jkl": {
+        "type": {
+          "$ref": "#/3"
+        },
+        "flags": 17,
+        "description": "Jkl prop"
+      },
+      "dictType": {
+        "type": {
+          "$ref": "#/5"
+        },
+        "flags": 0,
+        "description": "Dictionary of any"
+      },
+      "arrayType": {
+        "type": {
+          "$ref": "#/6"
+        },
+        "flags": 0,
+        "description": "Array of any"
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "foo@v1",
+    "scopeType": 0,
+    "body": {
+      "$ref": "#/7"
+    },
+    "flags": 0
+  }
+]

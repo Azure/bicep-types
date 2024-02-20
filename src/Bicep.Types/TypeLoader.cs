@@ -12,24 +12,23 @@ namespace Azure.Bicep.Types
 {
     public abstract class TypeLoader : ITypeLoader
     {
-        private const string TypeContainerName = "types.json";
         private const string TypeIndexResourceName = "index.json";
 
-        public ResourceType LoadResourceType(TypeLocation typeLocation)
+        public ResourceType LoadResourceType(CrossFileTypeReference reference)
         {
-            if (LoadType(typeLocation) is not ResourceType resourceType)
+            if (LoadType(reference) is not ResourceType resourceType)
             {
-                throw new ArgumentException($"Unable to locate resource type at index {typeLocation.Index} in \"{typeLocation.RelativePath}\" resource");
+                throw new ArgumentException($"Unable to locate resource type at index {reference.Index} in \"{reference.RelativePath}\" resource");
             }
 
             return resourceType;
         }
 
-        public ResourceFunctionType LoadResourceFunctionType(TypeLocation typeLocation)
+        public ResourceFunctionType LoadResourceFunctionType(CrossFileTypeReference reference)
         {
-            if (LoadType(typeLocation) is not ResourceFunctionType resourceFunctionType)
+            if (LoadType(reference) is not ResourceFunctionType resourceFunctionType)
             {
-                throw new ArgumentException($"Unable to locate resource function type at index {typeLocation.Index} in \"{typeLocation.RelativePath}\" resource");
+                throw new ArgumentException($"Unable to locate resource function type at index {reference.Index} in \"{reference.RelativePath}\" resource");
             }
 
             return resourceFunctionType;
@@ -42,12 +41,12 @@ namespace Azure.Bicep.Types
             return TypeSerializer.DeserializeIndex(contentStream);
         }
 
-        private TypeBase LoadType(TypeLocation typeLocation)
+        private TypeBase LoadType(CrossFileTypeReference reference)
         {
-            using var contentStream = GetContentStreamAtPath(typeLocation.RelativePath);
+            using var contentStream = GetContentStreamAtPath(reference.RelativePath);
             var types = TypeSerializer.Deserialize(contentStream);
 
-            return types[typeLocation.Index];
+            return types[reference.Index];
         }
 
         protected abstract Stream GetContentStreamAtPath(string path);

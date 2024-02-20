@@ -25,12 +25,4 @@ namespace Azure.Bicep.Types.Serialization;
 [JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 internal partial class TypeJsonContext : JsonSerializerContext
 {
-    public static JsonSerializerOptions GetSerializerOptions(TypeFactory factory)
-    {
-        var options = new JsonSerializerOptions();
-        options.Converters.Add(new TypeBaseConverter(factory));
-        options.TypeInfoResolver = TypeJsonContext.Default;
-
-        return options;
-    }
 }

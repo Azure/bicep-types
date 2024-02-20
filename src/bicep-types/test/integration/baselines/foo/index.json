@@ -1,1 +1,19 @@
-{"Resources":{"foo@v1":{"RelativePath":"foo/types.json","Index":8}},"Functions":{},"Settings":{"Name":"Foo","IsSingleton":true,"Version":"0.1.2","ConfigurationType":{"Index":0,"RelativePath":"config/types.json"}},"FallbackResourceType":{"Index":2,"RelativePath":"config/types.json"}}
+{
+  "resources": {
+    "foo@v1": {
+      "$ref": "foo/types.json#/8"
+    }
+  },
+  "resourceFunctions": {},
+  "settings": {
+    "name": "Foo",
+    "isSingleton": true,
+    "version": "0.1.2",
+    "configurationType": {
+      "$ref": "config/types.json#/0"
+    }
+  },
+  "fallbackResourceType": {
+    "$ref": "config/types.json#/2"
+  }
+}
