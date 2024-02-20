@@ -178,14 +178,14 @@ export type ObjectType = TypeBase<TypeBaseKind.ObjectType, {
   sensitive?: boolean;
 }>
 
-export type FunctionTypeParameter = {
+export type FunctionParameter = {
   name: string;
   type: TypeReference;
   description?: string;
 }
 
 export type FunctionType = TypeBase<TypeBaseKind.FunctionType, {
-  parameters: FunctionTypeParameter[];
+  parameters: FunctionParameter[];
   output: TypeReference;
 }>
 
@@ -391,7 +391,7 @@ export class TypeFactory {
     });
   }
 
-  public addFunctionType(parameters: FunctionTypeParameter[], output: TypeReference) {
+  public addFunctionType(parameters: FunctionParameter[], output: TypeReference) {
     return this.addType({
       type: TypeBaseKind.FunctionType,
       parameters,

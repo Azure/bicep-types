@@ -97,7 +97,7 @@ namespace Azure.Bicep.Types.UnitTests
             var objectType = factory.Create(() => new ObjectType("steven", new Dictionary<string, ObjectTypeProperty>(), null));
             var arrayType = factory.Create(() => new ArrayType(factory.GetReference(objectType)));
             var stringType = factory.Create(() => new StringType(true, 3, 10, "^foo"));
-            var functionParam = new FunctionTypeParameter("arg", factory.GetReference(stringType), null);
+            var functionParam = new FunctionParameter("arg", factory.GetReference(stringType), null);
             var resourceMethodType = factory.Create(() => new FunctionType(new [] { functionParam }, factory.GetReference(stringType)));
             var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.None, new Dictionary<string, ResourceTypeFunction> { ["sayHi"] = new(factory.GetReference(resourceMethodType), null) }));
             var unionType = factory.Create(() => new UnionType(new [] { factory.GetReference(builtInType), factory.GetReference(objectType) }));
