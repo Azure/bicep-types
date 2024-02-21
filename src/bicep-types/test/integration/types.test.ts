@@ -123,7 +123,7 @@ async function verifyBaselines(factory: TypeFactory, typesPath: string, testName
     expect(deserializedTypes).toEqual(configFactory.types);
 
     typeFiles.push({
-      relativePath: `${typesPath}/config.json`,
+      relativePath: `types.json`,
       types: configFactory.types,
     });
   }
