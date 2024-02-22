@@ -78,7 +78,7 @@ public class BaselineTests
 
         if (index.Settings != null && index.Settings.ConfigurationType != null)
         {
-            var objectType = typeLoader.LoadObjectType(index.Settings.ConfigurationType);
+            var objectType = typeLoader.LoadType(index.Settings.ConfigurationType);
         }
 
         if (index.FallbackResourceType != null)

@@ -34,16 +34,6 @@ namespace Azure.Bicep.Types
             return resourceFunctionType;
         }
 
-        public ObjectType LoadObjectType(CrossFileTypeReference reference)
-        {
-            if (LoadType(reference) is not ObjectType objectType)
-            {
-                throw new ArgumentException($"Unable to locate object type at index {reference.Index} in \"{reference.RelativePath}\" resource");
-            }
-
-            return objectType;
-        }
-
         public TypeIndex LoadTypeIndex()
         {
             using var contentStream = GetContentStreamAtPath(TypeIndexResourceName);
@@ -51,7 +41,7 @@ namespace Azure.Bicep.Types
             return TypeSerializer.DeserializeIndex(contentStream);
         }
 
-        private TypeBase LoadType(CrossFileTypeReference reference)
+        public TypeBase LoadType(CrossFileTypeReference reference)
         {
             using var contentStream = GetContentStreamAtPath(reference.RelativePath);
             var types = TypeSerializer.Deserialize(contentStream);
