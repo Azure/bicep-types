@@ -8,6 +8,7 @@ namespace Azure.Bicep.Types.Concrete;
 [JsonDerivedType(typeof(BuiltInType), typeDiscriminator: nameof(BuiltInType))]
 [JsonDerivedType(typeof(DiscriminatedObjectType), typeDiscriminator: nameof(DiscriminatedObjectType))]
 [JsonDerivedType(typeof(ObjectType), typeDiscriminator: nameof(ObjectType))]
+[JsonDerivedType(typeof(FunctionType), typeDiscriminator: nameof(FunctionType))]
 [JsonDerivedType(typeof(ResourceFunctionType), typeDiscriminator: nameof(ResourceFunctionType))]
 [JsonDerivedType(typeof(ResourceType), typeDiscriminator: nameof(ResourceType))]
 [JsonDerivedType(typeof(StringLiteralType), typeDiscriminator: nameof(StringLiteralType))]

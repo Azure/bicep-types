@@ -1,7 +1,7 @@
 {
   "resources": {
     "foo@v1": {
-      "$ref": "foo/types.json#/8"
+      "$ref": "foo/types.json#/9"
     }
   },
   "resourceFunctions": {},

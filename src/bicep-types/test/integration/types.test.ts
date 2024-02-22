@@ -4,7 +4,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
-import { CrossFileTypeReference, ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings } from '../../src/types';
+import { CrossFileTypeReference, FunctionParameter, ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings } from '../../src/types';
 import { readTypesJson, writeIndexJson, writeTypesJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
 import { buildIndex } from '../../src/indexer';
@@ -51,7 +51,11 @@ describe('types tests', () => {
         description: 'Array of any'
       },
     });
-    const res = factory.addResourceType('foo@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None);
+
+    const funcArg: FunctionParameter = { name: 'arg', type: factory.addStringType() };
+    const func = factory.addFunctionType([funcArg], factory.addBooleanType());
+
+    const res = factory.addResourceType('foo@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None, { doSomething: { type: func } });
 
     const configFactory = new TypeFactory();
     const configLocation = configFactory.addObjectType('config', {
