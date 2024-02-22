@@ -10,10 +10,10 @@
     "isSingleton": true,
     "version": "0.1.2",
     "configurationType": {
-      "$ref": "foo/config.json#/0"
+      "$ref": "types.json#/0"
     }
   },
   "fallbackResourceType": {
-    "$ref": "foo/config.json#/2"
+    "$ref": "types.json#/2"
   }
 }

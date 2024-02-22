@@ -13,5 +13,7 @@ namespace Azure.Bicep.Types
         ResourceFunctionType LoadResourceFunctionType(CrossFileTypeReference reference);
 
         TypeIndex LoadTypeIndex();
+
+        TypeBase LoadType(CrossFileTypeReference reference);
     }
 }
