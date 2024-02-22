@@ -9,7 +9,7 @@ namespace Azure.Bicep.Types.Index
     public class TypeSettings
     {
         [JsonConstructor]
-        public TypeSettings(string name, string version, bool isSingleton, TypeLocation configurationType)
+        public TypeSettings(string name, string version, bool isSingleton, CrossFileTypeReference configurationType)
             => (Name, Version, IsSingleton, ConfigurationType) = (name, version, isSingleton, configurationType);
 
         public string Name { get; }
@@ -18,6 +18,6 @@ namespace Azure.Bicep.Types.Index
 
         public bool IsSingleton { get; }
 
-        public TypeLocation? ConfigurationType { get; }
+        public CrossFileTypeReference? ConfigurationType { get; }
     }
 }
