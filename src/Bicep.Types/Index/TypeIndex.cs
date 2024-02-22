@@ -7,13 +7,13 @@ namespace Azure.Bicep.Types.Index
     public class TypeIndex
     {
         public TypeIndex(
-            IReadOnlyDictionary<string, TypeLocation> resources,
-            IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<TypeLocation>>> functions,
+            IReadOnlyDictionary<string, CrossFileTypeReference> resources,
+            IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<CrossFileTypeReference>>> resourceFunctions,
             TypeSettings settings,
-            TypeLocation fallbackResourceType)
+            CrossFileTypeReference fallbackResourceType)
         {
             Resources = resources;
-            Functions = functions;
+            ResourceFunctions = resourceFunctions;
             Settings = settings;
             FallbackResourceType = fallbackResourceType;
         }
@@ -21,12 +21,12 @@ namespace Azure.Bicep.Types.Index
         /// <summary>
         /// Available resource types, indexed by resource type name.
         /// </summary>
-        public IReadOnlyDictionary<string, TypeLocation> Resources { get; }
+        public IReadOnlyDictionary<string, CrossFileTypeReference> Resources { get; }
 
         /// <summary>
         /// Available resource function types, indexed by resource type -> api version.
         /// </summary>
-        public IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<TypeLocation>>> Functions { get; }
+        public IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<CrossFileTypeReference>>> ResourceFunctions { get; }
 
         /// <summary>
         /// Provider settings such as name, version, isSingleton and configurationType.
@@ -36,6 +36,6 @@ namespace Azure.Bicep.Types.Index
         /// <summary>
         /// If inputted type not recognized for provider, will default to fallbackType.
         /// </summary>
-        public TypeLocation? FallbackResourceType { get; }
+        public CrossFileTypeReference? FallbackResourceType { get; }
     }
 }

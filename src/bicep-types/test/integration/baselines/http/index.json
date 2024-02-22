@@ -1,1 +1,8 @@
-{"Resources":{"request@v1":{"RelativePath":"http/v1/types.json","Index":8}},"Functions":{}}
+{
+  "resources": {
+    "request@v1": {
+      "$ref": "http/v1/types.json#/8"
+    }
+  },
+  "resourceFunctions": {}
+}

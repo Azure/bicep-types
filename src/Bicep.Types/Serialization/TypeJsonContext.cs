@@ -13,6 +13,7 @@ namespace Azure.Bicep.Types.Serialization;
 [JsonSerializable(typeof(BuiltInType))]
 [JsonSerializable(typeof(DiscriminatedObjectType))]
 [JsonSerializable(typeof(ObjectType))]
+[JsonSerializable(typeof(FunctionType))]
 [JsonSerializable(typeof(ResourceFunctionType))]
 [JsonSerializable(typeof(ResourceType))]
 [JsonSerializable(typeof(StringLiteralType))]
@@ -25,12 +26,4 @@ namespace Azure.Bicep.Types.Serialization;
 [JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 internal partial class TypeJsonContext : JsonSerializerContext
 {
-    public static JsonSerializerOptions GetSerializerOptions(TypeFactory factory)
-    {
-        var options = new JsonSerializerOptions();
-        options.Converters.Add(new TypeBaseConverter(factory));
-        options.TypeInfoResolver = TypeJsonContext.Default;
-
-        return options;
-    }
 }
