@@ -41,7 +41,7 @@ namespace Azure.Bicep.Types
             return TypeSerializer.DeserializeIndex(contentStream);
         }
 
-        private TypeBase LoadType(CrossFileTypeReference reference)
+        public TypeBase LoadType(CrossFileTypeReference reference)
         {
             using var contentStream = GetContentStreamAtPath(reference.RelativePath);
             var types = TypeSerializer.Deserialize(contentStream);

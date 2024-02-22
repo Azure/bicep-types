@@ -73,10 +73,10 @@ describe('types tests', () => {
       name: 'Foo',
       isSingleton: true,
       version: '0.1.2',
-      configurationType: new CrossFileTypeReference('config/types.json', configLocation.index),
+      configurationType: new CrossFileTypeReference('types.json', configLocation.index),
     };
 
-    const fallbackResourceType = new CrossFileTypeReference('config/types.json', fallbackRef.index);
+    const fallbackResourceType = new CrossFileTypeReference('types.json', fallbackRef.index);
 
     await verifyBaselines(factory, 'foo', 'foo', configFactory, settings, fallbackResourceType);
   });
@@ -123,7 +123,7 @@ async function verifyBaselines(factory: TypeFactory, typesPath: string, testName
     expect(deserializedTypes).toEqual(configFactory.types);
 
     typeFiles.push({
-      relativePath: `${typesPath}/config.json`,
+      relativePath: `types.json`,
       types: configFactory.types,
     });
   }

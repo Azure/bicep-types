@@ -75,5 +75,15 @@ public class BaselineTests
                 }
             }
         }
+
+        if (index.Settings != null && index.Settings.ConfigurationType != null)
+        {
+            var objectType = typeLoader.LoadType(index.Settings.ConfigurationType);
+        }
+
+        if (index.FallbackResourceType != null)
+        {
+            var resourceType = typeLoader.LoadResourceType(index.FallbackResourceType);
+        }
     }
 }
