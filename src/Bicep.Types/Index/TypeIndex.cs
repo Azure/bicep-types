@@ -9,8 +9,8 @@ namespace Azure.Bicep.Types.Index
         public TypeIndex(
             IReadOnlyDictionary<string, CrossFileTypeReference> resources,
             IReadOnlyDictionary<string, IReadOnlyDictionary<string, IReadOnlyList<CrossFileTypeReference>>> resourceFunctions,
-            TypeSettings settings,
-            CrossFileTypeReference fallbackResourceType)
+            TypeSettings? settings,
+            CrossFileTypeReference? fallbackResourceType)
         {
             Resources = resources;
             ResourceFunctions = resourceFunctions;
