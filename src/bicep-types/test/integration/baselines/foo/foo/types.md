@@ -10,6 +10,12 @@
 * **ghi**: bool (WriteOnly): Ghi prop
 * **jkl**: [jkl](#jkl) (Required, Identifier): Jkl prop
 
+### Function doSomething
+* **Output**: bool
+#### Parameters
+0. **arg**: string
+1. **arg2**: string
+
 ## def
 ### Properties
 
