@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectTypePropertyFlagsLabels, getResourceFlagsLabels, getScopeTypeLabels, ObjectTypeProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, StringType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType, IntegerType } from '../types';
+import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectTypePropertyFlagsLabels, getResourceFlagsLabels, getScopeTypeLabels, ObjectTypeProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, StringType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType, IntegerType, FunctionType } from '../types';
 import { groupBy, orderBy } from '../utils';
 
 class MarkdownFile {
@@ -17,6 +17,11 @@ class MarkdownFile {
 
   writeBullet(key: string, value: string) {
     this.output += `* **${key}**: ${value}`;
+    this.writeNewLine();
+  }
+
+  writeNumbered(index: number, key: string, value: string) {
+    this.output += `${index}. **${key}**: ${value}`;
     this.writeNewLine();
   }
 
@@ -167,6 +172,21 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
     return orderBy(Object.keys(dictionary), x => x.toLowerCase());
   }
 
+  function writeFunctionType(name: string, functionType: FunctionType, nesting: number) {
+    md.writeHeading(nesting, `Function ${name}`);
+    
+    md.writeBullet("Output", getTypeName(types, functionType.output));
+
+    md.writeHeading(nesting + 1, "Parameters");
+    for (let i = 0; i < functionType.parameters.length; i++) {
+      const param = functionType.parameters[i];
+      md.writeNumbered(i, param.name, getTypeName(types, param.type));
+    }
+
+    md.writeNewLine();
+    return;
+  }
+
   function writeComplexType(types: BicepType[], type: BicepType, nesting: number, includeHeader: boolean) {
     switch (type.type) {
       case TypeBaseKind.ResourceType: {
@@ -175,6 +195,14 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
         md.writeHeading(nesting, `Resource ${resourceType.name}${flagsString}`);
         md.writeBullet("Valid Scope(s)", `${getScopeTypeLabels(resourceType.scopeType, [resourceType.readOnlyScopes, 'ReadOnly']).join(', ') || 'Unknown'}`);
         writeComplexType(types, types[resourceType.body.index], nesting, false);
+
+        if (resourceType.functions) {
+          for (const functionName in resourceType.functions) {
+            const { type } = resourceType.functions[functionName];
+            writeFunctionType(functionName, types[type.index] as FunctionType, nesting + 1);
+            return;
+          }
+        }
 
         return;
       }
