@@ -200,7 +200,6 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
           for (const functionName in resourceType.functions) {
             const { type } = resourceType.functions[functionName];
             writeFunctionType(functionName, types[type.index] as FunctionType, nesting + 1);
-            return;
           }
         }
 
