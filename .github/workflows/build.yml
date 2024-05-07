@@ -21,11 +21,20 @@ jobs:
   build-dotnet:
     name: Build Dotnet
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
@@ -51,15 +60,27 @@ jobs:
         with:
           flags: dotnet
 
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
   build-npm:
     name: Build NPM
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+  
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -93,3 +114,6 @@ jobs:
           name: bicep-types.tgz
           path: ./src/bicep-types/bicep-types.tgz
           if-no-files-found: error
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
