@@ -61,7 +61,7 @@ jobs:
           flags: dotnet
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
 
   build-npm:
     name: Build NPM
@@ -116,4 +116,4 @@ jobs:
           if-no-files-found: error
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
