@@ -36,7 +36,7 @@ internal class TypeReferenceConverter : JsonConverter<ITypeReference>
 
         if (reader.TokenType != JsonTokenType.String ||
             reader.GetString() is not { } stringVal ||
-            !stringVal.StartsWith(ReferencePrefix) ||
+            !stringVal.StartsWith(ReferencePrefix, StringComparison.InvariantCulture) ||
             !int.TryParse(stringVal.Substring(ReferencePrefix.Length), out var index))
         {
             throw new JsonException();

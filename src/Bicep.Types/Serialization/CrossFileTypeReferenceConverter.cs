@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -31,14 +32,14 @@ internal class CrossFileTypeReferenceConverter : JsonConverter<CrossFileTypeRefe
             throw new JsonException();
         }
 
-        var pathSepIndex = stringVal.IndexOf("#/");
+        var pathSepIndex = stringVal.IndexOf("#/", StringComparison.InvariantCulture);
         if (pathSepIndex is -1)
         {
             throw new JsonException();
         }
 
         var relativePath = stringVal.Substring(0, pathSepIndex);
-        var index = int.Parse(stringVal.Substring(pathSepIndex + 2));
+        var index = int.Parse(stringVal.Substring(pathSepIndex + 2), CultureInfo.InvariantCulture);
 
         reader.Read();
 
