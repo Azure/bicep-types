@@ -61,11 +61,12 @@
       },
       "System.Memory.Data": {
         "type": "Direct",
-        "requested": "[8.0.1, )",
-        "resolved": "8.0.1",
-        "contentHash": "BVYuec3jV23EMRDeR7Dr1/qhx7369dZzJ9IWy2xylvb4YfXsrUxspWc4UWYid/tj4zZK58uGZqn2WQiaDMhmAg==",
+        "requested": "[9.0.0, )",
+        "resolved": "9.0.0",
+        "contentHash": "CxUGXLXdbG7hxdQCRdxQKwq//OtYfxKsKyy6oYjSr9zpSvza5rW9TxokNasSLfmETRKDTfu1zqW8RQKokyKw/Q==",
         "dependencies": {
-          "System.Text.Json": "8.0.5"
+          "System.Memory": "4.5.5",
+          "System.Text.Json": "9.0.0"
         }
       },
       "Microsoft.ApplicationInsights": {
