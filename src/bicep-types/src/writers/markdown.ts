@@ -268,49 +268,6 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
     }
   }
 
-  function isComplexType(type: BicepType) {
-    switch (type.type) {
-      case TypeBaseKind.ResourceType:
-      case TypeBaseKind.ResourceFunctionType:
-      case TypeBaseKind.ObjectType:
-      case TypeBaseKind.DiscriminatedObjectType:
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  function getComplexTypeName(type: BicepType) {
-    switch (type.type) {
-      case TypeBaseKind.ResourceType:
-        return (type as ResourceType).name;
-      case TypeBaseKind.ResourceFunctionType:
-        return (type as ResourceFunctionType).name;
-      case TypeBaseKind.ObjectType:
-        return (type as ObjectType).name;
-      case TypeBaseKind.DiscriminatedObjectType:
-        return (type as DiscriminatedObjectType).name;
-      default:
-        return undefined;
-    }
-  }
-
-  function dedupeAndFilter(typesToWrite: BicepType[]) {
-    const uniqueTypesMap = new Map<string, BicepType>();
-
-    for (const type of typesToWrite) {
-      if (isComplexType(type)) {
-        const typeName = getComplexTypeName(type);
-
-        if (typeName && !uniqueTypesMap.has(typeName)) {
-          uniqueTypesMap.set(typeName, type);
-        }
-      }
-    }
-
-    return Array.from(uniqueTypesMap.values());
-  }
-
   function generateMarkdown(types: BicepType[]) {
     md.writeHeading(1, fileHeading ?? 'Bicep Types');
     md.writeNewLine();
@@ -333,9 +290,10 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       findTypesToWrite(types, typesToWrite, resourceFunctionType.output);
     }
 
-    const complexTypesToWrite = dedupeAndFilter(typesToWrite);
+    // There could be duplicates in typesToWrite. Dedupe by object reference here.
+    const dedupedTypesToWrite = [...new Set(typesToWrite)];
 
-    complexTypesToWrite.sort((a, b) => {
+    dedupedTypesToWrite.sort((a, b) => {
       const aName = (a as ObjectType).name?.toLowerCase();
       const bName = (b as ObjectType).name?.toLowerCase();
 
@@ -347,7 +305,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       return 0;
     });
 
-    for (const type of (resourceTypes as BicepType[]).concat(resourceFunctionTypes).concat(complexTypesToWrite)) {
+    for (const type of (resourceTypes as BicepType[]).concat(resourceFunctionTypes).concat(dedupedTypesToWrite)) {
       writeComplexType(types, type, 2, true);
     }
 
