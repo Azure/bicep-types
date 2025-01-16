@@ -174,7 +174,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
 
   function writeFunctionType(name: string, functionType: FunctionType, nesting: number) {
     md.writeHeading(nesting, `Function ${name}`);
-    
+
     md.writeBullet("Output", getTypeName(types, functionType.output));
 
     md.writeHeading(nesting + 1, "Parameters");
@@ -290,7 +290,10 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       findTypesToWrite(types, typesToWrite, resourceFunctionType.output);
     }
 
-    typesToWrite.sort((a, b) => {
+    // There could be duplicates in typesToWrite. Dedupe by object reference here.
+    const dedupedTypesToWrite = [...new Set(typesToWrite)];
+
+    dedupedTypesToWrite.sort((a, b) => {
       const aName = (a as ObjectType).name?.toLowerCase();
       const bName = (b as ObjectType).name?.toLowerCase();
 
@@ -302,7 +305,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       return 0;
     });
 
-    for (const type of (resourceTypes as BicepType[]).concat(resourceFunctionTypes).concat(typesToWrite)) {
+    for (const type of (resourceTypes as BicepType[]).concat(resourceFunctionTypes).concat(dedupedTypesToWrite)) {
       writeComplexType(types, type, 2, true);
     }
 
