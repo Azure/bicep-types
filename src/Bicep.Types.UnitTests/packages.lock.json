@@ -192,7 +192,7 @@
       "Azure.Bicep.Types": {
         "type": "Project",
         "dependencies": {
-          "System.Text.Json": "[9.0.2, )"
+          "System.Text.Json": "[9.0.3, )"
         }
       }
     }
