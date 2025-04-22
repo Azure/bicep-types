@@ -416,5 +416,7 @@ export interface TypeSettings {
   name: string;
   version: string;
   isSingleton: boolean;
+  isPreview?: boolean;
+  isDeprecated?: boolean;
   configurationType?: CrossFileTypeReference;
 }
