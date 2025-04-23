@@ -73,10 +73,12 @@ describe('types tests', () => {
         description: 'Body property',
       },
     }), ResourceFlags.None);
-    
+
     const settings: TypeSettings = {
       name: 'Foo',
       isSingleton: true,
+      isPreview: true,
+      isDeprecated: false,
       version: '0.1.2',
       configurationType: new CrossFileTypeReference('types.json', configLocation.index),
     };

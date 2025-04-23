@@ -8,6 +8,8 @@
   "settings": {
     "name": "Foo",
     "isSingleton": true,
+    "isPreview": true,
+    "isDeprecated": false,
     "version": "0.1.2",
     "configurationType": {
       "$ref": "types.json#/0"
