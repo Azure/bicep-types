@@ -113,10 +113,12 @@ export function getTypeBaseKindLabel(input: TypeBaseKind): string {
 export enum ResourceFlags {
   None = 0,
   ReadOnly = 1 << 0,
+  WriteOnly = 1 << 1,
 }
 
 const ResourceFlagsLabels = new Map<ResourceFlags, string>([
   [ResourceFlags.ReadOnly, 'ReadOnly'],
+  [ResourceFlags.WriteOnly, 'WriteOnly'],
 ]);
 
 export function getResourceFlagsLabels(input: ResourceFlags) {
