@@ -177,6 +177,31 @@ namespace Azure.Bicep.Types.UnitTests
             ((ResourceType)deserialized[1]).ReadOnlyScopes.HasValue.Should().Be(false);
         }
 
+        [TestMethod]
+        public void Resource_with_writeonly_flag_can_be_deserialized()
+        {
+            var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
+            var objectType = factory.Create(() => new ObjectType("testObject", new Dictionary<string, ObjectTypeProperty>(), null));
+            var resourceType = factory.Create(() => new ResourceType(
+                "testResource",
+                ScopeType.ResourceGroup,
+                null,
+                factory.GetReference(objectType),
+                ResourceFlags.WriteOnly,
+                null));
+
+            using var stream = BuildStream(s => TypeSerializer.Serialize(s, factory.GetTypes()));
+            var deserialized = TypeSerializer.Deserialize(stream);
+
+            deserialized[0].Should().BeOfType<ObjectType>();
+            deserialized[1].Should().BeOfType<ResourceType>();
+
+            ((ObjectType)deserialized[0]).Name.Should().Be(objectType.Name);
+            ((ResourceType)deserialized[1]).Name.Should().Be(resourceType.Name);
+            ((ResourceType)deserialized[1]).Flags.Should().Be(ResourceFlags.WriteOnly);
+            ((ResourceType)deserialized[1]).ReadOnlyScopes.HasValue.Should().Be(false);
+        }
+
         private static Stream BuildStream(Action<Stream> writeFunc)
         {
             var memoryStream = new MemoryStream();

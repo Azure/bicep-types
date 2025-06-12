@@ -12,6 +12,7 @@ namespace Azure.Bicep.Types.Concrete
     {
         None = 0,
         ReadOnly = 1 << 0,
+        WriteOnly = 1 << 1,
     }
 
     public class ResourceType : TypeBase
