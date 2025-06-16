@@ -11,15 +11,51 @@ namespace Azure.Bicep.Types.Concrete
     public enum ResourceFlags
     {
         None = 0,
-        ReadOnly = 1 << 0,
-        WriteOnly = 1 << 1,
+        ReadOnly = 1 << 0
     }
 
     public class ResourceType : TypeBase
     {
         [JsonConstructor]
-        public ResourceType(string name, ScopeType scopeType, ScopeType? readOnlyScopes, ITypeReference body, ResourceFlags flags, IReadOnlyDictionary<string, ResourceTypeFunction>? functions)
-            => (Name, ScopeType, ReadOnlyScopes, Body, Flags, Functions) = (name, scopeType, readOnlyScopes, body, flags, functions);
+        public ResourceType(
+            string name, 
+            ScopeType scopeType, 
+            ScopeType? readOnlyScopes, 
+            ITypeReference body, 
+            ResourceFlags flags, 
+            IReadOnlyDictionary<string, ResourceTypeFunction>? functions, 
+            ScopeType? writableScopes = null, 
+            ScopeType? readableScopes = null)
+        {
+            // Check for illegal mixing of legacy and new scope fields
+            bool hasLegacy = scopeType != ScopeType.Unknown ||
+                 (readOnlyScopes.HasValue && readOnlyScopes.Value != ScopeType.Unknown) ||
+                 flags != ResourceFlags.None;
+
+            bool hasModern =
+                (writableScopes.HasValue && writableScopes.Value != ScopeType.Unknown) ||
+                (readableScopes.HasValue && readableScopes.Value != ScopeType.Unknown);
+
+            if (hasLegacy && hasModern)
+            {
+                throw new ArgumentException("Cannot supply both legacy scope fields (scopeType, readOnlyScopes, flags) and modern fields (writableScopes, readableScopes).");
+            }
+
+            Name = name;
+            Body = body;
+            Functions = functions;
+
+            this.ScopeType = hasLegacy ? scopeType : ScopeType.Unknown;
+            this.ReadOnlyScopes = hasLegacy ? readOnlyScopes : null;
+            this.Flags = hasLegacy ? flags : ResourceFlags.None;
+
+            this.WritableScopes = hasModern && writableScopes.HasValue && writableScopes.Value != ScopeType.Unknown
+                ? writableScopes.Value
+                : null;
+            this.ReadableScopes = hasModern && readableScopes.HasValue && readableScopes.Value != ScopeType.Unknown
+                ? readableScopes.Value
+                : null;
+        }
 
         public string Name { get; }
 
@@ -32,6 +68,10 @@ namespace Azure.Bicep.Types.Concrete
         public ResourceFlags Flags { get; }
 
         public IReadOnlyDictionary<string, ResourceTypeFunction>? Functions { get; }
+
+        public ScopeType? ReadableScopes { get; }
+
+        public ScopeType? WritableScopes { get; }
     }
 }
 public class ResourceTypeFunction

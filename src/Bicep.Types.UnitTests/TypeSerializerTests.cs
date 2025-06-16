@@ -178,28 +178,51 @@ namespace Azure.Bicep.Types.UnitTests
         }
 
         [TestMethod]
-        public void Resource_with_writeonly_flag_can_be_deserialized()
+        public void ResourceType_with_readable_and_writable_scopes_can_be_serialized_and_deserialized()
         {
             var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
-            var objectType = factory.Create(() => new ObjectType("testObject", new Dictionary<string, ObjectTypeProperty>(), null));
+            var objectType = factory.Create(() => new ObjectType("sampleObject", new Dictionary<string, ObjectTypeProperty>(), null));
             var resourceType = factory.Create(() => new ResourceType(
-                "testResource",
-                ScopeType.ResourceGroup,
-                null,
-                factory.GetReference(objectType),
-                ResourceFlags.WriteOnly,
-                null));
+                "test.resourceType",
+                scopeType: ScopeType.Unknown,
+                readOnlyScopes: null,
+                body: factory.GetReference(objectType),
+                flags: ResourceFlags.None,
+                functions: null,
+                readableScopes: ScopeType.ResourceGroup | ScopeType.ManagementGroup,
+                writableScopes: ScopeType.ResourceGroup));
 
-            using var stream = BuildStream(s => TypeSerializer.Serialize(s, factory.GetTypes()));
+            using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
             var deserialized = TypeSerializer.Deserialize(stream);
 
-            deserialized[0].Should().BeOfType<ObjectType>();
-            deserialized[1].Should().BeOfType<ResourceType>();
+            var deserializedResource = deserialized.Single(t => t is ResourceType) as ResourceType;
 
-            ((ObjectType)deserialized[0]).Name.Should().Be(objectType.Name);
-            ((ResourceType)deserialized[1]).Name.Should().Be(resourceType.Name);
-            ((ResourceType)deserialized[1]).Flags.Should().Be(ResourceFlags.WriteOnly);
-            ((ResourceType)deserialized[1]).ReadOnlyScopes.HasValue.Should().Be(false);
+            deserializedResource!.ReadableScopes.Should().Be(ScopeType.ResourceGroup | ScopeType.ManagementGroup);
+            deserializedResource!.WritableScopes.Should().Be(ScopeType.ResourceGroup);
+            deserializedResource!.ReadOnlyScopes.Should().BeNull();
+            deserializedResource!.Flags.Should().Be(ResourceFlags.None);
+        }
+
+        [TestMethod]
+        public void Mixed_legacy_and_modern_scope_fields_throws_error()
+        {
+            var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
+            var objectType = factory.Create(() => new ObjectType("sampleObject", new Dictionary<string, ObjectTypeProperty>(), null));
+
+            Action act = () =>
+            {
+                _ = new ResourceType(
+                    name: "test.resourceType",
+                    scopeType: ScopeType.Unknown,
+                    readOnlyScopes: ScopeType.Subscription,
+                    body: factory.GetReference(objectType),
+                    flags: ResourceFlags.None,
+                    functions: null,
+                    readableScopes: ScopeType.ResourceGroup,
+                    writableScopes: ScopeType.ResourceGroup);
+            };
+
+            act.Should().Throw<ArgumentException>().WithMessage("*Cannot supply*");
         }
 
         private static Stream BuildStream(Action<Stream> writeFunc)

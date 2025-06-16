@@ -112,13 +112,11 @@ export function getTypeBaseKindLabel(input: TypeBaseKind): string {
 
 export enum ResourceFlags {
   None = 0,
-  ReadOnly = 1 << 0,
-  WriteOnly = 1 << 1,
+  ReadOnly = 1 << 0
 }
 
 const ResourceFlagsLabels = new Map<ResourceFlags, string>([
-  [ResourceFlags.ReadOnly, 'ReadOnly'],
-  [ResourceFlags.WriteOnly, 'WriteOnly'],
+  [ResourceFlags.ReadOnly, 'ReadOnly']
 ]);
 
 export function getResourceFlagsLabels(input: ResourceFlags) {
@@ -163,6 +161,8 @@ export type ResourceType = TypeBase<TypeBaseKind.ResourceType, {
   body: TypeReference;
   flags: ResourceFlags;
   functions?: Record<string, ResourceTypeFunction>;
+  readableScopes?: ScopeType;
+  writableScopes?: ScopeType;
 }>
 
 export type ResourceFunctionType = TypeBase<TypeBaseKind.ResourceFunctionType, {
