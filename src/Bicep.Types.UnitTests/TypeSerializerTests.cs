@@ -222,7 +222,7 @@ namespace Azure.Bicep.Types.UnitTests
                     writableScopes: ScopeType.ResourceGroup);
             };
 
-            act.Should().Throw<ArgumentException>().WithMessage("*Cannot supply*");
+            act.Should().Throw<ArgumentException>().WithMessage("*Cannot mix*");
         }
 
         private static Stream BuildStream(Action<Stream> writeFunc)

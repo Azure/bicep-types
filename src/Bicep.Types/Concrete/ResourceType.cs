@@ -38,7 +38,7 @@ namespace Azure.Bicep.Types.Concrete
 
             if (hasLegacy && hasModern)
             {
-                throw new ArgumentException("Cannot supply both legacy scope fields (scopeType, readOnlyScopes, flags) and modern fields (writableScopes, readableScopes).");
+                throw new ArgumentException("Cannot mix both legacy scope fields (scopeType, readOnlyScopes, flags) and modern fields (writableScopes, readableScopes).");
             }
 
             Name = name;
