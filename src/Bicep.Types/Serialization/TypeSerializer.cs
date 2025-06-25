@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Azure.Bicep.Types.Concrete;
 using Azure.Bicep.Types.Index;
 
@@ -35,6 +34,9 @@ public static class TypeSerializer
         JsonSerializer.Serialize(stream, types, options);
     }
 
+    [SuppressMessage("Trimming", 
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", 
+        Justification = "TypeBase[] is included in TypeJsonContext via [JsonSerializable(typeof(TypeBase[]))], providing required type metadata for trimming-safe serialization.")]
     public static TypeBase[] Deserialize(Stream contentStream)
     {
         var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
@@ -48,6 +50,9 @@ public static class TypeSerializer
         return types;
     }
 
+    [SuppressMessage("Trimming", 
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", 
+        Justification = "TypeIndex is included in TypeJsonContext via [JsonSerializable(typeof(TypeIndex))], providing required type metadata for trimming-safe serialization.")]
     public static TypeIndex DeserializeIndex(Stream contentStream)
     {
         var options = GetSerializerOptions();
