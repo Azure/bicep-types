@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using Azure.Bicep.Types.Concrete;
 using Azure.Bicep.Types.Index;
 
@@ -34,31 +34,26 @@ public static class TypeSerializer
         JsonSerializer.Serialize(stream, types, options);
     }
 
-    [SuppressMessage("Trimming", 
-        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", 
-        Justification = "TypeBase[] is included in TypeJsonContext via [JsonSerializable(typeof(TypeBase[]))], providing required type metadata for trimming-safe serialization.")]
     public static TypeBase[] Deserialize(Stream contentStream)
     {
         var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
         var options = GetSerializerOptions(factory);
+        // 'jsonTypeInfo' will have the original 'options' attached along with the type info for TypeBase[].
+        var jsonTypeInfo = (JsonTypeInfo<TypeBase[]>) options.GetTypeInfo(typeof(TypeBase[]));
 
-        var types = JsonSerializer.Deserialize<TypeBase[]>(contentStream, options)
-            ?? throw new JsonException("Failed to deserialize content");
+        var types = JsonSerializer.Deserialize(contentStream, jsonTypeInfo) ?? throw new JsonException("Failed to deserialize content");
 
         factory.Hydrate(types);
 
         return types;
     }
 
-    [SuppressMessage("Trimming", 
-        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", 
-        Justification = "TypeIndex is included in TypeJsonContext via [JsonSerializable(typeof(TypeIndex))], providing required type metadata for trimming-safe serialization.")]
     public static TypeIndex DeserializeIndex(Stream contentStream)
     {
         var options = GetSerializerOptions();
+        var jsonTypeInfo = (JsonTypeInfo<TypeIndex>) options.GetTypeInfo(typeof(TypeIndex));
 
-        return JsonSerializer.Deserialize<TypeIndex>(contentStream, options)
-            ?? throw new JsonException("Failed to deserialize index");
+        return JsonSerializer.Deserialize(contentStream, jsonTypeInfo) ?? throw new JsonException("Failed to deserialize index");
     }
 
     public static void SerializeIndex(Stream stream, TypeIndex index)
