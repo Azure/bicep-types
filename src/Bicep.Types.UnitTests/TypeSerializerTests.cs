@@ -273,7 +273,6 @@ namespace Azure.Bicep.Types.UnitTests
             var factory    = new TypeFactory(Enumerable.Empty<TypeBase>());
             var objectType = factory.Create(() => new ObjectType("sampleObject", new Dictionary<string, ObjectTypeProperty>(), null));
 
-
             Action act = () => _ = new ResourceType(
                 name: "bad.resource",
                 scopeType: null,
