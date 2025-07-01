@@ -77,10 +77,10 @@
   {
     "$type": "ResourceType",
     "name": "request@v1",
-    "scopeType": 0,
     "body": {
       "$ref": "#/7"
     },
+    "scopeType": 0,
     "flags": 0
   }
 ]

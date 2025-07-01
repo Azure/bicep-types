@@ -56,7 +56,7 @@ describe('types tests', () => {
     const funcArg2: FunctionParameter = { name: 'arg2', type: factory.addStringType() };
     const func = factory.addFunctionType([funcArg, funcArg2], factory.addBooleanType());
 
-    const res = factory.addResourceType('foo@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None, { doSomething: { type: func } });
+    const res = factory.addResourceType('foo@v1', props, ScopeType.Unknown, undefined, ResourceFlags.None, { doSomething: { type: func } });
 
     const configFactory = new TypeFactory();
     const configLocation = configFactory.addObjectType('config', {
@@ -66,13 +66,13 @@ describe('types tests', () => {
         description: 'Config property',
       },
     });
-    const fallbackRef = configFactory.addResourceType('fallback', ScopeType.Unknown, undefined, configFactory.addObjectType('fallback body', {
+    const fallbackRef = configFactory.addResourceType('fallback', configFactory.addObjectType('fallback body', {
       bodyProp: {
         type: factory.addStringType(),
         flags: ObjectTypePropertyFlags.Required,
         description: 'Body property',
       },
-    }), ResourceFlags.None);
+    }), ScopeType.Unknown, undefined, ResourceFlags.None);
 
     const settings: TypeSettings = {
       name: 'Foo',
@@ -103,7 +103,7 @@ describe('types tests', () => {
       statusCode: { type: factory.addIntegerType(100, 599), flags: ObjectTypePropertyFlags.ReadOnly, description: 'The status code of the HTTP request.' },
       body: { type: factory.addAnyType(), flags: ObjectTypePropertyFlags.ReadOnly, description: 'The parsed request body.' },
     });
-    factory.addResourceType('request@v1', ScopeType.Unknown, undefined, props, ResourceFlags.None);
+    factory.addResourceType('request@v1', props, ScopeType.Unknown, undefined, ResourceFlags.None);
 
     await verifyBaselines(factory, 'http/v1', 'http');
   });
@@ -113,6 +113,37 @@ describe('types tests', () => {
     expect(record).toBeFalsy();
   });
 });
+
+it('modern only resource emits modern scopes and omits legacy', async () => {
+  const f   = new TypeFactory();
+  const obj = f.addObjectType("dummy", {});
+
+  f.addResourceType(
+    "modern@v1",
+    obj,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    ScopeType.ResourceGroup | ScopeType.Subscription,
+    ScopeType.ResourceGroup,
+  );
+
+  const json      = writeTypesJson(f.types);
+  const parsed    = JSON.parse(json) as any[];
+  const resJson   = parsed.find(t => t.name === "modern@v1");
+
+  expect(resJson.writableScopes).toBeDefined();
+  expect(resJson.readableScopes).toBeDefined();
+  expect(resJson.scopeType).toBeUndefined();
+  expect(resJson.readOnlyScopes).toBeUndefined();
+  expect(resJson.flags).toBeUndefined();
+
+  const md = writeMarkdown(f.types);
+  expect(md).toMatch(/Valid Scope\(s\).*ResourceGroup/);
+  expect(md).toMatch(/Valid Scope\(s\).*Subscription/);
+});
+
 
 async function verifyBaselines(factory: TypeFactory, typesPath: string, testName: string, configFactory?: TypeFactory, settings?: TypeSettings, fallbackResourceType?: CrossFileTypeReference) {
   const deserializedTypes = readTypesJson(writeTypesJson(factory.types));

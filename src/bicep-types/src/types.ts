@@ -156,10 +156,10 @@ export type StringLiteralType = TypeBase<TypeBaseKind.StringLiteralType, {
 
 export type ResourceType = TypeBase<TypeBaseKind.ResourceType, {
   name: string;
-  scopeType: ScopeType;
+  scopeType?: ScopeType;
   readOnlyScopes?: ScopeType;
   body: TypeReference;
-  flags: ResourceFlags;
+  flags?: ResourceFlags;
   functions?: Record<string, ResourceTypeFunction>;
   readableScopes?: ScopeType;
   writableScopes?: ScopeType;
@@ -341,16 +341,55 @@ export class TypeFactory {
     return this.addType(this.booleanType);
   }
 
-  public addResourceType(name: string, scopeType: ScopeType, readOnlyScopes: ScopeType | undefined, body: TypeReference, flags: ResourceFlags, functions?: Record<string, ResourceTypeFunction>) {
-    return this.addType({
+  public addResourceType(
+    name: string,
+    body: TypeReference,
+    scopeType?: ScopeType,
+    readOnlyScopes?: ScopeType,
+    flags?: ResourceFlags,
+    functions?: Record<string, ResourceTypeFunction>,
+    readableScopes?: ScopeType,
+    writableScopes?: ScopeType,
+  ) {
+
+    // Guard against mixing legacy & modern
+    const hasLegacy =
+      scopeType !== undefined ||
+      readOnlyScopes !== undefined ||
+      (flags !== undefined && flags !== ResourceFlags.None);
+
+    const hasModern =
+      writableScopes !== undefined ||
+      readableScopes !== undefined;
+
+    if (hasLegacy && hasModern) {
+      throw new Error(
+        "Cannot mix legacy scope fields (scopeType, readOnlyScopes, flags) " +
+        "with modern fields (writableScopes, readableScopes).");
+    }
+
+    if (writableScopes === undefined && scopeType === undefined) {
+      throw new Error("Must supply either 'writableScopes' or 'scopeType'.");
+    }
+
+    if (readableScopes === undefined && scopeType === undefined) {
+      throw new Error("Must supply either 'readableScopes' or 'scopeType'.");
+    }
+
+    const resource: ResourceType = {
       type: TypeBaseKind.ResourceType,
-      name: name,
-      scopeType: scopeType,
-      readOnlyScopes: readOnlyScopes,
-      body: body,
-      flags: flags,
-      functions,
-    });
+      name,
+      body,
+    };
+
+    if (scopeType !== undefined) resource.scopeType = scopeType;
+    if (readOnlyScopes !== undefined) resource.readOnlyScopes = readOnlyScopes;
+    if (flags !== undefined) resource.flags = flags;
+    if (writableScopes !== undefined) resource.writableScopes = writableScopes;
+    if (readableScopes !== undefined) resource.readableScopes = readableScopes;
+    if (functions !== undefined) resource.functions = functions;
+
+    return this.addType(resource);
   }
 
   public addResourceFunctionType(name: string, resourceType: string, apiVersion: string, output: TypeReference, input?: TypeReference) {
