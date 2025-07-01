@@ -112,39 +112,38 @@ describe('types tests', () => {
     // This test just ensures the suite doesn't pass in 'record' mode
     expect(record).toBeFalsy();
   });
+
+  it('modern only resource emits modern scopes and omits legacy', async () => {
+    const f   = new TypeFactory();
+    const obj = f.addObjectType("dummy", {});
+
+    f.addResourceType(
+      "modern@v1",
+      obj,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      ScopeType.ResourceGroup | ScopeType.Subscription,
+      ScopeType.ResourceGroup,
+    );
+
+    const json      = writeTypesJson(f.types);
+    const parsed    = JSON.parse(json) as any[];
+    const resJson   = parsed.find(t => t.name === "modern@v1");
+
+    expect(resJson.writableScopes).toBeDefined();
+    expect(resJson.readableScopes).toBeDefined();
+    expect(resJson.scopeType).toBeUndefined();
+    expect(resJson.readOnlyScopes).toBeUndefined();
+    expect(resJson.flags).toBeUndefined();
+
+    const md = writeMarkdown(f.types);
+    expect(md).toMatch(/Valid Scope\(s\).*ResourceGroup/);
+    expect(md).toMatch(/Valid Scope\(s\).*Subscription/);
+  });
 });
-
-it('modern only resource emits modern scopes and omits legacy', async () => {
-  const f   = new TypeFactory();
-  const obj = f.addObjectType("dummy", {});
-
-  f.addResourceType(
-    "modern@v1",
-    obj,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    ScopeType.ResourceGroup | ScopeType.Subscription,
-    ScopeType.ResourceGroup,
-  );
-
-  const json      = writeTypesJson(f.types);
-  const parsed    = JSON.parse(json) as any[];
-  const resJson   = parsed.find(t => t.name === "modern@v1");
-
-  expect(resJson.writableScopes).toBeDefined();
-  expect(resJson.readableScopes).toBeDefined();
-  expect(resJson.scopeType).toBeUndefined();
-  expect(resJson.readOnlyScopes).toBeUndefined();
-  expect(resJson.flags).toBeUndefined();
-
-  const md = writeMarkdown(f.types);
-  expect(md).toMatch(/Valid Scope\(s\).*ResourceGroup/);
-  expect(md).toMatch(/Valid Scope\(s\).*Subscription/);
-});
-
-
+ 
 async function verifyBaselines(factory: TypeFactory, typesPath: string, testName: string, configFactory?: TypeFactory, settings?: TypeSettings, fallbackResourceType?: CrossFileTypeReference) {
   const deserializedTypes = readTypesJson(writeTypesJson(factory.types));
   expect(deserializedTypes).toEqual(factory.types);
