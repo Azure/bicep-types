@@ -124,8 +124,8 @@ describe('types tests', () => {
       ScopeType.ResourceGroup,
     );
 
-    const json      = writeTypesJson(f.types);
-    const parsed    = JSON.parse(json) as any[];
+    const json = writeTypesJson(f.types);
+    const parsed= JSON.parse(json) as any[];
     const resJson   = parsed.find(t => t.name === "modern@v1");
 
     expect(resJson.writableScopes).toBeDefined();
