@@ -110,26 +110,6 @@ export function getTypeBaseKindLabel(input: TypeBaseKind): string {
   return input;
 }
 
-export enum ResourceFlags {
-  None = 0,
-  ReadOnly = 1 << 0
-}
-
-const ResourceFlagsLabels = new Map<ResourceFlags, string>([
-  [ResourceFlags.ReadOnly, 'ReadOnly']
-]);
-
-export function getResourceFlagsLabels(input: ResourceFlags) {
-  const flags = [];
-  for (const [bitmask, label] of ResourceFlagsLabels) {
-    if ((bitmask & input) === bitmask) {
-      flags.push(label);
-    }
-  }
-
-  return flags;
-}
-
 export class TypeReference {
   constructor(public readonly index: number) {}
 }
@@ -156,13 +136,10 @@ export type StringLiteralType = TypeBase<TypeBaseKind.StringLiteralType, {
 
 export type ResourceType = TypeBase<TypeBaseKind.ResourceType, {
   name: string;
-  scopeType?: ScopeType;
-  readOnlyScopes?: ScopeType;
   body: TypeReference;
-  flags?: ResourceFlags;
   functions?: Record<string, ResourceTypeFunction>;
-  readableScopes?: ScopeType;
-  writableScopes?: ScopeType;
+  readableScopes: ScopeType;
+  writableScopes: ScopeType;
 }>
 
 export type ResourceFunctionType = TypeBase<TypeBaseKind.ResourceFunctionType, {
@@ -344,50 +321,18 @@ export class TypeFactory {
   public addResourceType(
     name: string,
     body: TypeReference,
-    scopeType?: ScopeType,
-    readOnlyScopes?: ScopeType,
-    flags?: ResourceFlags,
+    readableScopes: ScopeType,
+    writableScopes: ScopeType,
     functions?: Record<string, ResourceTypeFunction>,
-    readableScopes?: ScopeType,
-    writableScopes?: ScopeType,
   ) {
-
-    // Guard against mixing legacy & modern
-    const hasLegacy =
-      scopeType !== undefined ||
-      readOnlyScopes !== undefined ||
-      (flags !== undefined && flags !== ResourceFlags.None);
-
-    const hasModern =
-      writableScopes !== undefined ||
-      readableScopes !== undefined;
-
-    if (hasLegacy && hasModern) {
-      throw new Error(
-        "Cannot mix legacy scope fields (scopeType, readOnlyScopes, flags) " +
-        "with modern fields (writableScopes, readableScopes).");
-    }
-
-    if (writableScopes === undefined && scopeType === undefined) {
-      throw new Error("Must supply either 'writableScopes' or 'scopeType'.");
-    }
-
-    if (readableScopes === undefined && scopeType === undefined) {
-      throw new Error("Must supply either 'readableScopes' or 'scopeType'.");
-    }
-
     const resource: ResourceType = {
       type: TypeBaseKind.ResourceType,
       name,
       body,
+      readableScopes,
+      writableScopes,
+      functions,
     };
-
-    if (scopeType !== undefined) resource.scopeType = scopeType;
-    if (readOnlyScopes !== undefined) resource.readOnlyScopes = readOnlyScopes;
-    if (flags !== undefined) resource.flags = flags;
-    if (writableScopes !== undefined) resource.writableScopes = writableScopes;
-    if (readableScopes !== undefined) resource.readableScopes = readableScopes;
-    if (functions !== undefined) resource.functions = functions;
 
     return this.addType(resource);
   }

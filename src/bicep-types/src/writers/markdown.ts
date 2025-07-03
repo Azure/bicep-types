@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectTypePropertyFlagsLabels, getResourceFlagsLabels, getScopeTypeLabels, ObjectTypeProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, StringType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType, IntegerType, FunctionType, ScopeType } from '../types';
+import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectTypePropertyFlagsLabels, getScopeTypeLabels, ObjectTypeProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, StringType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType, IntegerType, FunctionType, ScopeType } from '../types';
 import { groupBy, orderBy } from '../utils';
 
 class MarkdownFile {
@@ -191,15 +191,13 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
     switch (type.type) {
       case TypeBaseKind.ResourceType: {
         const resourceType = type as ResourceType;
-        const flagsString = resourceType.flags ? ` (${getResourceFlagsLabels(resourceType.flags).join(', ')})` : '';
-        md.writeHeading(nesting, `Resource ${resourceType.name}${flagsString}`);
-        const writableScopes = resourceType.writableScopes ?? resourceType.scopeType ?? ScopeType.Unknown;
-        const readableMask   = resourceType.readableScopes ?? resourceType.readOnlyScopes ?? 0;
+        md.writeHeading(nesting, `Resource ${resourceType.name}`);
         md.writeBullet(
           "Valid Scope(s)",
-          getScopeTypeLabels(writableScopes | readableMask, [readableMask & ~writableScopes, "ReadOnly"])
+          getScopeTypeLabels(resourceType.writableScopes | resourceType.readableScopes, [resourceType.readableScopes & ~resourceType.writableScopes, "ReadOnly"])
             .join(", ") || "Unknown"
         );
+        writeComplexType(types, types[resourceType.body.index], nesting, false);
 
         if (resourceType.functions) {
           for (const functionName in resourceType.functions) {

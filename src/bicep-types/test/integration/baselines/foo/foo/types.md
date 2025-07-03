@@ -2,6 +2,14 @@
 
 ## Resource foo@v1
 * **Valid Scope(s)**: Unknown
+### Properties
+* **abc**: string: Abc prop
+* **arrayType**: any[] {minLength: 1, maxLength: 10}: Array of any
+* **def**: [def](#def) (ReadOnly): Def prop
+* **dictType**: [dictType](#dicttype): Dictionary of any
+* **ghi**: bool (WriteOnly): Ghi prop
+* **jkl**: [jkl](#jkl) (Required, Identifier): Jkl prop
+
 ### Function doSomething
 * **Output**: bool
 #### Parameters

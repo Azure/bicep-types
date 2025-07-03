@@ -109,8 +109,8 @@
     "body": {
       "$ref": "#/7"
     },
-    "scopeType": 0,
-    "flags": 0,
+    "readableScopes": 0,
+    "writableScopes": 0,
     "functions": {
       "doSomething": {
         "type": {

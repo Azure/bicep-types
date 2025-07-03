@@ -19,43 +19,64 @@ namespace Azure.Bicep.Types.Concrete
         [JsonConstructor]
         public ResourceType(
             string name, 
-            ScopeType? scopeType, 
-            ScopeType? readOnlyScopes, 
             ITypeReference body, 
-            ResourceFlags? flags, 
-            IReadOnlyDictionary<string, ResourceTypeFunction>? functions, 
-            ScopeType? writableScopes = null, 
-            ScopeType? readableScopes = null)
+            IReadOnlyDictionary<string, ResourceTypeFunction>? functions,
+            ScopeType? writableScopes_in = null, 
+            ScopeType? readableScopes_in = null,
+            ScopeType? scopeType = null, 
+            ScopeType? readOnlyScopes = null, 
+            ResourceFlags? flags = null)
         {
+            Name = name;
+            Body = body;
+            Functions = functions;
+
             // Check for illegal mixing of legacy and new scope fields
             bool hasLegacy = scopeType.HasValue || readOnlyScopes.HasValue || (flags.HasValue && flags.Value != ResourceFlags.None);
-            bool hasModern = writableScopes.HasValue || readableScopes.HasValue;
+            bool hasModern = writableScopes_in.HasValue || readableScopes_in.HasValue;
 
             if (hasLegacy && hasModern)
             {
                 throw new ArgumentException("Cannot mix both legacy scope fields (scopeType, readOnlyScopes, flags) and modern fields (writableScopes, readableScopes).");
             }
 
-            Name = name;
-            Body = body;
-            Functions = functions;
+            if (hasModern)
+            {
+                // Use modern input directly
+                if (!writableScopes_in.HasValue || !readableScopes_in.HasValue)
+                {
+                    throw new ArgumentException("Must set both WritableScopes and ReadableScopes when using modern configuration");
+                }
 
-            // Legacy properties (kept for backward compatibility)
-#pragma warning disable CS0618 
-            this.ScopeType = scopeType;
-            this.ReadOnlyScopes = readOnlyScopes;
-            this.Flags = flags;
-#pragma warning restore CS0618
-
-            this.WritableScopes = writableScopes;
-            this.ReadableScopes = readableScopes;
-
-            if (!this.WritableScopes.HasValue && !scopeType.HasValue) {
-                throw new ArgumentException("Must supply either 'writableScopes' or 'scopeType'.");
+                WritableScopes = writableScopes_in.Value;
+                ReadableScopes = readableScopes_in.Value;
             }
+            else
+            {
+                // Derive modern properties from legacy input (format normalization)
+                var effectiveScopeType = scopeType ?? Azure.Bicep.Types.Concrete.ScopeType.Unknown;
 
-            if (!this.ReadableScopes.HasValue && !scopeType.HasValue) {
-                throw new ArgumentException("Must supply either 'readableScopes' or 'scopeType'.");
+                ReadableScopes = effectiveScopeType;
+                if (readOnlyScopes.HasValue)
+                {
+                    ReadableScopes = ReadableScopes | readOnlyScopes.Value;
+                }
+
+                if (flags.HasValue && flags.Value.HasFlag(ResourceFlags.ReadOnly))
+                {
+                    WritableScopes = Azure.Bicep.Types.Concrete.ScopeType.Unknown;
+                }
+                else
+                {
+                    WritableScopes = effectiveScopeType;
+                }
+
+                // Store legacy values for property access
+#pragma warning disable CS0618 // Type or member is obsolete
+                ScopeType = scopeType;
+                ReadOnlyScopes = readOnlyScopes;
+                Flags = flags;
+#pragma warning restore CS0618 // Type or member is obsolete
             }
         }
 
@@ -65,24 +86,31 @@ namespace Azure.Bicep.Types.Concrete
 
         public IReadOnlyDictionary<string, ResourceTypeFunction>? Functions { get; }
 
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public ScopeType? ReadableScopes { get; }
+        [JsonIgnore]
+        public ScopeType ReadableScopes { get; }
 
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public ScopeType? WritableScopes { get; }
+        [JsonIgnore]
+        public ScopeType WritableScopes { get; }
 
-        // Legacy properties (kept for backward compatibility)
+        // Proxy properties for JSON serialization (format normalization)
+        [JsonPropertyName("readableScopes")]
+        public ScopeType? ReadableScopes_in => ReadableScopes;
+
+        [JsonPropertyName("writableScopes")]
+        public ScopeType? WritableScopes_in => WritableScopes;
+
+        // Legacy properties - exist only for JSON constructor parameter binding, never serialized
         [Obsolete("Use WritableScopes and ReadableScopes instead")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public ScopeType? ScopeType { get; }
+        [JsonIgnore]
+        public ScopeType? ScopeType { get; private set; }
 
         [Obsolete("Use ReadableScopes instead")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public ScopeType? ReadOnlyScopes { get; }
+        [JsonIgnore]
+        public ScopeType? ReadOnlyScopes { get; private set; }
 
         [Obsolete("Use WritableScopes instead")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public ResourceFlags? Flags { get; }
+        [JsonIgnore]
+        public ResourceFlags? Flags { get; private set; }
     }
 }
 public class ResourceTypeFunction

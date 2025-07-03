@@ -4,7 +4,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
-import { CrossFileTypeReference, FunctionParameter, ObjectTypePropertyFlags, ResourceFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings } from '../../src/types';
+import { CrossFileTypeReference, FunctionParameter, ObjectTypePropertyFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings } from '../../src/types';
 import { readTypesJson, writeIndexJson, writeTypesJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
 import { buildIndex } from '../../src/indexer';
@@ -56,7 +56,7 @@ describe('types tests', () => {
     const funcArg2: FunctionParameter = { name: 'arg2', type: factory.addStringType() };
     const func = factory.addFunctionType([funcArg, funcArg2], factory.addBooleanType());
 
-    const res = factory.addResourceType('foo@v1', props, ScopeType.Unknown, undefined, ResourceFlags.None, { doSomething: { type: func } });
+    const res = factory.addResourceType('foo@v1', props, ScopeType.Unknown, ScopeType.Unknown, { doSomething: { type: func } });
 
     const configFactory = new TypeFactory();
     const configLocation = configFactory.addObjectType('config', {
@@ -72,7 +72,7 @@ describe('types tests', () => {
         flags: ObjectTypePropertyFlags.Required,
         description: 'Body property',
       },
-    }), ScopeType.Unknown, undefined, ResourceFlags.None);
+    }), ScopeType.Unknown, ScopeType.Unknown);
 
     const settings: TypeSettings = {
       name: 'Foo',
@@ -103,7 +103,7 @@ describe('types tests', () => {
       statusCode: { type: factory.addIntegerType(100, 599), flags: ObjectTypePropertyFlags.ReadOnly, description: 'The status code of the HTTP request.' },
       body: { type: factory.addAnyType(), flags: ObjectTypePropertyFlags.ReadOnly, description: 'The parsed request body.' },
     });
-    factory.addResourceType('request@v1', props, ScopeType.Unknown, undefined, ResourceFlags.None);
+    factory.addResourceType('request@v1', props, ScopeType.Unknown, ScopeType.Unknown);
 
     await verifyBaselines(factory, 'http/v1', 'http');
   });
@@ -120,10 +120,6 @@ describe('types tests', () => {
     f.addResourceType(
       "modern@v1",
       obj,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
       ScopeType.ResourceGroup | ScopeType.Subscription,
       ScopeType.ResourceGroup,
     );

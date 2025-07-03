@@ -99,7 +99,7 @@ namespace Azure.Bicep.Types.UnitTests
             var stringType = factory.Create(() => new StringType(true, 3, 10, "^foo"));
             var functionParam = new FunctionParameter("arg", factory.GetReference(stringType), null);
             var resourceMethodType = factory.Create(() => new FunctionType(new [] { functionParam }, factory.GetReference(stringType)));
-            var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.None, new Dictionary<string, ResourceTypeFunction> { ["sayHi"] = new(factory.GetReference(resourceMethodType), null) }));
+            var resourceType = factory.Create(() => new ResourceType("gerrard", factory.GetReference(objectType), new Dictionary<string, ResourceTypeFunction> { ["sayHi"] = new(factory.GetReference(resourceMethodType), null) }, writableScopes_in: ScopeType.ResourceGroup, readableScopes_in: ScopeType.ResourceGroup));
             var unionType = factory.Create(() => new UnionType(new [] { factory.GetReference(builtInType), factory.GetReference(objectType) }));
             var stringLiteralType = factory.Create(() => new StringLiteralType("abcdef"));
             var discriminatedObjectType = factory.Create(() => new DiscriminatedObjectType("disctest", "disctest", new Dictionary<string, ObjectTypeProperty>(), new Dictionary<string, ITypeReference>()));
@@ -151,41 +151,16 @@ namespace Azure.Bicep.Types.UnitTests
         }
 
         [TestMethod]
-        public void Resources_without_flags_or_readonly_scopes_can_be_deserialized()
-        {
-            var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
-            var objectType = factory.Create(() => new ObjectType("steven", new Dictionary<string, ObjectTypeProperty>(), null));
-            var resourceType = factory.Create(() => new ResourceType("gerrard", ScopeType.ResourceGroup|ScopeType.Tenant, ScopeType.Tenant, factory.GetReference(objectType), ResourceFlags.ReadOnly, null));
-
-            using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
-            var deserializedNode = JsonSerializer.Deserialize<JsonNode>(stream)!;
-            deserializedNode.AsArray()[1]?.AsObject().Remove("flags").Should().BeTrue();
-            deserializedNode.AsArray()[1]?.AsObject().Remove("readOnlyScopes").Should().BeTrue();
-            using var rewrittenStream = BuildStream(stream => JsonSerializer.Serialize(stream, deserializedNode));
-
-            var deserialized = TypeSerializer.Deserialize(rewrittenStream);
-
-            deserialized[0].Should().BeOfType<ObjectType>();
-            deserialized[1].Should().BeOfType<ResourceType>();
-
-            ((ObjectType)deserialized[0]).Name.Should().Be(objectType.Name);
-            ((ResourceType)deserialized[1]).Name.Should().Be(resourceType.Name);
-        }
-
-        [TestMethod]
         public void ResourceType_with_readable_and_writable_scopes_can_be_serialized_and_deserialized()
         {
             var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
             var objectType = factory.Create(() => new ObjectType("sampleObject", new Dictionary<string, ObjectTypeProperty>(), null));
             var resourceType = factory.Create(() => new ResourceType(
                 "test.resourceType",
-                scopeType: null,
-                readOnlyScopes: null,
-                body: factory.GetReference(objectType),
-                flags: ResourceFlags.None,
-                functions: null,
-                readableScopes: ScopeType.ResourceGroup | ScopeType.ManagementGroup,
-                writableScopes: ScopeType.ResourceGroup));
+                factory.GetReference(objectType),
+                null,
+                readableScopes_in: ScopeType.ResourceGroup | ScopeType.ManagementGroup,
+                writableScopes_in: ScopeType.ResourceGroup));
 
             using var stream = BuildStream(stream => TypeSerializer.Serialize(stream, factory.GetTypes()));
             var deserialized = TypeSerializer.Deserialize(stream);
@@ -205,39 +180,39 @@ namespace Azure.Bicep.Types.UnitTests
             Action act = () =>
             {
                 _ = new ResourceType(
-                    name: "test.resourceType",
+                    name: "test.resource",
+                    body: factory.GetReference(objectType),
+                    functions: null,
                     scopeType: ScopeType.Unknown,
                     readOnlyScopes: ScopeType.Subscription,
-                    body: factory.GetReference(objectType),
                     flags: ResourceFlags.None,
-                    functions: null,
-                    readableScopes: ScopeType.ResourceGroup,
-                    writableScopes: ScopeType.ResourceGroup);
+                    readableScopes_in: ScopeType.ResourceGroup,
+                    writableScopes_in: ScopeType.ResourceGroup);
             };
 
             act.Should().Throw<ArgumentException>().WithMessage("*Cannot mix*");
         }
 
         [TestMethod]
-        public void Legacy_only_resourceType_omits_modern_fields_in_json()
+        public void Legacy_only_resourceType_outputs_modern_fields_in_json()
         {
             var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
             var objectType = factory.Create(() => new ObjectType("sampleObject", new Dictionary<string, ObjectTypeProperty>(), null));
 
             var resourceType  = new ResourceType(
                 "test.resource",
+                factory.GetReference(objectType),
+                null,
                 scopeType: ScopeType.ResourceGroup,
-                readOnlyScopes: null,
-                body: factory.GetReference(objectType),
-                flags: ResourceFlags.None,
-                functions: null);
+                flags: ResourceFlags.None);
 
             var json = JsonSerializer.SerializeToNode(resourceType,
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })!.AsObject();
 
-            json.ContainsKey("scopeType").Should().BeTrue();        
-            json.ContainsKey("writableScopes").Should().BeFalse();
-            json.ContainsKey("readableScopes").Should().BeFalse();
+            // Legacy input should be normalized to modern output
+            json.ContainsKey("scopeType").Should().BeFalse();        
+            json.ContainsKey("writableScopes").Should().BeTrue();
+            json.ContainsKey("readableScopes").Should().BeTrue();
         }
 
         [TestMethod]
@@ -248,13 +223,10 @@ namespace Azure.Bicep.Types.UnitTests
 
             var resourceType = new ResourceType(
                 name: "test.resource",
-                scopeType: null,
-                readOnlyScopes: null,
                 body: factory.GetReference(objectType),
-                flags: null,
                 functions: null,
-                writableScopes: ScopeType.ResourceGroup,
-                readableScopes: ScopeType.ResourceGroup | ScopeType.ManagementGroup);
+                writableScopes_in: ScopeType.ResourceGroup,
+                readableScopes_in: ScopeType.ResourceGroup | ScopeType.ManagementGroup);
 
             var json = JsonSerializer.SerializeToNode(resourceType,
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })!.AsObject();
@@ -268,24 +240,102 @@ namespace Azure.Bicep.Types.UnitTests
         }
 
         [TestMethod]
-        public void ResourceType_without_any_writable_or_readable_source_throws()
+        public void ResourceType_without_any_writable_or_readable_source_defaults_to_unknown()
         {
             var factory    = new TypeFactory(Enumerable.Empty<TypeBase>());
             var objectType = factory.Create(() => new ObjectType("sampleObject", new Dictionary<string, ObjectTypeProperty>(), null));
 
-            Action act = () => _ = new ResourceType(
-                name: "bad.resource",
-                scopeType: null,
-                readOnlyScopes: null,
+            var resourceType = new ResourceType(
+                name: "test.resource",
                 body: factory.GetReference(objectType),
-                flags: null,
-                functions: null,
-                writableScopes: null,
-                readableScopes: null);
+                functions: null);
 
-            act.Should()
-                .Throw<ArgumentException>()
-                .WithMessage("*either 'writableScopes' or 'scopeType'.*");
+            // When no scope parameters are provided, should default to Unknown scopes
+            resourceType.WritableScopes.Should().Be(ScopeType.Unknown);
+            resourceType.ReadableScopes.Should().Be(ScopeType.Unknown);
+        }
+
+        [TestMethod]
+        public void Legacy_resourceType_with_readonly_flag_sets_writable_to_unknown()
+        {
+            var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
+            var objectType = factory.Create(() => new ObjectType("sampleObject", new Dictionary<string, ObjectTypeProperty>(), null));
+
+            var resourceType = new ResourceType(
+                "readonly.resource",
+                factory.GetReference(objectType),
+                null,
+                scopeType: ScopeType.ResourceGroup,
+                flags: ResourceFlags.ReadOnly);
+
+            // ReadOnly flag should make WritableScopes = Unknown
+            resourceType.ReadableScopes.Should().Be(ScopeType.ResourceGroup);
+            resourceType.WritableScopes.Should().Be(ScopeType.Unknown);
+        }
+
+        [TestMethod]
+        public void Legacy_resourceType_with_readonly_scopes_expands_readable()
+        {
+            var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
+            var objectType = factory.Create(() => new ObjectType("sampleObject", new Dictionary<string, ObjectTypeProperty>(), null));
+
+            var resourceType = new ResourceType(
+                "test.resource", 
+                factory.GetReference(objectType),
+                null,
+                scopeType: ScopeType.ResourceGroup,
+                readOnlyScopes: ScopeType.Tenant,
+                flags: ResourceFlags.None);
+
+            // ReadableScopes should combine scopeType + readOnlyScopes using |= operator
+            resourceType.ReadableScopes.Should().Be(ScopeType.ResourceGroup | ScopeType.Tenant);
+            resourceType.WritableScopes.Should().Be(ScopeType.ResourceGroup);
+        }
+
+        [TestMethod]
+        public void Legacy_json_deserializes_and_reserializes_to_modern_format()
+        {
+            var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
+            var objectType = factory.Create(() => new ObjectType("testObject", new Dictionary<string, ObjectTypeProperty>(), null));
+            
+            var legacyResource = new ResourceType(
+                "test.resource",
+                factory.GetReference(objectType),
+                null,
+                scopeType: ScopeType.ResourceGroup,
+                readOnlyScopes: ScopeType.Tenant,
+                flags: ResourceFlags.None);
+
+            var serializedJson = JsonSerializer.Serialize(legacyResource);
+            
+            serializedJson.Should().NotContain("scopeType");
+            serializedJson.Should().NotContain("readOnlyScopes");
+            serializedJson.Should().NotContain("flags");
+            
+            serializedJson.Should().Contain("readableScopes");
+            serializedJson.Should().Contain("writableScopes");
+
+            // Verify the actual scope values are correct (scopeType | readOnlyScopes)
+            legacyResource.ReadableScopes.Should().Be(ScopeType.ResourceGroup | ScopeType.Tenant);
+            legacyResource.WritableScopes.Should().Be(ScopeType.ResourceGroup);
+        }
+
+        [TestMethod]
+        public void Legacy_with_all_fields_combines_correctly()
+        {
+            var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
+            var objectType = factory.Create(() => new ObjectType("sampleObject", new Dictionary<string, ObjectTypeProperty>(), null));
+
+            var resourceType = new ResourceType(
+                "test.resource",
+                factory.GetReference(objectType), 
+                null,
+                scopeType: ScopeType.ResourceGroup,
+                readOnlyScopes: ScopeType.Tenant | ScopeType.ManagementGroup,
+                flags: ResourceFlags.ReadOnly);
+
+            resourceType.ReadableScopes.Should().Be(ScopeType.ResourceGroup | ScopeType.Tenant | ScopeType.ManagementGroup);
+            resourceType.WritableScopes.Should().Be(ScopeType.Unknown);
         }
 
         private static Stream BuildStream(Action<Stream> writeFunc)
