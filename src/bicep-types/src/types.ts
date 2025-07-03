@@ -110,28 +110,6 @@ export function getTypeBaseKindLabel(input: TypeBaseKind): string {
   return input;
 }
 
-export enum ResourceFlags {
-  None = 0,
-  ReadOnly = 1 << 0,
-  WriteOnly = 1 << 1,
-}
-
-const ResourceFlagsLabels = new Map<ResourceFlags, string>([
-  [ResourceFlags.ReadOnly, 'ReadOnly'],
-  [ResourceFlags.WriteOnly, 'WriteOnly'],
-]);
-
-export function getResourceFlagsLabels(input: ResourceFlags) {
-  const flags = [];
-  for (const [bitmask, label] of ResourceFlagsLabels) {
-    if ((bitmask & input) === bitmask) {
-      flags.push(label);
-    }
-  }
-
-  return flags;
-}
-
 export class TypeReference {
   constructor(public readonly index: number) {}
 }
@@ -158,11 +136,10 @@ export type StringLiteralType = TypeBase<TypeBaseKind.StringLiteralType, {
 
 export type ResourceType = TypeBase<TypeBaseKind.ResourceType, {
   name: string;
-  scopeType: ScopeType;
-  readOnlyScopes?: ScopeType;
   body: TypeReference;
-  flags: ResourceFlags;
   functions?: Record<string, ResourceTypeFunction>;
+  readableScopes: ScopeType;
+  writableScopes: ScopeType;
 }>
 
 export type ResourceFunctionType = TypeBase<TypeBaseKind.ResourceFunctionType, {
@@ -341,16 +318,23 @@ export class TypeFactory {
     return this.addType(this.booleanType);
   }
 
-  public addResourceType(name: string, scopeType: ScopeType, readOnlyScopes: ScopeType | undefined, body: TypeReference, flags: ResourceFlags, functions?: Record<string, ResourceTypeFunction>) {
-    return this.addType({
+  public addResourceType(
+    name: string,
+    body: TypeReference,
+    readableScopes: ScopeType,
+    writableScopes: ScopeType,
+    functions?: Record<string, ResourceTypeFunction>,
+  ) {
+    const resource: ResourceType = {
       type: TypeBaseKind.ResourceType,
-      name: name,
-      scopeType: scopeType,
-      readOnlyScopes: readOnlyScopes,
-      body: body,
-      flags: flags,
+      name,
+      body,
+      readableScopes,
+      writableScopes,
       functions,
-    });
+    };
+
+    return this.addType(resource);
   }
 
   public addResourceFunctionType(name: string, resourceType: string, apiVersion: string, output: TypeReference, input?: TypeReference) {

@@ -28,10 +28,10 @@
   {
     "$type": "ResourceType",
     "name": "fallback",
-    "scopeType": 0,
     "body": {
       "$ref": "#/1"
     },
-    "flags": 0
+    "readableScopes": 0,
+    "writableScopes": 0
   }
 ]
