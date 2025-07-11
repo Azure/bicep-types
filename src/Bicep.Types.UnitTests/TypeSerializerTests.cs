@@ -183,7 +183,7 @@ namespace Azure.Bicep.Types.UnitTests
                     name: "test.resource",
                     body: factory.GetReference(objectType),
                     functions: null,
-                    scopeType: ScopeType.Unknown,
+                    scopeType: ScopeType.None,
                     readOnlyScopes: ScopeType.Subscription,
                     flags: ResourceFlags.None,
                     readableScopes_in: ScopeType.ResourceGroup,
@@ -240,7 +240,7 @@ namespace Azure.Bicep.Types.UnitTests
         }
 
         [TestMethod]
-        public void ResourceType_without_any_writable_or_readable_source_defaults_to_unknown()
+        public void ResourceType_without_any_writable_or_readable_source_defaults_to_none()
         {
             var factory    = new TypeFactory(Enumerable.Empty<TypeBase>());
             var objectType = factory.Create(() => new ObjectType("sampleObject", new Dictionary<string, ObjectTypeProperty>(), null));
@@ -250,13 +250,13 @@ namespace Azure.Bicep.Types.UnitTests
                 body: factory.GetReference(objectType),
                 functions: null);
 
-            // When no scope parameters are provided, should default to Unknown scopes
-            resourceType.WritableScopes.Should().Be(ScopeType.Unknown);
-            resourceType.ReadableScopes.Should().Be(ScopeType.Unknown);
+            // When no scope parameters are provided, should default to None scopes
+            resourceType.WritableScopes.Should().Be(ScopeType.None);
+            resourceType.ReadableScopes.Should().Be(ScopeType.None);
         }
 
         [TestMethod]
-        public void Legacy_resourceType_with_readonly_flag_sets_writable_to_unknown()
+        public void Legacy_resourceType_with_readonly_flag_sets_writable_to_none()
         {
             var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
             var objectType = factory.Create(() => new ObjectType("sampleObject", new Dictionary<string, ObjectTypeProperty>(), null));
@@ -268,9 +268,9 @@ namespace Azure.Bicep.Types.UnitTests
                 scopeType: ScopeType.ResourceGroup,
                 flags: ResourceFlags.ReadOnly);
 
-            // ReadOnly flag should make WritableScopes = Unknown
+            // ReadOnly flag should make WritableScopes = None
             resourceType.ReadableScopes.Should().Be(ScopeType.ResourceGroup);
-            resourceType.WritableScopes.Should().Be(ScopeType.Unknown);
+            resourceType.WritableScopes.Should().Be(ScopeType.None);
         }
 
         [TestMethod]
@@ -335,7 +335,7 @@ namespace Azure.Bicep.Types.UnitTests
                 flags: ResourceFlags.ReadOnly);
 
             resourceType.ReadableScopes.Should().Be(ScopeType.ResourceGroup | ScopeType.Tenant | ScopeType.ManagementGroup);
-            resourceType.WritableScopes.Should().Be(ScopeType.Unknown);
+            resourceType.WritableScopes.Should().Be(ScopeType.None);
         }
 
         private static Stream BuildStream(Action<Stream> writeFunc)

@@ -28,13 +28,15 @@ export function getBuiltInTypeKindLabel(input: BuiltInTypeKind) {
 }
 
 export enum ScopeType {
-  Unknown = 0,
+  None = 0,
   Tenant = 1 << 0,
   ManagementGroup = 1 << 1,
   Subscription = 1 << 2,
   ResourceGroup = 1 << 3,
   Extension = 1 << 4,
 }
+
+export const AllExceptExtension = ScopeType.Tenant | ScopeType.ManagementGroup | ScopeType.Subscription | ScopeType.ResourceGroup;
 
 const ScopeTypeLabel = new Map<ScopeType, string>([
   [ScopeType.Tenant, 'Tenant'],
@@ -324,7 +326,29 @@ export class TypeFactory {
     readableScopes: ScopeType,
     writableScopes: ScopeType,
     functions?: Record<string, ResourceTypeFunction>,
-  ) {
+  ): TypeReference {
+    const resource: ResourceType = {
+      type: TypeBaseKind.ResourceType,
+      name,
+      body,
+      readableScopes,
+      writableScopes,
+      functions,
+    };
+
+    return this.addType(resource);
+  }
+
+  public addUnscopedResourceType(
+    name: string,
+    body: TypeReference,
+    readable: boolean = true,
+    writable: boolean = true,
+    functions?: Record<string, ResourceTypeFunction>,
+  ): TypeReference {
+    const readableScopes = readable ? AllExceptExtension : ScopeType.None;
+    const writableScopes = writable ? AllExceptExtension : ScopeType.None;
+
     const resource: ResourceType = {
       type: TypeBaseKind.ResourceType,
       name,
