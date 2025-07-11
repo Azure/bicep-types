@@ -139,14 +139,14 @@ describe('types tests', () => {
     expect(md).toMatch(/Valid Scope\(s\).*Subscription/);
   });
 
-  it('addResourceTypeSimple maps boolean parameters correctly', () => {
+  it('addUnscopedResourceType maps boolean parameters correctly', () => {
     const factory = new TypeFactory();
     const body = factory.addObjectType('testBody', {});
 
-    const readableWritable = factory.addResourceTypeSimple('test1@v1', body, true, true);
-    const readableOnly = factory.addResourceTypeSimple('test2@v1', body, true, false);
-    const writableOnly = factory.addResourceTypeSimple('test3@v1', body, false, true);
-    const neither = factory.addResourceTypeSimple('test4@v1', body, false, false);
+    const readableWritable = factory.addUnscopedResourceType('test1@v1', body, true, true);
+    const readableOnly = factory.addUnscopedResourceType('test2@v1', body, true, false);
+    const writableOnly = factory.addUnscopedResourceType('test3@v1', body, false, true);
+    const neither = factory.addUnscopedResourceType('test4@v1', body, false, false);
 
     const resource1 = factory.lookupType(readableWritable) as ResourceType;
     expect(resource1.readableScopes).toBe(AllExceptExtension);
@@ -165,11 +165,11 @@ describe('types tests', () => {
     expect(resource4.writableScopes).toBe(ScopeType.None);
   });
 
-  it('addResourceTypeSimple defaults to readable=true and writable=true', () => {
+  it('addUnscopedResourceType defaults to readable=true and writable=true', () => {
     const factory = new TypeFactory();
     const body = factory.addObjectType('testBody', {});
 
-    const defaultBehavior = factory.addResourceTypeSimple('testDefaults@v1', body);
+    const defaultBehavior = factory.addUnscopedResourceType('testDefaults@v1', body);
 
     const resource = factory.lookupType(defaultBehavior) as ResourceType;
     expect(resource.readableScopes).toBe(AllExceptExtension);

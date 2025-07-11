@@ -18,11 +18,7 @@ namespace Azure.Bicep.Types.Concrete
         ResourceGroup = 1 << 3,
 
         Extension = 1 << 4,
-    }
 
-    public static class ScopeTypeConstants
-    {
-        public const ScopeType AllExceptExtension =
-            ScopeType.Tenant | ScopeType.ManagementGroup | ScopeType.Subscription | ScopeType.ResourceGroup;
+        AllExceptExtension = Tenant | ManagementGroup | Subscription | ResourceGroup,
     }
 }

@@ -339,7 +339,7 @@ export class TypeFactory {
     return this.addType(resource);
   }
 
-  public addResourceTypeSimple(
+  public addUnscopedResourceType(
     name: string,
     body: TypeReference,
     readable: boolean = true,
