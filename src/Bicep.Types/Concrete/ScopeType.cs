@@ -7,7 +7,7 @@ namespace Azure.Bicep.Types.Concrete
     [Flags]
     public enum ScopeType
     {
-        Unknown = 0,
+        None = 0,
 
         Tenant = 1 << 0,
 
@@ -18,5 +18,11 @@ namespace Azure.Bicep.Types.Concrete
         ResourceGroup = 1 << 3,
 
         Extension = 1 << 4,
+    }
+
+    public static class ScopeTypeConstants
+    {
+        public const ScopeType AllExceptExtension =
+            ScopeType.Tenant | ScopeType.ManagementGroup | ScopeType.Subscription | ScopeType.ResourceGroup;
     }
 }

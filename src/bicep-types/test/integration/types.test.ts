@@ -4,7 +4,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
-import { CrossFileTypeReference, FunctionParameter, ObjectTypePropertyFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings } from '../../src/types';
+import { CrossFileTypeReference, FunctionParameter, ObjectTypePropertyFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings, ResourceType, AllExceptExtension } from '../../src/types';
 import { readTypesJson, writeIndexJson, writeTypesJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
 import { buildIndex } from '../../src/indexer';
@@ -56,7 +56,7 @@ describe('types tests', () => {
     const funcArg2: FunctionParameter = { name: 'arg2', type: factory.addStringType() };
     const func = factory.addFunctionType([funcArg, funcArg2], factory.addBooleanType());
 
-    const res = factory.addResourceType('foo@v1', props, ScopeType.Unknown, ScopeType.Unknown, { doSomething: { type: func } });
+    const res = factory.addResourceType('foo@v1', props, ScopeType.None, ScopeType.None, { doSomething: { type: func } });
 
     const configFactory = new TypeFactory();
     const configLocation = configFactory.addObjectType('config', {
@@ -72,7 +72,7 @@ describe('types tests', () => {
         flags: ObjectTypePropertyFlags.Required,
         description: 'Body property',
       },
-    }), ScopeType.Unknown, ScopeType.Unknown);
+    }), ScopeType.None, ScopeType.None);
 
     const settings: TypeSettings = {
       name: 'Foo',
@@ -103,7 +103,7 @@ describe('types tests', () => {
       statusCode: { type: factory.addIntegerType(100, 599), flags: ObjectTypePropertyFlags.ReadOnly, description: 'The status code of the HTTP request.' },
       body: { type: factory.addAnyType(), flags: ObjectTypePropertyFlags.ReadOnly, description: 'The parsed request body.' },
     });
-    factory.addResourceType('request@v1', props, ScopeType.Unknown, ScopeType.Unknown);
+    factory.addResourceType('request@v1', props, ScopeType.None, ScopeType.None);
 
     await verifyBaselines(factory, 'http/v1', 'http');
   });
@@ -125,8 +125,8 @@ describe('types tests', () => {
     );
 
     const json = writeTypesJson(f.types);
-    const parsed= JSON.parse(json) as any[];
-    const resJson   = parsed.find(t => t.name === "modern@v1");
+    const parsed = JSON.parse(json) as any[];
+    const resJson = parsed.find(t => t.name === "modern@v1");
 
     expect(resJson.writableScopes).toBeDefined();
     expect(resJson.readableScopes).toBeDefined();
@@ -137,6 +137,43 @@ describe('types tests', () => {
     const md = writeMarkdown(f.types);
     expect(md).toMatch(/Valid Scope\(s\).*ResourceGroup/);
     expect(md).toMatch(/Valid Scope\(s\).*Subscription/);
+  });
+
+  it('addResourceTypeSimple maps boolean parameters correctly', () => {
+    const factory = new TypeFactory();
+    const body = factory.addObjectType('testBody', {});
+
+    const readableWritable = factory.addResourceTypeSimple('test1@v1', body, true, true);
+    const readableOnly = factory.addResourceTypeSimple('test2@v1', body, true, false);
+    const writableOnly = factory.addResourceTypeSimple('test3@v1', body, false, true);
+    const neither = factory.addResourceTypeSimple('test4@v1', body, false, false);
+
+    const resource1 = factory.lookupType(readableWritable) as ResourceType;
+    expect(resource1.readableScopes).toBe(AllExceptExtension);
+    expect(resource1.writableScopes).toBe(AllExceptExtension);
+
+    const resource2 = factory.lookupType(readableOnly) as ResourceType;
+    expect(resource2.readableScopes).toBe(AllExceptExtension);
+    expect(resource2.writableScopes).toBe(ScopeType.None);
+
+    const resource3 = factory.lookupType(writableOnly) as ResourceType;
+    expect(resource3.readableScopes).toBe(ScopeType.None);
+    expect(resource3.writableScopes).toBe(AllExceptExtension);
+
+    const resource4 = factory.lookupType(neither) as ResourceType;
+    expect(resource4.readableScopes).toBe(ScopeType.None);
+    expect(resource4.writableScopes).toBe(ScopeType.None);
+  });
+
+  it('addResourceTypeSimple defaults to readable=true and writable=true', () => {
+    const factory = new TypeFactory();
+    const body = factory.addObjectType('testBody', {});
+
+    const defaultBehavior = factory.addResourceTypeSimple('testDefaults@v1', body);
+
+    const resource = factory.lookupType(defaultBehavior) as ResourceType;
+    expect(resource.readableScopes).toBe(AllExceptExtension);
+    expect(resource.writableScopes).toBe(AllExceptExtension);
   });
 });
  

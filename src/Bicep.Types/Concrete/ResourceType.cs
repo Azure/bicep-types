@@ -54,7 +54,7 @@ namespace Azure.Bicep.Types.Concrete
             else
             {
                 // Derive modern properties from legacy input (format normalization)
-                var effectiveScopeType = scopeType ?? Azure.Bicep.Types.Concrete.ScopeType.Unknown;
+                var effectiveScopeType = scopeType ?? Azure.Bicep.Types.Concrete.ScopeType.None;
 
                 ReadableScopes = effectiveScopeType;
                 if (readOnlyScopes.HasValue)
@@ -64,7 +64,7 @@ namespace Azure.Bicep.Types.Concrete
 
                 if (flags.HasValue && flags.Value.HasFlag(ResourceFlags.ReadOnly))
                 {
-                    WritableScopes = Azure.Bicep.Types.Concrete.ScopeType.Unknown;
+                    WritableScopes = Azure.Bicep.Types.Concrete.ScopeType.None;
                 }
                 else
                 {
