@@ -121,7 +121,7 @@ describe('types tests', () => {
       "modern@v1",
       obj,
       ScopeType.ResourceGroup | ScopeType.Subscription,
-      ScopeType.ResourceGroup,
+      ScopeType.ManagementGroup,
     );
 
     const json = writeTypesJson(f.types);
@@ -135,8 +135,9 @@ describe('types tests', () => {
     expect(resJson.flags).toBeUndefined();
 
     const md = writeMarkdown(f.types);
-    expect(md).toMatch(/Valid Scope\(s\).*ResourceGroup/);
-    expect(md).toMatch(/Valid Scope\(s\).*Subscription/);
+    expect(md).toMatch(/Readable Scope\(s\).*ResourceGroup/);
+    expect(md).toMatch(/Readable Scope\(s\).*Subscription/);
+    expect(md).toMatch(/Writable Scope\(s\).*ManagementGroup/);
   });
 
   it('addUnscopedResourceType maps boolean parameters correctly', () => {

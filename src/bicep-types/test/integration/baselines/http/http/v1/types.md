@@ -1,7 +1,8 @@
 # Bicep Types
 
 ## Resource request@v1
-* **Valid Scope(s)**: Unknown
+* **Readable Scope(s)**: None
+* **Writable Scope(s)**: None
 ### Properties
 * **body**: any (ReadOnly): The parsed request body.
 * **format**: 'json' | 'raw': How to deserialize the response body.
