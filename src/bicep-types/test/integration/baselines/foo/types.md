@@ -1,7 +1,8 @@
 # Bicep Types
 
 ## Resource fallback
-* **Valid Scope(s)**: Unknown
+* **Readable Scope(s)**: None
+* **Writable Scope(s)**: None
 ### Properties
 * **bodyProp**: [config](#config) (Required): Body property
 

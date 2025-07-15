@@ -192,11 +192,8 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       case TypeBaseKind.ResourceType: {
         const resourceType = type as ResourceType;
         md.writeHeading(nesting, `Resource ${resourceType.name}`);
-        md.writeBullet(
-          "Valid Scope(s)",
-          getScopeTypeLabels(resourceType.writableScopes | resourceType.readableScopes, [resourceType.readableScopes & ~resourceType.writableScopes, "ReadOnly"])
-            .join(", ") || "Unknown"
-        );
+        md.writeBullet("Readable Scope(s)", getScopeTypeLabels(resourceType.readableScopes).join(", ") || "None");
+        md.writeBullet("Writable Scope(s)", getScopeTypeLabels(resourceType.writableScopes).join(", ") || "None");
         writeComplexType(types, types[resourceType.body.index], nesting, false);
 
         if (resourceType.functions) {
