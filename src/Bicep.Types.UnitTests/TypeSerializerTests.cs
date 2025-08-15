@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks.Dataflow;
+using System.Text.Json.Serialization;
 using Azure.Bicep.Types.Concrete;
 using Azure.Bicep.Types.Serialization;
 using FluentAssertions;
@@ -206,8 +206,12 @@ namespace Azure.Bicep.Types.UnitTests
                 scopeType: ScopeType.ResourceGroup,
                 flags: ResourceFlags.None);
 
-            var json = JsonSerializer.SerializeToNode(resourceType,
-                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })!.AsObject();
+            var serializedJson = JsonSerializer.Serialize(resourceType, new JsonSerializerOptions 
+            { 
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+            var json = JsonSerializer.Deserialize<JsonObject>(serializedJson)!;
 
             // Legacy input should be normalized to modern output
             json.ContainsKey("scopeType").Should().BeFalse();        
@@ -228,8 +232,12 @@ namespace Azure.Bicep.Types.UnitTests
                 writableScopes_in: ScopeType.ResourceGroup,
                 readableScopes_in: ScopeType.ResourceGroup | ScopeType.ManagementGroup);
 
-            var json = JsonSerializer.SerializeToNode(resourceType,
-                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })!.AsObject();
+            var serializedJson = JsonSerializer.Serialize(resourceType, new JsonSerializerOptions 
+            { 
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+            var json = JsonSerializer.Deserialize<JsonObject>(serializedJson)!;
 
             json.ContainsKey("writableScopes").Should().BeTrue();
             json.ContainsKey("readableScopes").Should().BeTrue();
@@ -306,7 +314,11 @@ namespace Azure.Bicep.Types.UnitTests
                 readOnlyScopes: ScopeType.Tenant,
                 flags: ResourceFlags.None);
 
-            var serializedJson = JsonSerializer.Serialize(legacyResource);
+            var serializedJson = JsonSerializer.Serialize(legacyResource, new JsonSerializerOptions 
+            { 
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
             
             serializedJson.Should().NotContain("scopeType");
             serializedJson.Should().NotContain("readOnlyScopes");
@@ -336,6 +348,38 @@ namespace Azure.Bicep.Types.UnitTests
 
             resourceType.ReadableScopes.Should().Be(ScopeType.ResourceGroup | ScopeType.Tenant | ScopeType.ManagementGroup);
             resourceType.WritableScopes.Should().Be(ScopeType.None);
+        }
+
+        [TestMethod]
+        public void ResourceType_with_scopes_deserializes_correctly_from_json()
+        {
+            // This test loads from JSON string to match customer scenario (AOT Team)
+            var json = @"[
+                {
+                    ""$type"": ""ObjectType"",
+                    ""name"": ""sampleBody"",
+                    ""properties"": {}
+                },
+                {
+                    ""$type"": ""ResourceType"",
+                    ""name"": ""Microsoft.ApiManagement/service/diagnostics/loggers"",
+                    ""body"": {
+                        ""$ref"": ""#/0""
+                    },
+                    ""scopeType"": 8,
+                    ""flags"": 0,
+                    ""readOnlyScopes"": null
+                }
+            ]";
+
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            
+            // Deserialize directly from JSON, thiss matches how AzTypeLoader would read the file
+            var deserialized = TypeSerializer.Deserialize(stream);
+            var deserializedResource = deserialized.OfType<ResourceType>().Single();
+            
+            deserializedResource.ReadableScopes.Should().Be(ScopeType.ResourceGroup);
+            deserializedResource.WritableScopes.Should().Be(ScopeType.ResourceGroup);
         }
 
         private static Stream BuildStream(Action<Stream> writeFunc)

@@ -71,12 +71,6 @@ namespace Azure.Bicep.Types.Concrete
                     WritableScopes = effectiveScopeType;
                 }
 
-                // Store legacy values for property access
-#pragma warning disable CS0618 // Type or member is obsolete
-                ScopeType = scopeType;
-                ReadOnlyScopes = readOnlyScopes;
-                Flags = flags;
-#pragma warning restore CS0618 // Type or member is obsolete
             }
         }
 
@@ -99,18 +93,18 @@ namespace Azure.Bicep.Types.Concrete
         [JsonPropertyName("writableScopes")]
         public ScopeType? WritableScopes_in => WritableScopes;
 
-        // Legacy properties - exist only for JSON constructor parameter binding, never serialized
-        [Obsolete("Use WritableScopes and ReadableScopes instead")]
-        [JsonIgnore]
-        public ScopeType? ScopeType { get; private set; }
+        // Legacy properties which are never serialized, only used for deserialization
+        [Obsolete("Use WritableScopes and ReadableScopes instead.")]
+        [JsonPropertyName("scopeType")]
+        public ScopeType? ScopeType => null; // Always null to prevent serialization
 
-        [Obsolete("Use ReadableScopes instead")]
-        [JsonIgnore]
-        public ScopeType? ReadOnlyScopes { get; private set; }
+        [Obsolete("Use ReadableScopes instead.")]
+        [JsonPropertyName("readOnlyScopes")]
+        public ScopeType? ReadOnlyScopes => null;
 
-        [Obsolete("Use WritableScopes instead")]
-        [JsonIgnore]
-        public ResourceFlags? Flags { get; private set; }
+        [Obsolete("Use WritableScopes instead.")]
+        [JsonPropertyName("flags")]
+        public ResourceFlags? Flags => null;
     }
 }
 public class ResourceTypeFunction
