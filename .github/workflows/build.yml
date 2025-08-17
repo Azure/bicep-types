@@ -27,7 +27,7 @@ jobs:
       security-events: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
 
@@ -72,7 +72,7 @@ jobs:
       security-events: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
 
