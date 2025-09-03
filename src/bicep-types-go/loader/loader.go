@@ -57,12 +57,21 @@ func (l *TypeLoader) LoadTypesFromFile(path string) ([]types.Type, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open types file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			err = fmt.Errorf("failed to close file: %w", closeErr)
+		}
+	}()
 
 	// Set the current path for cross-file reference resolution
 	// Note: This functionality would need to be implemented in TypeSerializer
 
-	return l.LoadTypes(file)
+	result, err := l.LoadTypes(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, err
 }
 
 // LoadTypeIndex loads a type index from a reader
@@ -86,9 +95,19 @@ func (l *TypeLoader) LoadTypeIndexFromFile(path string) (*index.TypeIndex, error
 	if err != nil {
 		return nil, fmt.Errorf("failed to open type index file: %w", err)
 	}
-	defer file.Close()
 
-	return l.LoadTypeIndex(file)
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			err = fmt.Errorf("failed to close file: %w", closeErr)
+		}
+	}()
+
+	result, err := l.LoadTypeIndex(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, err
 }
 
 // TypeLoaderWithResolver extends TypeLoader with cross-file resolution capabilities

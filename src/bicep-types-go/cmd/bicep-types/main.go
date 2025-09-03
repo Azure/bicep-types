@@ -45,7 +45,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error creating output file: %v\n", err)
 			os.Exit(1)
 		}
-		defer output.Close()
+		defer func() {
+			if closeErr := output.Close(); closeErr != nil {
+				fmt.Fprintf(os.Stderr, "Error closing output file: %v\n", closeErr)
+			}
+		}()
 	}
 
 	// Generate output based on format

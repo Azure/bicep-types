@@ -121,14 +121,14 @@ func (w *MarkdownWriter) WriteTypeIndex(writer io.Writer, idx *index.TypeIndex) 
 	}
 
 	// Write resources section
-	if idx.Resources != nil && len(idx.Resources) > 0 {
+	if len(idx.Resources) > 0 {
 		if err := w.writeResourcesIndex(writer, idx.Resources); err != nil {
 			return err
 		}
 	}
 
 	// Write resource functions section
-	if idx.ResourceFunctions != nil && len(idx.ResourceFunctions) > 0 {
+	if len(idx.ResourceFunctions) > 0 {
 		if err := w.writeResourceFunctionsIndex(writer, idx.ResourceFunctions); err != nil {
 			return err
 		}
@@ -431,7 +431,7 @@ func (w *MarkdownWriter) writeObjectType(writer io.Writer, ot *types.ObjectType)
 		return err
 	}
 
-	if ot.Properties != nil && len(ot.Properties) > 0 {
+	if len(ot.Properties) > 0 {
 		if _, err := fmt.Fprintf(writer, "**Properties:**\n\n"); err != nil {
 			return err
 		}
