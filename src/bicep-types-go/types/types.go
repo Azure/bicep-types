@@ -29,8 +29,8 @@ func (TypeReference) isTypeReference() {}
 
 // CrossFileTypeReference represents a reference to a type in another file
 type CrossFileTypeReference struct {
-	Ref              int    `json:"-"`
-	RelativePath     string `json:"relativePath"`
+	Ref          int    `json:"-"`
+	RelativePath string `json:"relativePath"`
 }
 
 func (CrossFileTypeReference) isTypeReference() {}
@@ -39,33 +39,31 @@ func (CrossFileTypeReference) isTypeReference() {}
 type ScopeType int
 
 const (
-	ScopeTypeUnknown ScopeType = iota
-	ScopeTypeTenant
-	ScopeTypeManagementGroup
-	ScopeTypeSubscription
-	ScopeTypeResourceGroup
-	ScopeTypeExtension
+	ScopeTypeNone            ScopeType = 0
+	ScopeTypeTenant          ScopeType = 1 << 0
+	ScopeTypeManagementGroup ScopeType = 1 << 1
+	ScopeTypeSubscription    ScopeType = 1 << 2
+	ScopeTypeResourceGroup   ScopeType = 1 << 3
+	ScopeTypeExtension       ScopeType = 1 << 4
 )
 
 // TypePropertyFlags represents flags for type properties
 type TypePropertyFlags int
 
 const (
-	TypePropertyFlagsNone        TypePropertyFlags = 0
-	TypePropertyFlagsRequired    TypePropertyFlags = 1 << 0
-	TypePropertyFlagsReadOnly    TypePropertyFlags = 1 << 1
-	TypePropertyFlagsWriteOnly   TypePropertyFlags = 1 << 2
-	TypePropertyFlagsDeployTime  TypePropertyFlags = 1 << 3
-	TypePropertyFlagsConstant    TypePropertyFlags = 1 << 4
-	TypePropertyFlagsNested      TypePropertyFlags = 1 << 5
-	TypePropertyFlagsIdentifier  TypePropertyFlags = 1 << 6
+	TypePropertyFlagsNone               TypePropertyFlags = 0
+	TypePropertyFlagsRequired           TypePropertyFlags = 1 << 0
+	TypePropertyFlagsReadOnly           TypePropertyFlags = 1 << 1
+	TypePropertyFlagsWriteOnly          TypePropertyFlags = 1 << 2
+	TypePropertyFlagsDeployTimeConstant TypePropertyFlags = 1 << 3
+	TypePropertyFlagsIdentifier         TypePropertyFlags = 1 << 4
 )
 
 // ObjectTypePropertyFlags represents flags specific to object type properties
 type ObjectTypePropertyFlags int
 
 const (
-	ObjectTypePropertyFlagsNone         ObjectTypePropertyFlags = 0
+	ObjectTypePropertyFlagsNone           ObjectTypePropertyFlags = 0
 	ObjectTypePropertyFlagsSystemProperty ObjectTypePropertyFlags = 1 << 0
 )
 
@@ -88,11 +86,11 @@ func (f *TypeFactory) GetReference(t Type) ITypeReference {
 	if idx, exists := f.index[t]; exists {
 		return TypeReference{Ref: idx}
 	}
-	
+
 	idx := len(f.types)
 	f.types = append(f.types, t)
 	f.index[t] = idx
-	
+
 	return TypeReference{Ref: idx}
 }
 
@@ -113,11 +111,11 @@ func (r *TypeReference) UnmarshalJSON(data []byte) error {
 	var temp struct {
 		Ref string `json:"$ref"`
 	}
-	
+
 	if err := json.Unmarshal(data, &temp); err != nil {
 		return err
 	}
-	
+
 	// Parse JSON Pointer format "#/0" -> 0
 	if strings.HasPrefix(temp.Ref, "#/") {
 		refStr := strings.TrimPrefix(temp.Ref, "#/")
@@ -128,7 +126,7 @@ func (r *TypeReference) UnmarshalJSON(data []byte) error {
 		r.Ref = refInt
 		return nil
 	}
-	
+
 	// Also support direct integer format for backward compatibility
 	refInt, err := strconv.Atoi(temp.Ref)
 	if err != nil {
@@ -152,29 +150,29 @@ func (r *CrossFileTypeReference) UnmarshalJSON(data []byte) error {
 		Ref          string `json:"$ref"`
 		RelativePath string `json:"relativePath"`
 	}
-	
+
 	if err := json.Unmarshal(data, &temp); err != nil {
 		return err
 	}
-	
+
 	// Parse different formats:
 	// 1. "filename.json#/0" -> extract filename and index
 	// 2. "#/0" -> extract index only
 	// 3. "0" -> direct integer
-	
+
 	if strings.Contains(temp.Ref, "#/") {
 		parts := strings.Split(temp.Ref, "#/")
 		if len(parts) != 2 {
 			return fmt.Errorf("invalid cross-file type reference format: %s", temp.Ref)
 		}
-		
+
 		// If there's a filename before #/, use it as relativePath if not already set
 		if parts[0] != "" && temp.RelativePath == "" {
 			r.RelativePath = parts[0]
 		} else {
 			r.RelativePath = temp.RelativePath
 		}
-		
+
 		refInt, err := strconv.Atoi(parts[1])
 		if err != nil {
 			return fmt.Errorf("invalid cross-file type reference index: %s", parts[1])
@@ -189,7 +187,7 @@ func (r *CrossFileTypeReference) UnmarshalJSON(data []byte) error {
 		r.Ref = refInt
 		r.RelativePath = temp.RelativePath
 	}
-	
+
 	return nil
 }
 
@@ -197,21 +195,21 @@ func (r *CrossFileTypeReference) UnmarshalJSON(data []byte) error {
 func marshalTypeWithDiscriminator(typeName string, v interface{}) ([]byte, error) {
 	// Create a map to hold all fields
 	m := make(map[string]interface{})
-	
+
 	// Marshal the struct to get its fields
 	temp, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Unmarshal into the map
 	if err := json.Unmarshal(temp, &m); err != nil {
 		return nil, err
 	}
-	
+
 	// Add the $type discriminator
 	m["$type"] = typeName
-	
+
 	// Marshal the final result
 	return json.Marshal(m)
 }
@@ -221,11 +219,11 @@ func UnmarshalType(data []byte) (Type, error) {
 	var discriminator struct {
 		Type string `json:"$type"`
 	}
-	
+
 	if err := json.Unmarshal(data, &discriminator); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal type discriminator: %w", err)
 	}
-	
+
 	switch discriminator.Type {
 	case "StringType":
 		var t StringType
@@ -323,7 +321,7 @@ func unmarshalTypeReference(data []byte) (ITypeReference, error) {
 	if err := json.Unmarshal(data, &temp); err != nil {
 		return nil, err
 	}
-	
+
 	// Check for explicit relativePath field
 	if _, hasPath := temp["relativePath"]; hasPath {
 		var ref CrossFileTypeReference
@@ -332,7 +330,7 @@ func unmarshalTypeReference(data []byte) (ITypeReference, error) {
 		}
 		return ref, nil
 	}
-	
+
 	// Check if $ref contains a filename (cross-file reference)
 	if refValue, hasRef := temp["$ref"]; hasRef {
 		if refStr, ok := refValue.(string); ok {
@@ -350,7 +348,7 @@ func unmarshalTypeReference(data []byte) (ITypeReference, error) {
 			}
 		}
 	}
-	
+
 	// It's a regular TypeReference
 	var ref TypeReference
 	if err := json.Unmarshal(data, &ref); err != nil {

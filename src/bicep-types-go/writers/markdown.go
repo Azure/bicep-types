@@ -659,14 +659,8 @@ func (w *MarkdownWriter) formatPropertyFlags(flags types.TypePropertyFlags) stri
 	if flags&types.TypePropertyFlagsWriteOnly != 0 {
 		flagNames = append(flagNames, "write-only")
 	}
-	if flags&types.TypePropertyFlagsDeployTime != 0 {
-		flagNames = append(flagNames, "deploy-time")
-	}
-	if flags&types.TypePropertyFlagsConstant != 0 {
-		flagNames = append(flagNames, "constant")
-	}
-	if flags&types.TypePropertyFlagsNested != 0 {
-		flagNames = append(flagNames, "nested")
+	if flags&types.TypePropertyFlagsDeployTimeConstant != 0 {
+		flagNames = append(flagNames, "deploy-time-constant")
 	}
 	if flags&types.TypePropertyFlagsIdentifier != 0 {
 		flagNames = append(flagNames, "identifier")
