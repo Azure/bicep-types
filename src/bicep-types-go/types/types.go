@@ -47,6 +47,8 @@ const (
 	ScopeTypeExtension       ScopeType = 1 << 4
 )
 
+const AllExceptExtension = ScopeTypeTenant | ScopeTypeManagementGroup | ScopeTypeSubscription | ScopeTypeResourceGroup
+
 // TypePropertyFlags represents flags for type properties
 type TypePropertyFlags int
 
@@ -60,12 +62,12 @@ const (
 )
 
 // ObjectTypePropertyFlags represents flags specific to object type properties
-type ObjectTypePropertyFlags int
+// type ObjectTypePropertyFlags int
 
-const (
-	ObjectTypePropertyFlagsNone           ObjectTypePropertyFlags = 0
-	ObjectTypePropertyFlagsSystemProperty ObjectTypePropertyFlags = 1 << 0
-)
+// const (
+// 	ObjectTypePropertyFlagsNone           ObjectTypePropertyFlags = 0
+// 	ObjectTypePropertyFlagsSystemProperty ObjectTypePropertyFlags = 1 << 0
+// )
 
 // TypeFactory provides methods to create and manage types
 type TypeFactory struct {

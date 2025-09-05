@@ -164,18 +164,26 @@ func (f *TypeFactory) CreateUnionType(elements []types.ITypeReference) *types.Un
 }
 
 // CreateObjectType creates a new ObjectType
-func (f *TypeFactory) CreateObjectType(name string) *types.ObjectType {
-	return &types.ObjectType{
-		Name:       name,
-		Properties: make(map[string]types.ObjectTypeProperty),
-	}
-}
+// func (f *TypeFactory) CreateObjectType(name string, properties map[string]types.ObjectTypeProperty) *types.ObjectType {
+// 	return &types.ObjectType{
+// 		Name:                 name,
+// 		Properties:           properties,
+// 		AdditionalProperties: nil,
+// 		Sensitive:            nil,
+// 	}
+// }
 
-// CreateObjectTypeWithProperties creates an ObjectType with properties
-func (f *TypeFactory) CreateObjectTypeWithProperties(name string, properties map[string]types.ObjectTypeProperty) *types.ObjectType {
+func (f *TypeFactory) CreateObjectType(
+	name string,
+	properties map[string]types.ObjectTypeProperty,
+	additionalProperties types.ITypeReference, // Optional - can be nil
+	sensitive *bool, // Optional - can be nil
+) *types.ObjectType {
 	return &types.ObjectType{
-		Name:       name,
-		Properties: properties,
+		Name:                 name,
+		Properties:           properties,
+		AdditionalProperties: additionalProperties,
+		Sensitive:            sensitive,
 	}
 }
 
@@ -191,94 +199,44 @@ func (f *TypeFactory) CreateDiscriminatedObjectType(name, discriminator string, 
 // Resource type factory methods
 
 // CreateResourceType creates a new ResourceType
-func (f *TypeFactory) CreateResourceType(name, resourceTypeID, apiVersion string, body types.ITypeReference) *types.ResourceType {
-	return &types.ResourceType{
-		Name:           name,
-		ResourceTypeID: resourceTypeID,
-		APIVersion:     apiVersion,
-		Body:           body,
-	}
-}
-
-// CreateResourceTypeWithDetails creates a ResourceType with all details
-func (f *TypeFactory) CreateResourceTypeWithDetails(
-	name, resourceTypeID, apiVersion string,
+func (f *TypeFactory) CreateResourceType(
+	name string,
 	body types.ITypeReference,
-	description string,
-	providers []string,
-	scopeTypes []types.ScopeType,
-	locationRequired, zoneRequired, isSingleton bool,
-	metadata map[string]interface{},
+	readableScopes types.ScopeType,
+	writableScopes types.ScopeType,
+	functions map[string]types.ResourceTypeFunction,
 ) *types.ResourceType {
 	return &types.ResourceType{
-		Name:             name,
-		ResourceTypeID:   resourceTypeID,
-		APIVersion:       apiVersion,
-		Body:             body,
-		Description:      description,
-		Providers:        providers,
-		ScopeTypes:       scopeTypes,
-		LocationRequired: locationRequired,
-		ZoneRequired:     zoneRequired,
-		IsSingleton:      isSingleton,
-		Metadata:         metadata,
+		Name:           name,
+		Body:           body,
+		ReadableScopes: readableScopes,
+		WritableScopes: writableScopes,
+		Functions:      functions, // Can be nil/empty
 	}
 }
 
 // Function type factory methods
 
 // CreateFunctionType creates a new FunctionType
-func (f *TypeFactory) CreateFunctionType(parameters []types.FunctionParameter, returnType types.ITypeReference) *types.FunctionType {
+func (f *TypeFactory) CreateFunctionType(parameters []types.FunctionParameter, output types.ITypeReference) *types.FunctionType {
 	return &types.FunctionType{
 		Parameters: parameters,
-		ReturnType: returnType,
-	}
-}
-
-// CreateFunctionTypeWithDetails creates a FunctionType with description and metadata
-func (f *TypeFactory) CreateFunctionTypeWithDetails(
-	parameters []types.FunctionParameter,
-	returnType types.ITypeReference,
-	description string,
-	metadata map[string]interface{},
-) *types.FunctionType {
-	return &types.FunctionType{
-		Parameters:  parameters,
-		ReturnType:  returnType,
-		Description: description,
-		Metadata:    metadata,
+		Output:     output, // Changed from ReturnType
 	}
 }
 
 // CreateResourceFunctionType creates a new ResourceFunctionType
 func (f *TypeFactory) CreateResourceFunctionType(
 	name, resourceType, apiVersion string,
-	returnType types.ITypeReference,
+	output types.ITypeReference,
+	input types.ITypeReference, // Optional - can be nil
 ) *types.ResourceFunctionType {
 	return &types.ResourceFunctionType{
 		Name:         name,
 		ResourceType: resourceType,
-		APIVersion:   apiVersion,
-		ReturnType:   returnType,
-	}
-}
-
-// CreateResourceFunctionTypeWithDetails creates a ResourceFunctionType with all details
-func (f *TypeFactory) CreateResourceFunctionTypeWithDetails(
-	name, resourceType, apiVersion string,
-	returnType types.ITypeReference,
-	description string,
-	parameters []types.FunctionParameter,
-	metadata map[string]interface{},
-) *types.ResourceFunctionType {
-	return &types.ResourceFunctionType{
-		Name:         name,
-		ResourceType: resourceType,
-		APIVersion:   apiVersion,
-		ReturnType:   returnType,
-		Description:  description,
-		Parameters:   parameters,
-		Metadata:     metadata,
+		ApiVersion:   apiVersion,
+		Output:       output,
+		Input:        input, // Can be nil for optional input
 	}
 }
 

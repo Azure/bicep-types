@@ -109,9 +109,9 @@ func (t *BuiltInType) MarshalJSON() ([]byte, error) {
 
 // ArrayType represents an array type
 type ArrayType struct {
-	ItemType ITypeReference `json:"itemType"`
-	MinLength *int64 `json:"minLength,omitempty"`
-	MaxLength *int64 `json:"maxLength,omitempty"`
+	ItemType  ITypeReference `json:"itemType"`
+	MinLength *int64         `json:"minLength,omitempty"`
+	MaxLength *int64         `json:"maxLength,omitempty"`
 }
 
 func (*ArrayType) Type() string { return "ArrayType" }
@@ -151,21 +151,21 @@ func (t *ArrayType) UnmarshalJSON(data []byte) error {
 		MinLength *int64          `json:"minLength,omitempty"`
 		MaxLength *int64          `json:"maxLength,omitempty"`
 	}
-	
+
 	if err := json.Unmarshal(data, &temp); err != nil {
 		return err
 	}
-	
+
 	// Unmarshal the item type reference
 	ref, err := unmarshalTypeReference(temp.ItemType)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal item type reference: %w", err)
 	}
-	
+
 	t.ItemType = ref
 	t.MinLength = temp.MinLength
 	t.MaxLength = temp.MaxLength
-	
+
 	return nil
 }
 
@@ -175,11 +175,11 @@ func (t *UnionType) UnmarshalJSON(data []byte) error {
 		Type     string            `json:"$type"`
 		Elements []json.RawMessage `json:"elements"`
 	}
-	
+
 	if err := json.Unmarshal(data, &temp); err != nil {
 		return err
 	}
-	
+
 	// Unmarshal each element reference
 	t.Elements = make([]ITypeReference, 0, len(temp.Elements))
 	for i, elem := range temp.Elements {
@@ -189,6 +189,6 @@ func (t *UnionType) UnmarshalJSON(data []byte) error {
 		}
 		t.Elements = append(t.Elements, ref)
 	}
-	
+
 	return nil
 }

@@ -8,4 +8,3 @@
 ## config
 ### Properties
 * **configProp**: [config](#config) (Required): Config property
-

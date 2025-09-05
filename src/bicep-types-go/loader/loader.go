@@ -66,12 +66,7 @@ func (l *TypeLoader) LoadTypesFromFile(path string) ([]types.Type, error) {
 	// Set the current path for cross-file reference resolution
 	// Note: This functionality would need to be implemented in TypeSerializer
 
-	result, err := l.LoadTypes(file)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, err
+	return l.LoadTypes(file)
 }
 
 // LoadTypeIndex loads a type index from a reader
@@ -95,19 +90,13 @@ func (l *TypeLoader) LoadTypeIndexFromFile(path string) (*index.TypeIndex, error
 	if err != nil {
 		return nil, fmt.Errorf("failed to open type index file: %w", err)
 	}
-
 	defer func() {
 		if closeErr := file.Close(); closeErr != nil {
 			err = fmt.Errorf("failed to close file: %w", closeErr)
 		}
 	}()
 
-	result, err := l.LoadTypeIndex(file)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, err
+	return l.LoadTypeIndex(file)
 }
 
 // TypeLoaderWithResolver extends TypeLoader with cross-file resolution capabilities
@@ -220,7 +209,7 @@ func (l *TypeLoaderWithResolver) findCrossFileReferencesInType(t types.Type, pat
 			paths[ref.RelativePath] = true
 		}
 	case *types.FunctionType:
-		if ref, ok := v.ReturnType.(types.CrossFileTypeReference); ok {
+		if ref, ok := v.Output.(types.CrossFileTypeReference); ok {
 			paths[ref.RelativePath] = true
 		}
 		for _, param := range v.Parameters {
@@ -229,11 +218,11 @@ func (l *TypeLoaderWithResolver) findCrossFileReferencesInType(t types.Type, pat
 			}
 		}
 	case *types.ResourceFunctionType:
-		if ref, ok := v.ReturnType.(types.CrossFileTypeReference); ok {
+		if ref, ok := v.Output.(types.CrossFileTypeReference); ok {
 			paths[ref.RelativePath] = true
 		}
-		for _, param := range v.Parameters {
-			if ref, ok := param.Type.(types.CrossFileTypeReference); ok {
+		if v.Input != nil {
+			if ref, ok := v.Input.(types.CrossFileTypeReference); ok {
 				paths[ref.RelativePath] = true
 			}
 		}

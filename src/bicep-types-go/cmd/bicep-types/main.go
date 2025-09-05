@@ -158,7 +158,7 @@ func generateCommand() {
 	boolType := f.CreateBooleanType()
 
 	// Create an object type
-	objectType := f.CreateObjectType("SampleObject")
+	objectType := f.CreateObjectType("SampleObject", nil, nil, nil)
 	objectType.Properties = map[string]types.ObjectTypeProperty{
 		"name": f.CreateRequiredStringProperty("The name of the object"),
 		"count": {
@@ -173,10 +173,11 @@ func generateCommand() {
 
 	// Create a resource type
 	resourceType := f.CreateResourceType(
-		"Sample Resource",
-		"Microsoft.Sample/resources",
-		"2023-01-01",
-		f.GetReference(objectType),
+		"Microsoft.Sample/resources@2023-01-01",     // Full resource name with API version
+		f.GetReference(objectType),                  // Body type reference
+		types.AllExceptExtension,                    // ReadableScopes
+		types.AllExceptExtension,                    // WritableScopes
+		make(map[string]types.ResourceTypeFunction), // Functions (empty map)
 	)
 
 	// Get all types

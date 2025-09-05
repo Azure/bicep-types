@@ -210,46 +210,66 @@ func (w *MarkdownWriter) writeResourceType(writer io.Writer, rt *types.ResourceT
 		return err
 	}
 
-	if _, err := fmt.Fprintf(writer, "**Resource Type ID:** `%s`\n\n", rt.ResourceTypeID); err != nil {
-		return err
-	}
+	// Parse resource name to extract parts (since Name now contains full resource name)
+	// Example: "Microsoft.Storage/storageAccounts@2023-01-01"
+	parts := strings.Split(rt.Name, "@")
+	if len(parts) == 2 {
+		resourceTypeId := parts[0]
+		apiVersion := parts[1]
 
-	if _, err := fmt.Fprintf(writer, "**API Version:** `%s`\n\n", rt.APIVersion); err != nil {
-		return err
-	}
+		if _, err := fmt.Fprintf(writer, "**Resource Type ID:** `%s`\n\n", resourceTypeId); err != nil {
+			return err
+		}
 
-	if rt.Description != "" {
-		if _, err := fmt.Fprintf(writer, "**Description:** %s\n\n", rt.Description); err != nil {
+		if _, err := fmt.Fprintf(writer, "**API Version:** `%s`\n\n", apiVersion); err != nil {
 			return err
 		}
 	}
 
-	if len(rt.ScopeTypes) > 0 {
-		if _, err := fmt.Fprintf(writer, "**Scope Types:** %s\n\n", w.formatScopeTypes(rt.ScopeTypes)); err != nil {
+	// Write scope information using the new fields
+	if rt.ReadableScopes != types.ScopeTypeNone {
+		if _, err := fmt.Fprintf(writer, "**Readable Scopes:** %s\n\n", w.formatScopeType(rt.ReadableScopes)); err != nil {
 			return err
 		}
 	}
 
-	if len(rt.Providers) > 0 {
-		if _, err := fmt.Fprintf(writer, "**Providers:** %s\n\n", strings.Join(rt.Providers, ", ")); err != nil {
+	if rt.WritableScopes != types.ScopeTypeNone {
+		if _, err := fmt.Fprintf(writer, "**Writable Scopes:** %s\n\n", w.formatScopeType(rt.WritableScopes)); err != nil {
 			return err
 		}
 	}
 
-	if rt.LocationRequired {
-		if _, err := fmt.Fprintf(writer, "**Location Required:** Yes\n\n"); err != nil {
+	// Write functions if present
+	if len(rt.Functions) > 0 {
+		if _, err := fmt.Fprintf(writer, "**Functions:**\n\n"); err != nil {
 			return err
 		}
-	}
 
-	if rt.ZoneRequired {
-		if _, err := fmt.Fprintf(writer, "**Zone Required:** Yes\n\n"); err != nil {
-			return err
+		// Sort function names
+		var funcNames []string
+		for name := range rt.Functions {
+			funcNames = append(funcNames, name)
 		}
-	}
+		sort.Strings(funcNames)
 
-	if rt.IsSingleton {
-		if _, err := fmt.Fprintf(writer, "**Singleton:** Yes\n\n"); err != nil {
+		for _, name := range funcNames {
+			function := rt.Functions[name]
+			if _, err := fmt.Fprintf(writer, "- `%s`", name); err != nil {
+				return err
+			}
+
+			if function.Description != "" {
+				if _, err := fmt.Fprintf(writer, ": %s", function.Description); err != nil {
+					return err
+				}
+			}
+
+			if _, err := fmt.Fprintf(writer, "\n"); err != nil {
+				return err
+			}
+		}
+
+		if _, err := fmt.Fprintf(writer, "\n"); err != nil {
 			return err
 		}
 	}
@@ -289,11 +309,8 @@ func (w *MarkdownWriter) writeFunctionType(writer io.Writer, ft *types.FunctionT
 		return err
 	}
 
-	if ft.Description != "" {
-		if _, err := fmt.Fprintf(writer, "**Description:** %s\n\n", ft.Description); err != nil {
-			return err
-		}
-	}
+	// FunctionType doesn't have Description field in the new structure
+	// Remove the description section
 
 	if len(ft.Parameters) > 0 {
 		if _, err := fmt.Fprintf(writer, "**Parameters:**\n\n"); err != nil {
@@ -319,6 +336,10 @@ func (w *MarkdownWriter) writeFunctionType(writer io.Writer, ft *types.FunctionT
 		if _, err := fmt.Fprintf(writer, "\n"); err != nil {
 			return err
 		}
+	}
+
+	if _, err := fmt.Fprintf(writer, "**Output Type:** (type reference)\n\n"); err != nil {
+		return err
 	}
 
 	if _, err := fmt.Fprintf(writer, "---\n\n"); err != nil {
@@ -359,40 +380,18 @@ func (w *MarkdownWriter) writeResourceFunctionType(writer io.Writer, rft *types.
 		return err
 	}
 
-	if _, err := fmt.Fprintf(writer, "**API Version:** `%s`\n\n", rft.APIVersion); err != nil {
+	if _, err := fmt.Fprintf(writer, "**API Version:** `%s`\n\n", rft.ApiVersion); err != nil { // Fixed: APIVersion -> ApiVersion
 		return err
 	}
 
-	if rft.Description != "" {
-		if _, err := fmt.Fprintf(writer, "**Description:** %s\n\n", rft.Description); err != nil {
+	if rft.Input != nil {
+		if _, err := fmt.Fprintf(writer, "**Input Type:** (type reference)\n\n"); err != nil {
 			return err
 		}
 	}
 
-	if len(rft.Parameters) > 0 {
-		if _, err := fmt.Fprintf(writer, "**Parameters:**\n\n"); err != nil {
-			return err
-		}
-
-		for _, param := range rft.Parameters {
-			if _, err := fmt.Fprintf(writer, "- `%s`", param.Name); err != nil {
-				return err
-			}
-
-			if param.Description != "" {
-				if _, err := fmt.Fprintf(writer, ": %s", param.Description); err != nil {
-					return err
-				}
-			}
-
-			if _, err := fmt.Fprintf(writer, "\n"); err != nil {
-				return err
-			}
-		}
-
-		if _, err := fmt.Fprintf(writer, "\n"); err != nil {
-			return err
-		}
+	if _, err := fmt.Fprintf(writer, "**Output Type:** (type reference)\n\n"); err != nil {
+		return err
 	}
 
 	if _, err := fmt.Fprintf(writer, "---\n\n"); err != nil {
@@ -621,27 +620,28 @@ func (w *MarkdownWriter) writeSettings(writer io.Writer, settings *index.TypeSet
 	return nil
 }
 
-func (w *MarkdownWriter) formatScopeTypes(scopeTypes []types.ScopeType) string {
-	if len(scopeTypes) == 0 {
-		return ""
+// Remove the old formatScopeTypes function and replace with:
+func (w *MarkdownWriter) formatScopeType(scopeType types.ScopeType) string {
+	var names []string
+
+	if scopeType&types.ScopeTypeTenant != 0 {
+		names = append(names, "Tenant")
+	}
+	if scopeType&types.ScopeTypeManagementGroup != 0 {
+		names = append(names, "Management Group")
+	}
+	if scopeType&types.ScopeTypeSubscription != 0 {
+		names = append(names, "Subscription")
+	}
+	if scopeType&types.ScopeTypeResourceGroup != 0 {
+		names = append(names, "Resource Group")
+	}
+	if scopeType&types.ScopeTypeExtension != 0 {
+		names = append(names, "Extension")
 	}
 
-	var names []string
-	for _, st := range scopeTypes {
-		switch st {
-		case types.ScopeTypeTenant:
-			names = append(names, "Tenant")
-		case types.ScopeTypeManagementGroup:
-			names = append(names, "Management Group")
-		case types.ScopeTypeSubscription:
-			names = append(names, "Subscription")
-		case types.ScopeTypeResourceGroup:
-			names = append(names, "Resource Group")
-		case types.ScopeTypeExtension:
-			names = append(names, "Extension")
-		default:
-			names = append(names, "Unknown")
-		}
+	if len(names) == 0 {
+		return "None"
 	}
 
 	return strings.Join(names, ", ")

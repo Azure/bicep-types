@@ -1,7 +1,8 @@
 # Bicep Types
 
 ## Resource foo@v1
-* **Valid Scope(s)**: Unknown
+* **Readable Scope(s)**: None
+* **Writable Scope(s)**: None
 ### Properties
 * **abc**: string: Abc prop
 * **arrayType**: any[] {minLength: 1, maxLength: 10}: Array of any
@@ -27,4 +28,3 @@
 
 ## jkl
 ### Properties
-

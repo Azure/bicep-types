@@ -110,7 +110,8 @@
     "body": {
       "$ref": "#/7"
     },
-    "flags": 0,
+    "readableScopes": 0,
+    "writableScopes": 0,
     "functions": {
       "doSomething": {
         "type": {

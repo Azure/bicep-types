@@ -93,11 +93,11 @@ func TestMarkdownWriter_WriteTypes(t *testing.T) {
 
 	// Create test types
 	resourceType := &types.ResourceType{
-		Name:           "Test Resource",
-		ResourceTypeID: "Microsoft.Test/resources",
-		APIVersion:     "2023-01-01",
-		Description:    "A test resource",
+		Name:           "Microsoft.Test/resources@2023-01-01",
 		Body:           types.TypeReference{Ref: 0},
+		Functions:      nil,
+		ReadableScopes: types.AllExceptExtension,
+		WritableScopes: types.AllExceptExtension,
 	}
 
 	objectType := &types.ObjectType{
@@ -126,10 +126,8 @@ func TestMarkdownWriter_WriteTypes(t *testing.T) {
 	// Should contain markdown headers and content
 	assert.Contains(t, output, "# Types")
 	assert.Contains(t, output, "## Resource Types")
-	assert.Contains(t, output, "### Test Resource")
 	assert.Contains(t, output, "**Resource Type ID:** `Microsoft.Test/resources`")
 	assert.Contains(t, output, "**API Version:** `2023-01-01`")
-	assert.Contains(t, output, "**Description:** A test resource")
 	assert.Contains(t, output, "## Object Types")
 	assert.Contains(t, output, "### TestObject")
 	assert.Contains(t, output, "- `name`: The name property (required)")
@@ -210,16 +208,8 @@ func TestMarkdownWriter_ResourceFunctionTypes(t *testing.T) {
 	rft := &types.ResourceFunctionType{
 		Name:         "listKeys",
 		ResourceType: "Microsoft.Storage/storageAccounts",
-		APIVersion:   "2023-01-01",
-		Description:  "Lists storage account keys",
-		Parameters: []types.FunctionParameter{
-			{
-				Name:        "resourceName",
-				Type:        types.TypeReference{Ref: 0},
-				Description: "The resource name",
-			},
-		},
-		ReturnType: types.TypeReference{Ref: 1},
+		ApiVersion:   "2023-01-01",
+		Output:       types.TypeReference{Ref: 1},
 	}
 
 	testTypes := []types.Type{rft}
@@ -234,9 +224,6 @@ func TestMarkdownWriter_ResourceFunctionTypes(t *testing.T) {
 	assert.Contains(t, output, "### listKeys")
 	assert.Contains(t, output, "**Resource Type:** `Microsoft.Storage/storageAccounts`")
 	assert.Contains(t, output, "**API Version:** `2023-01-01`")
-	assert.Contains(t, output, "**Description:** Lists storage account keys")
-	assert.Contains(t, output, "**Parameters:**")
-	assert.Contains(t, output, "- `resourceName`: The resource name")
 }
 
 func TestMarkdownWriter_PropertyFlags(t *testing.T) {

@@ -185,17 +185,10 @@ func TestTypeFactory_CreateComplexTypes(t *testing.T) {
 	assert.Equal(t, "UnionType", unionType.Type())
 
 	// Test object type
-	objectType := factory.CreateObjectType("TestObject")
+	objectType := factory.CreateObjectType("TestObject", map[string]types.ObjectTypeProperty{}, nil, nil)
 	assert.Equal(t, "TestObject", objectType.Name)
 	assert.NotNil(t, objectType.Properties)
 	assert.Equal(t, "ObjectType", objectType.Type())
-
-	// Test object type with properties
-	properties := map[string]types.ObjectTypeProperty{
-		"name": factory.CreateRequiredStringProperty("The name"),
-	}
-	objectWithProps := factory.CreateObjectTypeWithProperties("TestObject", properties)
-	assert.Equal(t, properties, objectWithProps.Properties)
 
 	// Test discriminated object type
 	elementsMap := map[string]types.ITypeReference{
@@ -212,49 +205,24 @@ func TestTypeFactory_CreateResourceTypes(t *testing.T) {
 	factory := NewTypeFactory()
 
 	// Create body type
-	objectType := factory.CreateObjectType("ResourceBody")
+	objectType := factory.CreateObjectType("ResourceBody", nil, nil, nil)
 	bodyRef := factory.GetReference(objectType)
 
 	// Test basic resource type
 	resourceType := factory.CreateResourceType(
-		"Test Resource",
-		"Microsoft.Test/resources",
-		"2023-01-01",
+		"Microsoft.Test/resources@2023-01-01",
 		bodyRef,
+		types.AllExceptExtension,
+		types.AllExceptExtension,
+		nil,
 	)
 
-	assert.Equal(t, "Test Resource", resourceType.Name)
-	assert.Equal(t, "Microsoft.Test/resources", resourceType.ResourceTypeID)
-	assert.Equal(t, "2023-01-01", resourceType.APIVersion)
+	assert.Equal(t, "Microsoft.Test/resources@2023-01-01", resourceType.Name)
 	assert.Equal(t, bodyRef, resourceType.Body)
 	assert.Equal(t, "ResourceType", resourceType.Type())
+	assert.Equal(t, types.AllExceptExtension, resourceType.ReadableScopes)
+	assert.Equal(t, types.AllExceptExtension, resourceType.WritableScopes)
 
-	// Test resource type with details
-	providers := []string{"Microsoft.Test"}
-	scopeTypes := []types.ScopeType{types.ScopeTypeResourceGroup}
-	metadata := map[string]interface{}{"key": "value"}
-
-	detailedResource := factory.CreateResourceTypeWithDetails(
-		"Detailed Resource",
-		"Microsoft.Test/detailed",
-		"2023-01-01",
-		bodyRef,
-		"A detailed resource",
-		providers,
-		scopeTypes,
-		true,  // locationRequired
-		false, // zoneRequired
-		true,  // isSingleton
-		metadata,
-	)
-
-	assert.Equal(t, "A detailed resource", detailedResource.Description)
-	assert.Equal(t, providers, detailedResource.Providers)
-	assert.Equal(t, scopeTypes, detailedResource.ScopeTypes)
-	assert.True(t, detailedResource.LocationRequired)
-	assert.False(t, detailedResource.ZoneRequired)
-	assert.True(t, detailedResource.IsSingleton)
-	assert.Equal(t, metadata, detailedResource.Metadata)
 }
 
 func TestTypeFactory_CreateFunctionTypes(t *testing.T) {
@@ -275,20 +243,8 @@ func TestTypeFactory_CreateFunctionTypes(t *testing.T) {
 	functionType := factory.CreateFunctionType(parameters, stringRef)
 
 	assert.Equal(t, parameters, functionType.Parameters)
-	assert.Equal(t, stringRef, functionType.ReturnType)
+	assert.Equal(t, stringRef, functionType.Output)
 	assert.Equal(t, "FunctionType", functionType.Type())
-
-	// Test function type with details
-	metadata := map[string]interface{}{"key": "value"}
-	detailedFunction := factory.CreateFunctionTypeWithDetails(
-		parameters,
-		stringRef,
-		"A test function",
-		metadata,
-	)
-
-	assert.Equal(t, "A test function", detailedFunction.Description)
-	assert.Equal(t, metadata, detailedFunction.Metadata)
 
 	// Test resource function type
 	resourceFunction := factory.CreateResourceFunctionType(
@@ -296,12 +252,13 @@ func TestTypeFactory_CreateFunctionTypes(t *testing.T) {
 		"Microsoft.Storage/storageAccounts",
 		"2023-01-01",
 		stringRef,
+		nil,
 	)
 
 	assert.Equal(t, "listKeys", resourceFunction.Name)
 	assert.Equal(t, "Microsoft.Storage/storageAccounts", resourceFunction.ResourceType)
-	assert.Equal(t, "2023-01-01", resourceFunction.APIVersion)
-	assert.Equal(t, stringRef, resourceFunction.ReturnType)
+	assert.Equal(t, "2023-01-01", resourceFunction.ApiVersion)
+	assert.Equal(t, stringRef, resourceFunction.Output)
 	assert.Equal(t, "ResourceFunctionType", resourceFunction.Type())
 }
 
