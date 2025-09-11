@@ -1,0 +1,21 @@
+{
+  "resources": {
+    "foo@v1": {
+      "$ref": "foo/types.json#/9"
+    }
+  },
+  "resourceFunctions": {},
+  "settings": {
+    "name": "Foo",
+    "isSingleton": true,
+    "isPreview": true,
+    "isDeprecated": false,
+    "version": "0.1.2",
+    "configurationType": {
+      "$ref": "types.json#/0"
+    }
+  },
+  "fallbackResourceType": {
+    "$ref": "types.json#/2"
+  }
+}
