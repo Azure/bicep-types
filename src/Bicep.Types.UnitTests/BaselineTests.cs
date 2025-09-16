@@ -52,7 +52,7 @@ public class BaselineTests
         GetBaselinePaths().Should().Contain(x => (string)x[0] == "foo");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DynamicData(nameof(GetBaselinePaths), DynamicDataSourceType.Method)]
     public void TypeLoader_can_load_all_types_without_throwing(string baselineName)
     {
