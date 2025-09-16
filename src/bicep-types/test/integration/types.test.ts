@@ -4,7 +4,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
-import { CrossFileTypeReference, FunctionParameter, ObjectTypePropertyFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings, ResourceType, AllExceptExtension } from '../../src/types';
+import { CrossFileTypeReference, FunctionParameter, ObjectTypePropertyFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings, ResourceType, AllExceptExtension, All } from '../../src/types';
 import { readTypesJson, writeIndexJson, writeTypesJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
 import { buildIndex } from '../../src/indexer';
@@ -150,16 +150,16 @@ describe('types tests', () => {
     const neither = factory.addUnscopedResourceType('test4@v1', body, false, false);
 
     const resource1 = factory.lookupType(readableWritable) as ResourceType;
-    expect(resource1.readableScopes).toBe(AllExceptExtension);
-    expect(resource1.writableScopes).toBe(AllExceptExtension);
+  expect(resource1.readableScopes).toBe(All);
+  expect(resource1.writableScopes).toBe(All);
 
     const resource2 = factory.lookupType(readableOnly) as ResourceType;
-    expect(resource2.readableScopes).toBe(AllExceptExtension);
+  expect(resource2.readableScopes).toBe(All);
     expect(resource2.writableScopes).toBe(ScopeType.None);
 
     const resource3 = factory.lookupType(writableOnly) as ResourceType;
     expect(resource3.readableScopes).toBe(ScopeType.None);
-    expect(resource3.writableScopes).toBe(AllExceptExtension);
+  expect(resource3.writableScopes).toBe(All);
 
     const resource4 = factory.lookupType(neither) as ResourceType;
     expect(resource4.readableScopes).toBe(ScopeType.None);
@@ -173,8 +173,8 @@ describe('types tests', () => {
     const defaultBehavior = factory.addUnscopedResourceType('testDefaults@v1', body);
 
     const resource = factory.lookupType(defaultBehavior) as ResourceType;
-    expect(resource.readableScopes).toBe(AllExceptExtension);
-    expect(resource.writableScopes).toBe(AllExceptExtension);
+  expect(resource.readableScopes).toBe(All);
+  expect(resource.writableScopes).toBe(All);
   });
 });
  

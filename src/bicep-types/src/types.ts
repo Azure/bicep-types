@@ -37,6 +37,7 @@ export enum ScopeType {
 }
 
 export const AllExceptExtension = ScopeType.Tenant | ScopeType.ManagementGroup | ScopeType.Subscription | ScopeType.ResourceGroup;
+export const All = AllExceptExtension | ScopeType.Extension;
 
 const ScopeTypeLabel = new Map<ScopeType, string>([
   [ScopeType.Tenant, 'Tenant'],
@@ -346,8 +347,8 @@ export class TypeFactory {
     writable: boolean = true,
     functions?: Record<string, ResourceTypeFunction>,
   ): TypeReference {
-    const readableScopes = readable ? AllExceptExtension : ScopeType.None;
-    const writableScopes = writable ? AllExceptExtension : ScopeType.None;
+  const readableScopes = readable ? All : ScopeType.None;
+  const writableScopes = writable ? All : ScopeType.None;
 
     const resource: ResourceType = {
       type: TypeBaseKind.ResourceType,

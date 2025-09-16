@@ -383,9 +383,9 @@ namespace Azure.Bicep.Types.UnitTests
         }
 
         [TestMethod]
-        public void ResourceType_with_legacy_unknown_scope_deserializes_as_all_except_extension()
+        public void ResourceType_with_legacy_unknown_scope_deserializes_as_all()
         {
-            // This test verifies that legacy ScopeType.Unknown (value 0) is remapped to AllExceptExtension
+            // This test verifies that legacy ScopeType.Unknown (value 0) is remapped to ScopeType.All (all scopes including extension)
             var json = @"[
                 {
                     ""$type"": ""ObjectType"",
@@ -409,9 +409,9 @@ namespace Azure.Bicep.Types.UnitTests
             var deserialized = TypeSerializer.Deserialize(stream);
             var deserializedResource = deserialized.OfType<ResourceType>().Single();
             
-            // Legacy ScopeType.Unknown (0) should be interpreted as AllExceptExtension for backward compatibility
-            deserializedResource.ReadableScopes.Should().Be(ScopeType.AllExceptExtension);
-            deserializedResource.WritableScopes.Should().Be(ScopeType.AllExceptExtension);
+            // Legacy ScopeType.Unknown (0) should be interpreted as All for backward compatibility
+            deserializedResource.ReadableScopes.Should().Be(ScopeType.All);
+            deserializedResource.WritableScopes.Should().Be(ScopeType.All);
         }
 
         private static Stream BuildStream(Action<Stream> writeFunc)
