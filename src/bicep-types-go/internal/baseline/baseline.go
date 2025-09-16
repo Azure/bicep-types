@@ -3,10 +3,11 @@
 package baseline
 
 import (
-	"embed"
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/Azure/bicep-types/src/bicep-types-go/index"
@@ -14,26 +15,35 @@ import (
 	"github.com/Azure/bicep-types/src/bicep-types-go/types"
 )
 
-//go:embed baselines
-var baselinesFS embed.FS
-
 // BaselineTypeLoader provides functionality to load baseline test data
 type BaselineTypeLoader struct {
-	loader *loader.TypeLoaderWithResolver
+	loader        *loader.TypeLoaderWithResolver
+	baselinesPath string
 }
 
 // NewBaselineTypeLoader creates a new baseline type loader
 func NewBaselineTypeLoader() *BaselineTypeLoader {
+	// Default to the bicep-types baseline path
+	baselinesPath := "../../../bicep-types/test/integration/baselines"
 	return &BaselineTypeLoader{
-		loader: loader.NewTypeLoaderWithResolver(),
+		loader:        loader.NewTypeLoaderWithResolver(),
+		baselinesPath: baselinesPath,
+	}
+}
+
+// NewBaselineTypeLoaderWithPath creates a new baseline type loader with custom path
+func NewBaselineTypeLoaderWithPath(baselinesPath string) *BaselineTypeLoader {
+	return &BaselineTypeLoader{
+		loader:        loader.NewTypeLoaderWithResolver(),
+		baselinesPath: baselinesPath,
 	}
 }
 
 // GetBaselineNames returns all available baseline test names
 func (b *BaselineTypeLoader) GetBaselineNames() ([]string, error) {
-	entries, err := baselinesFS.ReadDir("baselines")
+	entries, err := os.ReadDir(b.baselinesPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read baselines directory: %w", err)
+		return nil, fmt.Errorf("failed to read baselines directory %s: %w", b.baselinesPath, err)
 	}
 
 	var names []string
@@ -48,9 +58,9 @@ func (b *BaselineTypeLoader) GetBaselineNames() ([]string, error) {
 
 // LoadBaselineTypes loads types from a baseline test
 func (b *BaselineTypeLoader) LoadBaselineTypes(baselineName string) ([]types.Type, error) {
-	typesPath := fmt.Sprintf("baselines/%s/types.json", baselineName)
+	typesPath := filepath.Join(b.baselinesPath, baselineName, "types.json")
 
-	data, err := baselinesFS.ReadFile(typesPath)
+	data, err := os.ReadFile(typesPath)
 	if err != nil {
 		// If direct types.json doesn't exist, return empty slice
 		// This handles cases like http baseline that only has nested types
@@ -76,9 +86,9 @@ func (b *BaselineTypeLoader) LoadBaselineTypes(baselineName string) ([]types.Typ
 
 // LoadBaselineIndex loads a type index from a baseline test
 func (b *BaselineTypeLoader) LoadBaselineIndex(baselineName string) (*index.TypeIndex, error) {
-	indexPath := fmt.Sprintf("baselines/%s/index.json", baselineName)
+	indexPath := filepath.Join(b.baselinesPath, baselineName, "index.json")
 
-	data, err := baselinesFS.ReadFile(indexPath)
+	data, err := os.ReadFile(indexPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read baseline index file %s: %w", indexPath, err)
 	}
@@ -93,9 +103,9 @@ func (b *BaselineTypeLoader) LoadBaselineIndex(baselineName string) (*index.Type
 
 // LoadBaselineMarkdown loads markdown content from a baseline test
 func (b *BaselineTypeLoader) LoadBaselineMarkdown(baselineName string, fileName string) (string, error) {
-	markdownPath := fmt.Sprintf("baselines/%s/%s", baselineName, fileName)
+	markdownPath := filepath.Join(b.baselinesPath, baselineName, fileName)
 
-	data, err := baselinesFS.ReadFile(markdownPath)
+	data, err := os.ReadFile(markdownPath)
 	if err != nil {
 		return "", fmt.Errorf("failed to read baseline markdown file %s: %w", markdownPath, err)
 	}
@@ -105,17 +115,20 @@ func (b *BaselineTypeLoader) LoadBaselineMarkdown(baselineName string, fileName 
 
 // GetAllBaselineFiles returns all files in a baseline directory
 func (b *BaselineTypeLoader) GetAllBaselineFiles(baselineName string) ([]string, error) {
-	baselineDir := fmt.Sprintf("baselines/%s", baselineName)
+	baselineDir := filepath.Join(b.baselinesPath, baselineName)
 
 	var files []string
-	err := fs.WalkDir(baselinesFS, baselineDir, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(baselineDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		if !d.IsDir() {
-			// Remove the baselines/ prefix to get relative path
-			relativePath := strings.TrimPrefix(path, baselineDir+"/")
+			// Get relative path from baseline directory
+			relativePath, relErr := filepath.Rel(baselineDir, path)
+			if relErr != nil {
+				return relErr
+			}
 			files = append(files, relativePath)
 		}
 
@@ -164,15 +177,15 @@ func (b *BaselineTypeLoader) LoadBaselineWithCrossFileReferences(baselineName st
 	additionalTypes := make(map[string][]types.Type)
 
 	// Check for nested directories with types.json
-	baselineDir := fmt.Sprintf("baselines/%s", baselineName)
-	err = fs.WalkDir(baselinesFS, baselineDir, func(path string, d fs.DirEntry, err error) error {
+	baselineDir := filepath.Join(b.baselinesPath, baselineName)
+	err = filepath.WalkDir(baselineDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if !d.IsDir() && d.Name() == "types.json" && path != fmt.Sprintf("%s/types.json", baselineDir) {
+		if !d.IsDir() && d.Name() == "types.json" && path != filepath.Join(baselineDir, "types.json") {
 			// This is an additional types file
-			data, readErr := baselinesFS.ReadFile(path)
+			data, readErr := os.ReadFile(path)
 			if readErr != nil {
 				return readErr
 			}
@@ -192,7 +205,10 @@ func (b *BaselineTypeLoader) LoadBaselineWithCrossFileReferences(baselineName st
 			}
 
 			// Store with relative path from baseline directory
-			relativePath := strings.TrimPrefix(path, baselineDir+"/")
+			relativePath, relErr := filepath.Rel(baselineDir, path)
+			if relErr != nil {
+				return relErr
+			}
 			additionalTypes[relativePath] = typesList
 		}
 
