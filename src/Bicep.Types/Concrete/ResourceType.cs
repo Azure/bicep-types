@@ -56,6 +56,14 @@ namespace Azure.Bicep.Types.Concrete
                 // Derive modern properties from legacy input (format normalization)
                 var effectiveScopeType = scopeType ?? Azure.Bicep.Types.Concrete.ScopeType.None;
 
+                // Legacy: 'Unknown' value (0) historically meant "valid at any scope (including extension)".
+                // Value 0 now numerically maps to ScopeType.None. For backward compatibility,
+                // Remap explicit legacy 0 to ScopeType.All (AllExceptExtension | Extension).
+                if (scopeType.HasValue && scopeType.Value == Azure.Bicep.Types.Concrete.ScopeType.None)
+                {
+                    effectiveScopeType = Azure.Bicep.Types.Concrete.ScopeType.All;
+                }
+
                 ReadableScopes = effectiveScopeType;
                 if (readOnlyScopes.HasValue)
                 {

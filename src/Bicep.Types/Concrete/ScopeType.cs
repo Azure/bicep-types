@@ -20,5 +20,7 @@ namespace Azure.Bicep.Types.Concrete
         Extension = 1 << 4,
 
         AllExceptExtension = Tenant | ManagementGroup | Subscription | ResourceGroup,
+
+        All = AllExceptExtension | Extension,
     }
 }
