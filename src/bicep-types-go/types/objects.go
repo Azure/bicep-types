@@ -40,22 +40,25 @@ func (t *ObjectType) MarshalJSON() ([]byte, error) {
 
 // DiscriminatedObjectType represents an object type with a discriminator property
 type DiscriminatedObjectType struct {
-	Name          string                    `json:"name,omitempty"`
-	Discriminator string                    `json:"discriminator"`
-	Elements      map[string]ITypeReference `json:"elements"`
+	Name           string                        `json:"name,omitempty"`
+	Discriminator  string                        `json:"discriminator"`
+	BaseProperties map[string]ObjectTypeProperty `json:"baseProperties"`
+	Elements       map[string]ITypeReference     `json:"elements"`
 }
 
 func (*DiscriminatedObjectType) Type() string { return "DiscriminatedObjectType" }
 
 func (t *DiscriminatedObjectType) MarshalJSON() ([]byte, error) {
 	return marshalTypeWithDiscriminator(t.Type(), struct {
-		Name          string                    `json:"name,omitempty"`
-		Discriminator string                    `json:"discriminator"`
-		Elements      map[string]ITypeReference `json:"elements"`
+		Name           string                        `json:"name,omitempty"`
+		Discriminator  string                        `json:"discriminator"`
+		BaseProperties map[string]ObjectTypeProperty `json:"baseProperties"`
+		Elements       map[string]ITypeReference     `json:"elements"`
 	}{
-		Name:          t.Name,
-		Discriminator: t.Discriminator,
-		Elements:      t.Elements,
+		Name:           t.Name,
+		Discriminator:  t.Discriminator,
+		BaseProperties: t.BaseProperties,
+		Elements:       t.Elements,
 	})
 }
 
@@ -213,9 +216,10 @@ func (t *ObjectType) UnmarshalJSON(data []byte) error {
 // UnmarshalJSON for DiscriminatedObjectType
 func (t *DiscriminatedObjectType) UnmarshalJSON(data []byte) error {
 	var temp struct {
-		Name          string                     `json:"name,omitempty"`
-		Discriminator string                     `json:"discriminator"`
-		Elements      map[string]json.RawMessage `json:"elements"`
+		Name           string                     `json:"name,omitempty"`
+		Discriminator  string                     `json:"discriminator"`
+		BaseProperties map[string]json.RawMessage `json:"baseProperties"`
+		Elements       map[string]json.RawMessage `json:"elements"`
 	}
 
 	if err := json.Unmarshal(data, &temp); err != nil {
@@ -224,6 +228,18 @@ func (t *DiscriminatedObjectType) UnmarshalJSON(data []byte) error {
 
 	t.Name = temp.Name
 	t.Discriminator = temp.Discriminator
+
+	// Unmarshal base properties
+	if temp.BaseProperties != nil {
+		t.BaseProperties = make(map[string]ObjectTypeProperty)
+		for key, propData := range temp.BaseProperties {
+			var prop ObjectTypeProperty
+			if err := json.Unmarshal(propData, &prop); err != nil {
+				return fmt.Errorf("failed to unmarshal base property %s: %w", key, err)
+			}
+			t.BaseProperties[key] = prop
+		}
+	}
 
 	// Unmarshal element references
 	t.Elements = make(map[string]ITypeReference)

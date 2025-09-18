@@ -197,10 +197,24 @@ func TestTypeFactory_CreateComplexTypes(t *testing.T) {
 		"option1": stringRef,
 		"option2": intRef,
 	}
-	discriminatedType := factory.CreateDiscriminatedObjectType("TestDiscriminated", "type", elementsMap)
+	// Test discriminated object type
+	baseProperties := map[string]types.ObjectTypeProperty{
+		"id": {
+			Type:        stringRef,
+			Flags:       types.TypePropertyFlagsRequired,
+			Description: "The resource ID",
+		},
+		"name": {
+			Type:        stringRef,
+			Flags:       types.TypePropertyFlagsReadOnly,
+			Description: "The resource name",
+		},
+	}
+	discriminatedType := factory.CreateDiscriminatedObjectType("TestDiscriminated", "type", baseProperties, elementsMap)
 	assert.Equal(t, "TestDiscriminated", discriminatedType.Name)
 	assert.Equal(t, "type", discriminatedType.Discriminator)
 	assert.Equal(t, elementsMap, discriminatedType.Elements)
+	assert.Equal(t, baseProperties, discriminatedType.BaseProperties)
 }
 
 func TestTypeFactory_CreateResourceTypes(t *testing.T) {

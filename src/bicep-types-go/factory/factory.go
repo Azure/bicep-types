@@ -190,11 +190,12 @@ func (f *TypeFactory) CreateObjectType(
 }
 
 // CreateDiscriminatedObjectType creates a new DiscriminatedObjectType
-func (f *TypeFactory) CreateDiscriminatedObjectType(name, discriminator string, elements map[string]types.ITypeReference) *types.DiscriminatedObjectType {
+func (f *TypeFactory) CreateDiscriminatedObjectType(name, discriminator string, baseProperties map[string]types.ObjectTypeProperty, elements map[string]types.ITypeReference) *types.DiscriminatedObjectType {
 	return &types.DiscriminatedObjectType{
-		Name:          name,
-		Discriminator: discriminator,
-		Elements:      elements,
+		Name:           name,
+		Discriminator:  discriminator,
+		BaseProperties: baseProperties,
+		Elements:       elements,
 	}
 }
 
