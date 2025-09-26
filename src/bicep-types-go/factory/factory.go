@@ -201,6 +201,13 @@ func (f *TypeFactory) CreateDiscriminatedObjectType(name, discriminator string, 
 
 // Resource type factory methods
 
+// UnscopedResourceTypeOptions configures optional parameters for CreateUnscopedResourceType.
+type UnscopedResourceTypeOptions struct {
+	Readable  *bool
+	Writable  *bool
+	Functions map[string]types.ResourceTypeFunction
+}
+
 // CreateResourceType creates a new ResourceType
 func (f *TypeFactory) CreateResourceType(
 	name string,
@@ -216,6 +223,42 @@ func (f *TypeFactory) CreateResourceType(
 		WritableScopes: writableScopes,
 		Functions:      functions, // Can be nil/empty
 	}
+}
+
+// CreateUnscopedResourceType creates a resource type whose readable and writable scopes map to AllExceptExtension based on the provided flags.
+// Defaults to readable and writable when options are nil or when the respective flag is unspecified.
+func (f *TypeFactory) CreateUnscopedResourceType(
+	name string,
+	body types.ITypeReference,
+	options *UnscopedResourceTypeOptions,
+) *types.ResourceType {
+	readable := true
+	writable := true
+	var functions map[string]types.ResourceTypeFunction
+
+	if options != nil {
+		if options.Readable != nil {
+			readable = *options.Readable
+		}
+		if options.Writable != nil {
+			writable = *options.Writable
+		}
+		if options.Functions != nil {
+			functions = options.Functions
+		}
+	}
+
+	readableScopes := types.ScopeTypeNone
+	if readable {
+		readableScopes = types.AllExceptExtension
+	}
+
+	writableScopes := types.ScopeTypeNone
+	if writable {
+		writableScopes = types.AllExceptExtension
+	}
+
+	return f.CreateResourceType(name, body, readableScopes, writableScopes, functions)
 }
 
 // Function type factory methods

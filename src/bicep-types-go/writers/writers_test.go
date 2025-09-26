@@ -94,9 +94,11 @@ func TestMarkdownWriter_WriteTypes(t *testing.T) {
 	writer := NewMarkdownWriter()
 
 	// Create test types
+	stringType := &types.StringType{}
+	boolType := &types.BooleanType{}
 	resourceType := &types.ResourceType{
 		Name:           "Microsoft.Test/resources@2023-01-01",
-		Body:           types.TypeReference{Ref: 0},
+		Body:           types.TypeReference{Ref: 1},
 		Functions:      nil,
 		ReadableScopes: types.AllExceptExtension,
 		WritableScopes: types.AllExceptExtension,
@@ -106,18 +108,18 @@ func TestMarkdownWriter_WriteTypes(t *testing.T) {
 		Name: "TestObject",
 		Properties: map[string]types.ObjectTypeProperty{
 			"name": {
-				Type:        types.TypeReference{Ref: 1},
+				Type:        types.TypeReference{Ref: 2},
 				Flags:       types.TypePropertyFlagsRequired,
 				Description: "The name property",
 			},
 			"value": {
-				Type:  types.TypeReference{Ref: 2},
+				Type:  types.TypeReference{Ref: 3},
 				Flags: types.TypePropertyFlagsReadOnly,
 			},
 		},
 	}
 
-	testTypes := []types.Type{resourceType, objectType}
+	testTypes := []types.Type{resourceType, objectType, stringType, boolType}
 
 	var buf bytes.Buffer
 	err := writer.WriteTypes(&buf, testTypes)
@@ -125,15 +127,14 @@ func TestMarkdownWriter_WriteTypes(t *testing.T) {
 
 	output := buf.String()
 
-	// Should contain markdown headers and content
-	assert.Contains(t, output, "# Types")
-	assert.Contains(t, output, "## Resource Types")
-	assert.Contains(t, output, "**Resource Type ID:** `Microsoft.Test/resources`")
-	assert.Contains(t, output, "**API Version:** `2023-01-01`")
-	assert.Contains(t, output, "## Object Types")
-	assert.Contains(t, output, "### TestObject")
-	assert.Contains(t, output, "- `name`: The name property (required)")
-	assert.Contains(t, output, "- `value` (read-only)")
+	// Should contain TypeScript-aligned markdown output
+	assert.Contains(t, output, "# Bicep Types")
+	assert.Contains(t, output, "## Resource Microsoft.Test/resources@2023-01-01")
+	assert.Contains(t, output, "* **Readable Scope(s)**: Tenant, ManagementGroup, Subscription, ResourceGroup")
+	assert.Contains(t, output, "* **Writable Scope(s)**: Tenant, ManagementGroup, Subscription, ResourceGroup")
+	assert.Contains(t, output, "### Properties")
+	assert.Contains(t, output, "* **name**: string (Required): The name property")
+	assert.Contains(t, output, "* **value**: bool (ReadOnly)")
 }
 
 func TestMarkdownWriter_WriteTypeIndex(t *testing.T) {
@@ -141,9 +142,8 @@ func TestMarkdownWriter_WriteTypeIndex(t *testing.T) {
 
 	// Create test index
 	idx := index.NewTypeIndex()
-	idx.AddResource("Microsoft.Test/resources", "2023-01-01", types.TypeReference{Ref: 0})
-	idx.AddResource("Microsoft.Test/resources", "2023-02-01", types.TypeReference{Ref: 1})
-	idx.AddResourceFunction("Microsoft.Test/resources", "2023-01-01", "list", types.TypeReference{Ref: 2})
+	idx.AddResource("Microsoft.Test/resources", "2023-01-01", types.CrossFileTypeReference{RelativePath: "providers/Microsoft.Test/resources.json", Ref: 0})
+	idx.AddResource("Microsoft.Test/resources", "2023-02-01", types.CrossFileTypeReference{RelativePath: "providers/Microsoft.Test/resources.json", Ref: 1})
 
 	var buf bytes.Buffer
 	err := writer.WriteTypeIndex(&buf, idx)
@@ -151,57 +151,12 @@ func TestMarkdownWriter_WriteTypeIndex(t *testing.T) {
 
 	output := buf.String()
 
-	// Should contain index structure
-	assert.Contains(t, output, "# Type Index")
-	assert.Contains(t, output, "## Resources")
-	assert.Contains(t, output, "### Microsoft.Test/resources")
-	assert.Contains(t, output, "**API Versions:**")
-	assert.Contains(t, output, "- `2023-01-01`")
-	assert.Contains(t, output, "- `2023-02-01`")
-	assert.Contains(t, output, "## Resource Functions")
-	assert.Contains(t, output, "- `list`")
-}
-
-func TestMarkdownWriter_WithTableOfContents(t *testing.T) {
-	writer := NewMarkdownWriter()
-	writer.SetIncludeTableOfContents(true)
-
-	testTypes := []types.Type{
-		&types.ResourceType{Name: "TestResource"},
-		&types.FunctionType{},
-		&types.ObjectType{Name: "TestObject"},
-	}
-
-	var buf bytes.Buffer
-	err := writer.WriteTypes(&buf, testTypes)
-	require.NoError(t, err)
-
-	output := buf.String()
-
-	// Should contain table of contents
-	assert.Contains(t, output, "## Table of Contents")
-	assert.Contains(t, output, "- [Resource Types](#resource-types)")
-	assert.Contains(t, output, "- [Function Types](#function-types)")
-	assert.Contains(t, output, "- [Object Types](#object-types)")
-}
-
-func TestMarkdownWriter_WithoutTableOfContents(t *testing.T) {
-	writer := NewMarkdownWriter()
-	writer.SetIncludeTableOfContents(false)
-
-	testTypes := []types.Type{
-		&types.ResourceType{Name: "TestResource"},
-	}
-
-	var buf bytes.Buffer
-	err := writer.WriteTypes(&buf, testTypes)
-	require.NoError(t, err)
-
-	output := buf.String()
-
-	// Should not contain table of contents
-	assert.NotContains(t, output, "## Table of Contents")
-	assert.Contains(t, output, "## Resource Types")
+	// Should contain flattened index structure matching TypeScript writer
+	assert.Contains(t, output, "# Bicep Types")
+	assert.Contains(t, output, "## microsoft.test")
+	assert.Contains(t, output, "### microsoft.test/resources")
+	assert.Contains(t, output, "* **Link**: [2023-01-01](providers/Microsoft.Test/resources.md#resource-microsofttestresources2023-01-01)")
+	assert.Contains(t, output, "* **Link**: [2023-02-01](providers/Microsoft.Test/resources.md#resource-microsofttestresources2023-02-01)")
 }
 
 func TestMarkdownWriter_ResourceFunctionTypes(t *testing.T) {
@@ -214,7 +169,9 @@ func TestMarkdownWriter_ResourceFunctionTypes(t *testing.T) {
 		Output:       types.TypeReference{Ref: 1},
 	}
 
-	testTypes := []types.Type{rft}
+	stringType := &types.StringType{}
+
+	testTypes := []types.Type{rft, stringType}
 
 	var buf bytes.Buffer
 	err := writer.WriteTypes(&buf, testTypes)
@@ -222,38 +179,47 @@ func TestMarkdownWriter_ResourceFunctionTypes(t *testing.T) {
 
 	output := buf.String()
 
-	assert.Contains(t, output, "## Resource Function Types")
-	assert.Contains(t, output, "### listKeys")
-	assert.Contains(t, output, "**Resource Type:** `Microsoft.Storage/storageAccounts`")
-	assert.Contains(t, output, "**API Version:** `2023-01-01`")
+	assert.Contains(t, output, "## Function listKeys (Microsoft.Storage/storageAccounts@2023-01-01)")
+	assert.Contains(t, output, "* **Resource**: Microsoft.Storage/storageAccounts")
+	assert.Contains(t, output, "* **ApiVersion**: 2023-01-01")
+	assert.Contains(t, output, "* **Output**: string")
 }
 
 func TestMarkdownWriter_PropertyFlags(t *testing.T) {
 	writer := NewMarkdownWriter()
 
+	stringType := &types.StringType{}
+	boolType := &types.BooleanType{}
+	anotherString := &types.StringType{}
+
 	objectType := &types.ObjectType{
 		Name: "TestObject",
 		Properties: map[string]types.ObjectTypeProperty{
 			"readOnlyProp": {
-				Type:  types.TypeReference{Ref: 0},
+				Type:  types.TypeReference{Ref: 2},
 				Flags: types.TypePropertyFlagsReadOnly,
 			},
 			"requiredProp": {
-				Type:  types.TypeReference{Ref: 1},
+				Type:  types.TypeReference{Ref: 2},
 				Flags: types.TypePropertyFlagsRequired,
 			},
 			"identifierProp": {
-				Type:  types.TypeReference{Ref: 2},
+				Type:  types.TypeReference{Ref: 3},
 				Flags: types.TypePropertyFlagsIdentifier,
 			},
 			"combinedFlags": {
-				Type:  types.TypeReference{Ref: 3},
+				Type:  types.TypeReference{Ref: 4},
 				Flags: types.TypePropertyFlagsRequired | types.TypePropertyFlagsReadOnly,
 			},
 		},
 	}
 
-	testTypes := []types.Type{objectType}
+	resourceType := &types.ResourceType{
+		Name: "Test/resource@2023-01-01",
+		Body: types.TypeReference{Ref: 1},
+	}
+
+	testTypes := []types.Type{resourceType, objectType, stringType, boolType, anotherString}
 
 	var buf bytes.Buffer
 	err := writer.WriteTypes(&buf, testTypes)
@@ -261,10 +227,10 @@ func TestMarkdownWriter_PropertyFlags(t *testing.T) {
 
 	output := buf.String()
 
-	assert.Contains(t, output, "- `readOnlyProp` (read-only)")
-	assert.Contains(t, output, "- `requiredProp` (required)")
-	assert.Contains(t, output, "- `identifierProp` (identifier)")
-	assert.Contains(t, output, "- `combinedFlags` (required, read-only)")
+	assert.Contains(t, output, "* **readOnlyProp**: string (ReadOnly)")
+	assert.Contains(t, output, "* **requiredProp**: string (Required)")
+	assert.Contains(t, output, "* **identifierProp**: bool (Identifier)")
+	assert.Contains(t, output, "* **combinedFlags**: string (Required, ReadOnly)")
 }
 
 // Helper function

@@ -348,3 +348,41 @@ func BenchmarkTypeFactory_CreateStringType(b *testing.B) {
 		factory.CreateStringType()
 	}
 }
+
+func TestTypeFactory_CreateUnscopedResourceType_BooleanMapping(t *testing.T) {
+	factory := NewTypeFactory()
+	body := factory.CreateObjectType("testBody", nil, nil, nil)
+	bodyRef := factory.GetReference(body)
+
+	readableWritable := factory.CreateUnscopedResourceType("test1@v1", bodyRef, nil)
+	readableOnly := factory.CreateUnscopedResourceType("test2@v1", bodyRef, &UnscopedResourceTypeOptions{Readable: boolPtr(true), Writable: boolPtr(false)})
+	writableOnly := factory.CreateUnscopedResourceType("test3@v1", bodyRef, &UnscopedResourceTypeOptions{Readable: boolPtr(false), Writable: boolPtr(true)})
+	neither := factory.CreateUnscopedResourceType("test4@v1", bodyRef, &UnscopedResourceTypeOptions{Readable: boolPtr(false), Writable: boolPtr(false)})
+
+	assert.Equal(t, types.AllExceptExtension, readableWritable.ReadableScopes)
+	assert.Equal(t, types.AllExceptExtension, readableWritable.WritableScopes)
+
+	assert.Equal(t, types.AllExceptExtension, readableOnly.ReadableScopes)
+	assert.Equal(t, types.ScopeTypeNone, readableOnly.WritableScopes)
+
+	assert.Equal(t, types.ScopeTypeNone, writableOnly.ReadableScopes)
+	assert.Equal(t, types.AllExceptExtension, writableOnly.WritableScopes)
+
+	assert.Equal(t, types.ScopeTypeNone, neither.ReadableScopes)
+	assert.Equal(t, types.ScopeTypeNone, neither.WritableScopes)
+}
+
+func TestTypeFactory_CreateUnscopedResourceType_Defaults(t *testing.T) {
+	factory := NewTypeFactory()
+	body := factory.CreateObjectType("testBody", nil, nil, nil)
+	bodyRef := factory.GetReference(body)
+
+	resource := factory.CreateUnscopedResourceType("testDefaults@v1", bodyRef, nil)
+
+	assert.Equal(t, types.AllExceptExtension, resource.ReadableScopes)
+	assert.Equal(t, types.AllExceptExtension, resource.WritableScopes)
+}
+
+func boolPtr(v bool) *bool {
+	return &v
+}

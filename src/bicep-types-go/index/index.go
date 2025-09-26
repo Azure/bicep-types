@@ -5,10 +5,17 @@ package index
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/Azure/bicep-types/src/bicep-types-go/types"
 )
+
+// TypeFile describes a types collection with its relative path.
+type TypeFile struct {
+	RelativePath string
+	Types        []types.Type
+}
 
 // TypeSettings represents settings for a type index
 type TypeSettings struct {
@@ -76,6 +83,76 @@ func NewTypeIndex() *TypeIndex {
 		Resources:         make(map[string]ResourceVersionMap),
 		ResourceFunctions: make(map[string]ResourceFunctionVersionMap),
 	}
+}
+
+// BuildIndex constructs a TypeIndex from the provided type files, replicating the ordering and duplicate detection semantics of the TypeScript implementation.
+func BuildIndex(typeFiles []TypeFile, logFunc func(string), settings *TypeSettings, fallback types.ITypeReference) *TypeIndex {
+	if logFunc == nil {
+		logFunc = func(string) {}
+	}
+
+	files := make([]TypeFile, len(typeFiles))
+	copy(files, typeFiles)
+	sort.Slice(files, func(i, j int) bool {
+		return strings.ToLower(files[i].RelativePath) < strings.ToLower(files[j].RelativePath)
+	})
+
+	idx := NewTypeIndex()
+	if settings != nil {
+		idx.Settings = settings
+	}
+	if fallback != nil {
+		idx.FallbackResource = fallback
+	}
+
+	resourceSeen := make(map[string]struct{})
+	functionSeen := make(map[string]struct{})
+
+	for _, file := range files {
+		for typeIndex, t := range file.Types {
+			switch concrete := t.(type) {
+			case *types.ResourceType:
+				lowerName := strings.ToLower(concrete.Name)
+				if _, exists := resourceSeen[lowerName]; exists {
+					logFunc(fmt.Sprintf("WARNING: Found duplicate type \"%s\"", concrete.Name))
+					continue
+				}
+				resourceSeen[lowerName] = struct{}{}
+
+				resourceType, apiVersion, ok := splitResourceName(concrete.Name)
+				if !ok {
+					logFunc(fmt.Sprintf("WARNING: Resource type \"%s\" does not include an API version", concrete.Name))
+					continue
+				}
+
+				ref := types.CrossFileTypeReference{RelativePath: file.RelativePath, Ref: typeIndex}
+				idx.AddResource(resourceType, apiVersion, ref)
+
+			case *types.ResourceFunctionType:
+				funcKey := fmt.Sprintf("%s@%s:%s", concrete.ResourceType, concrete.ApiVersion, concrete.Name)
+				lowerFuncKey := strings.ToLower(funcKey)
+				if _, exists := functionSeen[lowerFuncKey]; exists {
+					logFunc(fmt.Sprintf("WARNING: Found duplicate function \"%s\" for resource type \"%s@%s\"", concrete.Name, concrete.ResourceType, concrete.ApiVersion))
+					continue
+				}
+				functionSeen[lowerFuncKey] = struct{}{}
+
+				ref := types.CrossFileTypeReference{RelativePath: file.RelativePath, Ref: typeIndex}
+				idx.AddResourceFunction(concrete.ResourceType, concrete.ApiVersion, concrete.Name, ref)
+			}
+		}
+	}
+
+	return idx
+}
+
+func splitResourceName(name string) (resourceType string, apiVersion string, ok bool) {
+	pos := strings.LastIndex(name, "@")
+	if pos <= 0 || pos == len(name)-1 {
+		return "", "", false
+	}
+
+	return name[:pos], name[pos+1:], true
 }
 
 // AddResource adds a resource type to the index

@@ -5,6 +5,7 @@ package writers
 import (
 	"fmt"
 	"io"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -12,661 +13,759 @@ import (
 	"github.com/Azure/bicep-types/src/bicep-types-go/types"
 )
 
-// MarkdownWriter handles writing types and indices to Markdown format
-type MarkdownWriter struct {
-	includeTableOfContents bool
-	resolver               TypeResolver
-}
+var anchorSanitizer = regexp.MustCompile(`[^a-zA-Z0-9-]`)
 
-// TypeResolver interface for resolving type references
-type TypeResolver interface {
-	ResolveReference(ref types.ITypeReference) (types.Type, error)
-}
+// MarkdownWriter emits types and type indexes in the same markdown format as the TypeScript implementation.
+type MarkdownWriter struct{}
 
-// NewMarkdownWriter creates a new Markdown writer
+// NewMarkdownWriter creates a new Markdown writer.
 func NewMarkdownWriter() *MarkdownWriter {
-	return &MarkdownWriter{
-		includeTableOfContents: true,
-	}
+	return &MarkdownWriter{}
 }
 
-// NewMarkdownWriterWithResolver creates a new Markdown writer with a type resolver
-func NewMarkdownWriterWithResolver(resolver TypeResolver) *MarkdownWriter {
-	return &MarkdownWriter{
-		includeTableOfContents: true,
-		resolver:               resolver,
-	}
-}
+// SetIncludeTableOfContents retained for backwards compatibility; table of contents is not emitted by the TypeScript implementation.
+func (w *MarkdownWriter) SetIncludeTableOfContents(bool) {}
 
-// SetIncludeTableOfContents sets whether to include a table of contents
-func (w *MarkdownWriter) SetIncludeTableOfContents(include bool) {
-	w.includeTableOfContents = include
-}
-
-// WriteTypes writes types to Markdown format
+// WriteTypes writes the provided types to markdown using the TypeScript formatting.
 func (w *MarkdownWriter) WriteTypes(writer io.Writer, typesList []types.Type) error {
-	if _, err := fmt.Fprintf(writer, "# Types\n\n"); err != nil {
+	content, err := generateTypesMarkdown(typesList, "Bicep Types")
+	if err != nil {
 		return err
 	}
 
-	// Group types by category
-	var resourceTypes []*types.ResourceType
-	var functionTypes []*types.FunctionType
-	var resourceFunctionTypes []*types.ResourceFunctionType
-	var objectTypes []*types.ObjectType
-	var otherTypes []types.Type
-
-	for _, typ := range typesList {
-		switch v := typ.(type) {
-		case *types.ResourceType:
-			resourceTypes = append(resourceTypes, v)
-		case *types.FunctionType:
-			functionTypes = append(functionTypes, v)
-		case *types.ResourceFunctionType:
-			resourceFunctionTypes = append(resourceFunctionTypes, v)
-		case *types.ObjectType:
-			objectTypes = append(objectTypes, v)
-		default:
-			otherTypes = append(otherTypes, typ)
-		}
-	}
-
-	// Write table of contents if enabled
-	if w.includeTableOfContents {
-		if err := w.writeTableOfContents(writer, resourceTypes, functionTypes, resourceFunctionTypes, objectTypes, otherTypes); err != nil {
-			return err
-		}
-	}
-
-	// Write resource types
-	if len(resourceTypes) > 0 {
-		if err := w.writeResourceTypes(writer, resourceTypes); err != nil {
-			return err
-		}
-	}
-
-	// Write function types
-	if len(functionTypes) > 0 {
-		if err := w.writeFunctionTypes(writer, functionTypes); err != nil {
-			return err
-		}
-	}
-
-	// Write resource function types
-	if len(resourceFunctionTypes) > 0 {
-		if err := w.writeResourceFunctionTypes(writer, resourceFunctionTypes); err != nil {
-			return err
-		}
-	}
-
-	// Write object types
-	if len(objectTypes) > 0 {
-		if err := w.writeObjectTypes(writer, objectTypes); err != nil {
-			return err
-		}
-	}
-
-	// Write other types
-	if len(otherTypes) > 0 {
-		if err := w.writeOtherTypes(writer, otherTypes); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	_, err = io.WriteString(writer, content)
+	return err
 }
 
-// WriteTypeIndex writes a type index to Markdown format
+// WriteTypeIndex writes the provided type index to markdown using the TypeScript formatting.
 func (w *MarkdownWriter) WriteTypeIndex(writer io.Writer, idx *index.TypeIndex) error {
-	if _, err := fmt.Fprintf(writer, "# Type Index\n\n"); err != nil {
-		return err
-	}
-
-	// Write resources section
-	if len(idx.Resources) > 0 {
-		if err := w.writeResourcesIndex(writer, idx.Resources); err != nil {
-			return err
-		}
-	}
-
-	// Write resource functions section
-	if len(idx.ResourceFunctions) > 0 {
-		if err := w.writeResourceFunctionsIndex(writer, idx.ResourceFunctions); err != nil {
-			return err
-		}
-	}
-
-	// Write settings if present
-	if idx.Settings != nil {
-		if err := w.writeSettings(writer, idx.Settings); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	content := generateIndexMarkdown(idx)
+	_, err := io.WriteString(writer, content)
+	return err
 }
 
-func (w *MarkdownWriter) writeTableOfContents(writer io.Writer, resourceTypes []*types.ResourceType, functionTypes []*types.FunctionType, resourceFunctionTypes []*types.ResourceFunctionType, objectTypes []*types.ObjectType, otherTypes []types.Type) error {
-	if _, err := fmt.Fprintf(writer, "## Table of Contents\n\n"); err != nil {
-		return err
-	}
-
-	if len(resourceTypes) > 0 {
-		if _, err := fmt.Fprintf(writer, "- [Resource Types](#resource-types)\n"); err != nil {
-			return err
-		}
-	}
-
-	if len(functionTypes) > 0 {
-		if _, err := fmt.Fprintf(writer, "- [Function Types](#function-types)\n"); err != nil {
-			return err
-		}
-	}
-
-	if len(resourceFunctionTypes) > 0 {
-		if _, err := fmt.Fprintf(writer, "- [Resource Function Types](#resource-function-types)\n"); err != nil {
-			return err
-		}
-	}
-
-	if len(objectTypes) > 0 {
-		if _, err := fmt.Fprintf(writer, "- [Object Types](#object-types)\n"); err != nil {
-			return err
-		}
-	}
-
-	if len(otherTypes) > 0 {
-		if _, err := fmt.Fprintf(writer, "- [Other Types](#other-types)\n"); err != nil {
-			return err
-		}
-	}
-
-	if _, err := fmt.Fprintf(writer, "\n"); err != nil {
-		return err
-	}
-
-	return nil
+type markdownBuilder struct {
+	builder strings.Builder
 }
 
-func (w *MarkdownWriter) writeResourceTypes(writer io.Writer, resourceTypes []*types.ResourceType) error {
-	if _, err := fmt.Fprintf(writer, "## Resource Types\n\n"); err != nil {
-		return err
+func (m *markdownBuilder) writeHeading(nesting int, message string) {
+	if nesting < 1 {
+		nesting = 1
 	}
 
-	// Sort by name
-	sort.Slice(resourceTypes, func(i, j int) bool {
-		return resourceTypes[i].Name < resourceTypes[j].Name
+	m.builder.WriteString(strings.Repeat("#", nesting))
+	m.builder.WriteByte(' ')
+	m.builder.WriteString(message)
+	m.writeNewLine()
+}
+
+func (m *markdownBuilder) writeBullet(key, value string) {
+	m.builder.WriteString("* **")
+	m.builder.WriteString(key)
+	m.builder.WriteString("**: ")
+	m.builder.WriteString(value)
+	m.writeNewLine()
+}
+
+func (m *markdownBuilder) writeNumbered(index int, key, value string) {
+	m.builder.WriteString(fmt.Sprintf("%d. **%s**: %s", index, key, value))
+	m.writeNewLine()
+}
+
+func (m *markdownBuilder) writeNotaBene(content string) {
+	m.builder.WriteByte('*')
+	m.builder.WriteString(content)
+	m.builder.WriteByte('*')
+	m.writeNewLine()
+}
+
+func (m *markdownBuilder) writeNewLine() {
+	m.builder.WriteByte('\n')
+}
+
+func (m *markdownBuilder) generateAnchorLink(name string) string {
+	return fmt.Sprintf("[%s](#%s)", name, anchorize(name))
+}
+
+func (m *markdownBuilder) String() string {
+	return m.builder.String()
+}
+
+func anchorize(value string) string {
+	return strings.ToLower(anchorSanitizer.ReplaceAllString(value, ""))
+}
+
+func generateTypesMarkdown(typesList []types.Type, fileHeading string) (string, error) {
+	md := &markdownBuilder{}
+	md.writeHeading(1, fileHeading)
+	md.writeNewLine()
+
+	var resourceTypes []*types.ResourceType
+	var resourceFunctionTypes []*types.ResourceFunctionType
+
+	for _, t := range typesList {
+		switch concrete := t.(type) {
+		case *types.ResourceType:
+			resourceTypes = append(resourceTypes, concrete)
+		case *types.ResourceFunctionType:
+			resourceFunctionTypes = append(resourceFunctionTypes, concrete)
+		}
+	}
+
+	sort.SliceStable(resourceTypes, func(i, j int) bool {
+		baseI := resourceBaseName(resourceTypes[i].Name)
+		baseJ := resourceBaseName(resourceTypes[j].Name)
+		if baseI == baseJ {
+			return strings.ToLower(resourceTypes[i].Name) < strings.ToLower(resourceTypes[j].Name)
+		}
+		return baseI < baseJ
 	})
 
+	sort.SliceStable(resourceFunctionTypes, func(i, j int) bool {
+		baseI := resourceBaseName(resourceFunctionTypes[i].Name)
+		baseJ := resourceBaseName(resourceFunctionTypes[j].Name)
+		if baseI == baseJ {
+			return strings.ToLower(resourceFunctionTypes[i].Name) < strings.ToLower(resourceFunctionTypes[j].Name)
+		}
+		return baseI < baseJ
+	})
+
+	typesToWrite := make([]types.Type, 0)
+
+	for _, resource := range resourceTypes {
+		findTypesToWrite(typesList, &typesToWrite, resource.Body)
+	}
+
+	for _, fn := range resourceFunctionTypes {
+		if fn.Input != nil {
+			appendTypeForReference(typesList, &typesToWrite, fn.Input)
+			findTypesToWrite(typesList, &typesToWrite, fn.Input)
+		}
+
+		appendTypeForReference(typesList, &typesToWrite, fn.Output)
+		findTypesToWrite(typesList, &typesToWrite, fn.Output)
+	}
+
+	deduped := dedupeTypes(typesToWrite)
+	sortTypesByName(deduped)
+
+	combined := make([]types.Type, 0, len(resourceTypes)+len(resourceFunctionTypes)+len(deduped))
 	for _, rt := range resourceTypes {
-		if err := w.writeResourceType(writer, rt); err != nil {
-			return err
-		}
+		combined = append(combined, rt)
 	}
-
-	return nil
-}
-
-func (w *MarkdownWriter) writeResourceType(writer io.Writer, rt *types.ResourceType) error {
-	if _, err := fmt.Fprintf(writer, "### %s\n\n", rt.Name); err != nil {
-		return err
-	}
-
-	// Parse resource name to extract parts (since Name now contains full resource name)
-	// Example: "Microsoft.Storage/storageAccounts@2023-01-01"
-	parts := strings.Split(rt.Name, "@")
-	if len(parts) == 2 {
-		resourceTypeId := parts[0]
-		apiVersion := parts[1]
-
-		if _, err := fmt.Fprintf(writer, "**Resource Type ID:** `%s`\n\n", resourceTypeId); err != nil {
-			return err
-		}
-
-		if _, err := fmt.Fprintf(writer, "**API Version:** `%s`\n\n", apiVersion); err != nil {
-			return err
-		}
-	}
-
-	// Write scope information using the new fields
-	if rt.ReadableScopes != types.ScopeTypeNone {
-		if _, err := fmt.Fprintf(writer, "**Readable Scopes:** %s\n\n", w.formatScopeType(rt.ReadableScopes)); err != nil {
-			return err
-		}
-	}
-
-	if rt.WritableScopes != types.ScopeTypeNone {
-		if _, err := fmt.Fprintf(writer, "**Writable Scopes:** %s\n\n", w.formatScopeType(rt.WritableScopes)); err != nil {
-			return err
-		}
-	}
-
-	// Write functions if present
-	if len(rt.Functions) > 0 {
-		if _, err := fmt.Fprintf(writer, "**Functions:**\n\n"); err != nil {
-			return err
-		}
-
-		// Sort function names
-		var funcNames []string
-		for name := range rt.Functions {
-			funcNames = append(funcNames, name)
-		}
-		sort.Strings(funcNames)
-
-		for _, name := range funcNames {
-			function := rt.Functions[name]
-			if _, err := fmt.Fprintf(writer, "- `%s`", name); err != nil {
-				return err
-			}
-
-			if function.Description != "" {
-				if _, err := fmt.Fprintf(writer, ": %s", function.Description); err != nil {
-					return err
-				}
-			}
-
-			if _, err := fmt.Fprintf(writer, "\n"); err != nil {
-				return err
-			}
-		}
-
-		if _, err := fmt.Fprintf(writer, "\n"); err != nil {
-			return err
-		}
-	}
-
-	// Write body type information if resolver is available
-	if w.resolver != nil && rt.Body != nil {
-		if bodyType, err := w.resolver.ResolveReference(rt.Body); err == nil {
-			if _, err := fmt.Fprintf(writer, "**Body Type:** `%s`\n\n", bodyType.Type()); err != nil {
-				return err
-			}
-		}
-	}
-
-	if _, err := fmt.Fprintf(writer, "---\n\n"); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (w *MarkdownWriter) writeFunctionTypes(writer io.Writer, functionTypes []*types.FunctionType) error {
-	if _, err := fmt.Fprintf(writer, "## Function Types\n\n"); err != nil {
-		return err
-	}
-
-	for i, ft := range functionTypes {
-		if err := w.writeFunctionType(writer, ft, i); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (w *MarkdownWriter) writeFunctionType(writer io.Writer, ft *types.FunctionType, index int) error {
-	if _, err := fmt.Fprintf(writer, "### Function Type %d\n\n", index); err != nil {
-		return err
-	}
-
-	// FunctionType doesn't have Description field in the new structure
-	// Remove the description section
-
-	if len(ft.Parameters) > 0 {
-		if _, err := fmt.Fprintf(writer, "**Parameters:**\n\n"); err != nil {
-			return err
-		}
-
-		for _, param := range ft.Parameters {
-			if _, err := fmt.Fprintf(writer, "- `%s`", param.Name); err != nil {
-				return err
-			}
-
-			if param.Description != "" {
-				if _, err := fmt.Fprintf(writer, ": %s", param.Description); err != nil {
-					return err
-				}
-			}
-
-			if _, err := fmt.Fprintf(writer, "\n"); err != nil {
-				return err
-			}
-		}
-
-		if _, err := fmt.Fprintf(writer, "\n"); err != nil {
-			return err
-		}
-	}
-
-	if _, err := fmt.Fprintf(writer, "**Output Type:** (type reference)\n\n"); err != nil {
-		return err
-	}
-
-	if _, err := fmt.Fprintf(writer, "---\n\n"); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (w *MarkdownWriter) writeResourceFunctionTypes(writer io.Writer, resourceFunctionTypes []*types.ResourceFunctionType) error {
-	if _, err := fmt.Fprintf(writer, "## Resource Function Types\n\n"); err != nil {
-		return err
-	}
-
-	// Sort by resource type and name
-	sort.Slice(resourceFunctionTypes, func(i, j int) bool {
-		if resourceFunctionTypes[i].ResourceType != resourceFunctionTypes[j].ResourceType {
-			return resourceFunctionTypes[i].ResourceType < resourceFunctionTypes[j].ResourceType
-		}
-		return resourceFunctionTypes[i].Name < resourceFunctionTypes[j].Name
-	})
-
 	for _, rft := range resourceFunctionTypes {
-		if err := w.writeResourceFunctionType(writer, rft); err != nil {
-			return err
+		combined = append(combined, rft)
+	}
+	combined = append(combined, deduped...)
+
+	for _, t := range combined {
+		if err := writeComplexType(md, typesList, t, 2, true); err != nil {
+			return "", err
 		}
 	}
 
-	return nil
+	return md.String(), nil
 }
 
-func (w *MarkdownWriter) writeResourceFunctionType(writer io.Writer, rft *types.ResourceFunctionType) error {
-	if _, err := fmt.Fprintf(writer, "### %s\n\n", rft.Name); err != nil {
-		return err
+func generateIndexMarkdown(idx *index.TypeIndex) string {
+	md := &markdownBuilder{}
+	md.writeHeading(1, "Bicep Types")
+
+	if idx == nil || len(idx.Resources) == 0 {
+		return md.String()
 	}
 
-	if _, err := fmt.Fprintf(writer, "**Resource Type:** `%s`\n\n", rft.ResourceType); err != nil {
-		return err
-	}
-
-	if _, err := fmt.Fprintf(writer, "**API Version:** `%s`\n\n", rft.ApiVersion); err != nil { // Fixed: APIVersion -> ApiVersion
-		return err
-	}
-
-	if rft.Input != nil {
-		if _, err := fmt.Fprintf(writer, "**Input Type:** (type reference)\n\n"); err != nil {
-			return err
+	flattened := make(map[string]types.ITypeReference)
+	for resourceType, versionMap := range idx.Resources {
+		for version, ref := range versionMap {
+			typeString := fmt.Sprintf("%s@%s", resourceType, version)
+			flattened[typeString] = ref
 		}
 	}
 
-	if _, err := fmt.Fprintf(writer, "**Output Type:** (type reference)\n\n"); err != nil {
-		return err
+	if len(flattened) == 0 {
+		return md.String()
 	}
 
-	if _, err := fmt.Fprintf(writer, "---\n\n"); err != nil {
-		return err
+	byProvider := make(map[string][]string)
+	for typeString := range flattened {
+		provider := providerKey(typeString)
+		byProvider[provider] = append(byProvider[provider], typeString)
 	}
 
-	return nil
+	providerKeys := sortedKeys(byProvider)
+
+	for _, provider := range providerKeys {
+		md.writeHeading(2, provider)
+
+		byResourceType := make(map[string][]string)
+		for _, typeString := range byProvider[provider] {
+			key := resourceTypeKey(typeString)
+			byResourceType[key] = append(byResourceType[key], typeString)
+		}
+
+		resourceKeys := sortedKeys(byResourceType)
+		for _, resource := range resourceKeys {
+			md.writeHeading(3, resource)
+
+			entries := byResourceType[resource]
+			sort.SliceStable(entries, func(i, j int) bool {
+				return strings.ToLower(entries[i]) < strings.ToLower(entries[j])
+			})
+
+			for _, typeString := range entries {
+				version := versionFromTypeString(typeString)
+				ref := flattened[typeString]
+				mdPath := relativeMarkdownPath(ref)
+				anchor := fmt.Sprintf("resource-%s", anchorize(typeString))
+				md.writeBullet("Link", fmt.Sprintf("[%s](%s#%s)", version, mdPath, anchor))
+			}
+
+			md.writeNewLine()
+		}
+	}
+
+	return md.String()
 }
 
-func (w *MarkdownWriter) writeObjectTypes(writer io.Writer, objectTypes []*types.ObjectType) error {
-	if _, err := fmt.Fprintf(writer, "## Object Types\n\n"); err != nil {
-		return err
-	}
+func writeComplexType(md *markdownBuilder, typesList []types.Type, t types.Type, nesting int, includeHeader bool) error {
+	switch concrete := t.(type) {
+	case *types.ResourceType:
+		md.writeHeading(nesting, fmt.Sprintf("Resource %s", concrete.Name))
+		md.writeBullet("Readable Scope(s)", formatScopeList(concrete.ReadableScopes))
+		md.writeBullet("Writable Scope(s)", formatScopeList(concrete.WritableScopes))
 
-	// Sort by name
-	sort.Slice(objectTypes, func(i, j int) bool {
-		return objectTypes[i].Name < objectTypes[j].Name
-	})
-
-	for _, ot := range objectTypes {
-		if err := w.writeObjectType(writer, ot); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (w *MarkdownWriter) writeObjectType(writer io.Writer, ot *types.ObjectType) error {
-	name := ot.Name
-	if name == "" {
-		name = "Object Type"
-	}
-
-	if _, err := fmt.Fprintf(writer, "### %s\n\n", name); err != nil {
-		return err
-	}
-
-	if len(ot.Properties) > 0 {
-		if _, err := fmt.Fprintf(writer, "**Properties:**\n\n"); err != nil {
-			return err
-		}
-
-		// Sort properties by name
-		var propNames []string
-		for propName := range ot.Properties {
-			propNames = append(propNames, propName)
-		}
-		sort.Strings(propNames)
-
-		for _, propName := range propNames {
-			prop := ot.Properties[propName]
-			if _, err := fmt.Fprintf(writer, "- `%s`", propName); err != nil {
+		if bodyType, ok := resolveTypeRef(typesList, concrete.Body); ok {
+			if err := writeComplexType(md, typesList, bodyType, nesting, false); err != nil {
 				return err
 			}
+		}
 
-			if prop.Description != "" {
-				if _, err := fmt.Fprintf(writer, ": %s", prop.Description); err != nil {
-					return err
-				}
-			}
-
-			// Add flags information
-			if prop.Flags != types.TypePropertyFlagsNone {
-				flagsStr := w.formatPropertyFlags(prop.Flags)
-				if flagsStr != "" {
-					if _, err := fmt.Fprintf(writer, " (%s)", flagsStr); err != nil {
+		if len(concrete.Functions) > 0 {
+			functionNames := sortedKeys(concrete.Functions)
+			for _, name := range functionNames {
+				fn := concrete.Functions[name]
+				if functionType, ok := resolveFunctionType(typesList, fn.Type); ok {
+					if err := writeFunctionType(md, typesList, name, functionType, nesting+1); err != nil {
 						return err
 					}
 				}
 			}
+		}
+	case *types.ResourceFunctionType:
+		md.writeHeading(nesting, fmt.Sprintf("Function %s (%s@%s)", concrete.Name, concrete.ResourceType, concrete.ApiVersion))
+		md.writeBullet("Resource", concrete.ResourceType)
+		md.writeBullet("ApiVersion", concrete.ApiVersion)
 
-			if _, err := fmt.Fprintf(writer, "\n"); err != nil {
+		if concrete.Input != nil {
+			value, err := getTypeName(md, typesList, concrete.Input)
+			if err != nil {
+				return err
+			}
+			if value != "" {
+				md.writeBullet("Input", value)
+			}
+		}
+
+		output, err := getTypeName(md, typesList, concrete.Output)
+		if err != nil {
+			return err
+		}
+		md.writeBullet("Output", output)
+		md.writeNewLine()
+	case *types.ObjectType:
+		if includeHeader {
+			md.writeHeading(nesting, concrete.Name)
+		}
+
+		if concrete.Sensitive != nil && *concrete.Sensitive {
+			md.writeNotaBene("Sensitive")
+		}
+
+		md.writeHeading(nesting+1, "Properties")
+		propertyNames := sortedKeys(concrete.Properties)
+		for _, name := range propertyNames {
+			if err := writeTypeProperty(md, typesList, name, concrete.Properties[name]); err != nil {
 				return err
 			}
 		}
 
-		if _, err := fmt.Fprintf(writer, "\n"); err != nil {
-			return err
-		}
-	}
-
-	if _, err := fmt.Fprintf(writer, "---\n\n"); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (w *MarkdownWriter) writeOtherTypes(writer io.Writer, otherTypes []types.Type) error {
-	if _, err := fmt.Fprintf(writer, "## Other Types\n\n"); err != nil {
-		return err
-	}
-
-	for i, t := range otherTypes {
-		if _, err := fmt.Fprintf(writer, "### Type %d\n\n", i); err != nil {
-			return err
+		if concrete.AdditionalProperties != nil {
+			md.writeHeading(nesting+1, "Additional Properties")
+			additional, err := getTypeName(md, typesList, concrete.AdditionalProperties)
+			if err != nil {
+				return err
+			}
+			if additional != "" {
+				md.writeBullet("Additional Properties Type", additional)
+			}
 		}
 
-		if _, err := fmt.Fprintf(writer, "**Type:** `%s`\n\n", t.Type()); err != nil {
-			return err
+		md.writeNewLine()
+	case *types.DiscriminatedObjectType:
+		if includeHeader {
+			md.writeHeading(nesting, concrete.Name)
 		}
 
-		if _, err := fmt.Fprintf(writer, "---\n\n"); err != nil {
-			return err
-		}
-	}
+		md.writeBullet("Discriminator", concrete.Discriminator)
+		md.writeNewLine()
 
-	return nil
-}
-
-func (w *MarkdownWriter) writeResourcesIndex(writer io.Writer, resources map[string]index.ResourceVersionMap) error {
-	if _, err := fmt.Fprintf(writer, "## Resources\n\n"); err != nil {
-		return err
-	}
-
-	// Sort resource names
-	var resourceNames []string
-	for name := range resources {
-		resourceNames = append(resourceNames, name)
-	}
-	sort.Strings(resourceNames)
-
-	for _, name := range resourceNames {
-		versions := resources[name]
-
-		if _, err := fmt.Fprintf(writer, "### %s\n\n", name); err != nil {
-			return err
-		}
-
-		// Sort versions
-		var versionNames []string
-		for version := range versions {
-			versionNames = append(versionNames, version)
-		}
-		sort.Strings(versionNames)
-
-		if _, err := fmt.Fprintf(writer, "**API Versions:**\n\n"); err != nil {
-			return err
-		}
-
-		for _, version := range versionNames {
-			if _, err := fmt.Fprintf(writer, "- `%s`\n", version); err != nil {
+		md.writeHeading(nesting+1, "Base Properties")
+		basePropertyNames := sortedKeys(concrete.BaseProperties)
+		for _, name := range basePropertyNames {
+			if err := writeTypeProperty(md, typesList, name, concrete.BaseProperties[name]); err != nil {
 				return err
 			}
 		}
 
-		if _, err := fmt.Fprintf(writer, "\n---\n\n"); err != nil {
-			return err
-		}
-	}
+		md.writeNewLine()
 
-	return nil
-}
-
-func (w *MarkdownWriter) writeResourceFunctionsIndex(writer io.Writer, resourceFunctions map[string]index.ResourceFunctionVersionMap) error {
-	if _, err := fmt.Fprintf(writer, "## Resource Functions\n\n"); err != nil {
-		return err
-	}
-
-	// Sort resource names
-	var resourceNames []string
-	for name := range resourceFunctions {
-		resourceNames = append(resourceNames, name)
-	}
-	sort.Strings(resourceNames)
-
-	for _, name := range resourceNames {
-		versionMap := resourceFunctions[name]
-
-		if _, err := fmt.Fprintf(writer, "### %s\n\n", name); err != nil {
-			return err
-		}
-
-		// Sort versions
-		var versionNames []string
-		for version := range versionMap {
-			versionNames = append(versionNames, version)
-		}
-		sort.Strings(versionNames)
-
-		for _, version := range versionNames {
-			functionMap := versionMap[version]
-
-			if _, err := fmt.Fprintf(writer, "**API Version %s:**\n\n", version); err != nil {
-				return err
-			}
-
-			// Sort function names
-			var functionNames []string
-			for funcName := range functionMap {
-				functionNames = append(functionNames, funcName)
-			}
-			sort.Strings(functionNames)
-
-			for _, funcName := range functionNames {
-				if _, err := fmt.Fprintf(writer, "- `%s`\n", funcName); err != nil {
+		elementNames := sortedKeys(concrete.Elements)
+		for _, elementName := range elementNames {
+			if elementType, ok := resolveTypeRef(typesList, concrete.Elements[elementName]); ok {
+				if err := writeComplexType(md, typesList, elementType, nesting+1, true); err != nil {
 					return err
 				}
 			}
-
-			if _, err := fmt.Fprintf(writer, "\n"); err != nil {
-				return err
-			}
 		}
 
-		if _, err := fmt.Fprintf(writer, "---\n\n"); err != nil {
-			return err
-		}
+		md.writeNewLine()
 	}
 
 	return nil
 }
 
-func (w *MarkdownWriter) writeSettings(writer io.Writer, settings *index.TypeSettings) error {
-	if _, err := fmt.Fprintf(writer, "## Settings\n\n"); err != nil {
+func writeFunctionType(md *markdownBuilder, typesList []types.Type, name string, functionType *types.FunctionType, nesting int) error {
+	md.writeHeading(nesting, fmt.Sprintf("Function %s", name))
+
+	output, err := getTypeName(md, typesList, functionType.Output)
+	if err != nil {
+		return err
+	}
+	md.writeBullet("Output", output)
+
+	md.writeHeading(nesting+1, "Parameters")
+	for index, parameter := range functionType.Parameters {
+		value, err := getTypeName(md, typesList, parameter.Type)
+		if err != nil {
+			return err
+		}
+		md.writeNumbered(index, parameter.Name, value)
+	}
+
+	md.writeNewLine()
+	return nil
+}
+
+func writeTypeProperty(md *markdownBuilder, typesList []types.Type, name string, property types.ObjectTypeProperty) error {
+	value, err := getTypeName(md, typesList, property.Type)
+	if err != nil {
 		return err
 	}
 
-	if settings.ConfigurationType != nil {
-		if _, err := fmt.Fprintf(writer, "**Configuration Type:** (type reference)\n\n"); err != nil {
-			return err
-		}
+	if flags := formatPropertyFlags(property.Flags); flags != "" {
+		value = fmt.Sprintf("%s (%s)", value, flags)
 	}
 
+	if description := strings.TrimSpace(property.Description); description != "" {
+		value = fmt.Sprintf("%s: %s", value, description)
+	}
+
+	md.writeBullet(name, value)
 	return nil
 }
 
-// Remove the old formatScopeTypes function and replace with:
-func (w *MarkdownWriter) formatScopeType(scopeType types.ScopeType) string {
-	var names []string
+func getTypeName(md *markdownBuilder, typesList []types.Type, ref types.ITypeReference) (string, error) {
+	switch concrete := ref.(type) {
+	case types.TypeReference:
+		return describeType(md, typesList, concrete.Ref)
+	case *types.TypeReference:
+		return describeType(md, typesList, concrete.Ref)
+	case types.CrossFileTypeReference:
+		return fmt.Sprintf("%s#/%d", concrete.RelativePath, concrete.Ref), nil
+	case *types.CrossFileTypeReference:
+		return fmt.Sprintf("%s#/%d", concrete.RelativePath, concrete.Ref), nil
+	case nil:
+		return "", nil
+	default:
+		return "", fmt.Errorf("unsupported type reference %T", ref)
+	}
+}
 
-	if scopeType&types.ScopeTypeTenant != 0 {
-		names = append(names, "Tenant")
-	}
-	if scopeType&types.ScopeTypeManagementGroup != 0 {
-		names = append(names, "Management Group")
-	}
-	if scopeType&types.ScopeTypeSubscription != 0 {
-		names = append(names, "Subscription")
-	}
-	if scopeType&types.ScopeTypeResourceGroup != 0 {
-		names = append(names, "Resource Group")
-	}
-	if scopeType&types.ScopeTypeExtension != 0 {
-		names = append(names, "Extension")
+func describeType(md *markdownBuilder, typesList []types.Type, index int) (string, error) {
+	if index < 0 || index >= len(typesList) {
+		return "", fmt.Errorf("type reference %d out of bounds", index)
 	}
 
-	if len(names) == 0 {
+	switch concrete := typesList[index].(type) {
+	case *types.BuiltInType:
+		return strings.ToLower(builtInTypeLabel(concrete.Kind)), nil
+	case *types.ObjectType:
+		return md.generateAnchorLink(concrete.Name), nil
+	case *types.DiscriminatedObjectType:
+		return md.generateAnchorLink(concrete.Name), nil
+	case *types.ArrayType:
+		itemName, err := getTypeName(md, typesList, concrete.ItemType)
+		if err != nil {
+			return "", err
+		}
+		if strings.Contains(itemName, " ") {
+			itemName = fmt.Sprintf("(%s)", itemName)
+		}
+		modifiers := formatModifiers(lengthModifier("minLength", concrete.MinLength), lengthModifier("maxLength", concrete.MaxLength))
+		return fmt.Sprintf("%s[]%s", itemName, modifiers), nil
+	case *types.ResourceType:
+		return concrete.Name, nil
+	case *types.ResourceFunctionType:
+		return fmt.Sprintf("%s (%s@%s)", concrete.Name, concrete.ResourceType, concrete.ApiVersion), nil
+	case *types.UnionType:
+		names := make([]string, 0, len(concrete.Elements))
+		for _, element := range concrete.Elements {
+			value, err := getTypeName(md, typesList, element)
+			if err != nil {
+				return "", err
+			}
+			names = append(names, value)
+		}
+		sort.Strings(names)
+		return strings.Join(names, " | "), nil
+	case *types.StringLiteralType:
+		return fmt.Sprintf("'%s'", concrete.Value), nil
+	case *types.AnyType:
+		return "any", nil
+	case *types.NullType:
+		return "null", nil
+	case *types.BooleanType:
+		return "bool", nil
+	case *types.IntegerType:
+		modifiers := formatModifiers(integerModifier("minValue", concrete.MinValue), integerModifier("maxValue", concrete.MaxValue))
+		return fmt.Sprintf("int%s", modifiers), nil
+	case *types.StringType:
+		modifiers := []string{}
+		if concrete.Sensitive {
+			modifiers = append(modifiers, "sensitive")
+		}
+		modifiers = append(modifiers, lengthModifier("minLength", concrete.MinLength))
+		modifiers = append(modifiers, lengthModifier("maxLength", concrete.MaxLength))
+		if concrete.Pattern != "" {
+			escaped := strings.ReplaceAll(concrete.Pattern, "\"", "\\\"")
+			modifiers = append(modifiers, fmt.Sprintf("pattern: \"%s\"", escaped))
+		}
+		return fmt.Sprintf("string%s", formatModifiers(modifiers...)), nil
+	case *types.FunctionType:
+		return "function", nil
+	default:
+		return "", fmt.Errorf("unrecognized type %T", concrete)
+	}
+}
+
+func builtInTypeLabel(kind string) string {
+	labels := map[string]string{
+		"Any":         "Any",
+		"Null":        "Null",
+		"Bool":        "Bool",
+		"Int":         "Int",
+		"String":      "String",
+		"Object":      "Object",
+		"Array":       "Array",
+		"ResourceRef": "ResourceRef",
+	}
+
+	if label, ok := labels[kind]; ok {
+		return label
+	}
+
+	return kind
+}
+
+func formatModifiers(modifiers ...string) string {
+	filtered := make([]string, 0, len(modifiers))
+	for _, modifier := range modifiers {
+		if modifier != "" {
+			filtered = append(filtered, modifier)
+		}
+	}
+
+	if len(filtered) == 0 {
+		return ""
+	}
+
+	return fmt.Sprintf(" {%s}", strings.Join(filtered, ", "))
+}
+
+func lengthModifier(label string, value *int64) string {
+	if value == nil {
+		return ""
+	}
+	return fmt.Sprintf("%s: %d", label, *value)
+}
+
+func integerModifier(label string, value *int64) string {
+	if value == nil {
+		return ""
+	}
+	return fmt.Sprintf("%s: %d", label, *value)
+}
+
+func formatScopeList(scope types.ScopeType) string {
+	labels := getScopeTypeLabels(scope)
+	if len(labels) == 0 {
 		return "None"
+	}
+
+	return strings.Join(labels, ", ")
+}
+
+func getScopeTypeLabels(scope types.ScopeType) []string {
+	entries := []struct {
+		flag  types.ScopeType
+		label string
+	}{
+		{types.ScopeTypeTenant, "Tenant"},
+		{types.ScopeTypeManagementGroup, "ManagementGroup"},
+		{types.ScopeTypeSubscription, "Subscription"},
+		{types.ScopeTypeResourceGroup, "ResourceGroup"},
+		{types.ScopeTypeExtension, "Extension"},
+	}
+
+	result := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if scope&entry.flag == entry.flag {
+			result = append(result, entry.label)
+		}
+	}
+
+	return result
+}
+
+func formatPropertyFlags(flags types.TypePropertyFlags) string {
+	labels := []struct {
+		flag  types.TypePropertyFlags
+		label string
+	}{
+		{types.TypePropertyFlagsRequired, "Required"},
+		{types.TypePropertyFlagsReadOnly, "ReadOnly"},
+		{types.TypePropertyFlagsWriteOnly, "WriteOnly"},
+		{types.TypePropertyFlagsDeployTimeConstant, "DeployTimeConstant"},
+		{types.TypePropertyFlagsIdentifier, "Identifier"},
+	}
+
+	names := make([]string, 0, len(labels))
+	for _, entry := range labels {
+		if flags&entry.flag == entry.flag {
+			names = append(names, entry.label)
+		}
 	}
 
 	return strings.Join(names, ", ")
 }
 
-func (w *MarkdownWriter) formatPropertyFlags(flags types.TypePropertyFlags) string {
-	var flagNames []string
+func findTypesToWrite(typesList []types.Type, typesToWrite *[]types.Type, ref types.ITypeReference) {
+	findTypesToWriteInternal(typesList, typesToWrite, ref, make(map[int]struct{}))
+}
 
-	if flags&types.TypePropertyFlagsRequired != 0 {
-		flagNames = append(flagNames, "required")
-	}
-	if flags&types.TypePropertyFlagsReadOnly != 0 {
-		flagNames = append(flagNames, "read-only")
-	}
-	if flags&types.TypePropertyFlagsWriteOnly != 0 {
-		flagNames = append(flagNames, "write-only")
-	}
-	if flags&types.TypePropertyFlagsDeployTimeConstant != 0 {
-		flagNames = append(flagNames, "deploy-time-constant")
-	}
-	if flags&types.TypePropertyFlagsIdentifier != 0 {
-		flagNames = append(flagNames, "identifier")
+func findTypesToWriteInternal(typesList []types.Type, typesToWrite *[]types.Type, ref types.ITypeReference, visited map[int]struct{}) {
+	index, ok := typeReferenceIndex(ref)
+	if !ok || index < 0 || index >= len(typesList) {
+		return
 	}
 
-	return strings.Join(flagNames, ", ")
+	if _, seen := visited[index]; seen {
+		return
+	}
+	visited[index] = struct{}{}
+
+	process := func(inner types.ITypeReference, skipParent bool) {
+		innerIndex, ok := typeReferenceIndex(inner)
+		if !ok || innerIndex < 0 || innerIndex >= len(typesList) {
+			return
+		}
+
+		innerType := typesList[innerIndex]
+		if !skipParent && !typeSliceContains(*typesToWrite, innerType) {
+			*typesToWrite = append(*typesToWrite, innerType)
+		}
+
+		findTypesToWriteInternal(typesList, typesToWrite, inner, visited)
+	}
+
+	switch concrete := typesList[index].(type) {
+	case *types.ArrayType:
+		process(concrete.ItemType, false)
+	case *types.ObjectType:
+		for _, name := range sortedKeys(concrete.Properties) {
+			process(concrete.Properties[name].Type, false)
+		}
+		if concrete.AdditionalProperties != nil {
+			process(concrete.AdditionalProperties, false)
+		}
+	case *types.DiscriminatedObjectType:
+		for _, name := range sortedKeys(concrete.BaseProperties) {
+			process(concrete.BaseProperties[name].Type, false)
+		}
+		for _, name := range sortedKeys(concrete.Elements) {
+			process(concrete.Elements[name], true)
+		}
+	}
+}
+
+func appendTypeForReference(typesList []types.Type, target *[]types.Type, ref types.ITypeReference) {
+	if resolved, ok := resolveTypeRef(typesList, ref); ok {
+		*target = append(*target, resolved)
+	}
+}
+
+func resolveTypeRef(typesList []types.Type, ref types.ITypeReference) (types.Type, bool) {
+	index, ok := typeReferenceIndex(ref)
+	if !ok || index < 0 || index >= len(typesList) {
+		return nil, false
+	}
+	return typesList[index], true
+}
+
+func resolveFunctionType(typesList []types.Type, ref types.ITypeReference) (*types.FunctionType, bool) {
+	if resolved, ok := resolveTypeRef(typesList, ref); ok {
+		if fn, ok := resolved.(*types.FunctionType); ok {
+			return fn, true
+		}
+	}
+
+	return nil, false
+}
+
+func dedupeTypes(values []types.Type) []types.Type {
+	result := make([]types.Type, 0, len(values))
+	seen := make(map[types.Type]struct{})
+
+	for _, value := range values {
+		if _, exists := seen[value]; exists {
+			continue
+		}
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+
+	return result
+}
+
+func sortTypesByName(values []types.Type) {
+	sort.SliceStable(values, func(i, j int) bool {
+		nameI, okI := lowerTypeName(values[i])
+		nameJ, okJ := lowerTypeName(values[j])
+
+		if !okI {
+			if !okJ {
+				return false
+			}
+			return false
+		}
+
+		if !okJ {
+			return true
+		}
+
+		return nameI < nameJ
+	})
+}
+
+func lowerTypeName(value types.Type) (string, bool) {
+	switch concrete := value.(type) {
+	case *types.ObjectType:
+		return strings.ToLower(concrete.Name), true
+	case *types.DiscriminatedObjectType:
+		return strings.ToLower(concrete.Name), true
+	default:
+		return "", false
+	}
+}
+
+func resourceBaseName(name string) string {
+	parts := strings.Split(name, "@")
+	if len(parts) == 0 {
+		return strings.ToLower(name)
+	}
+	return strings.ToLower(parts[0])
+}
+
+func providerKey(typeString string) string {
+	parts := strings.SplitN(typeString, "/", 2)
+	if len(parts) == 0 {
+		return strings.ToLower(typeString)
+	}
+	return strings.ToLower(parts[0])
+}
+
+func resourceTypeKey(typeString string) string {
+	parts := strings.SplitN(typeString, "@", 2)
+	if len(parts) == 0 {
+		return strings.ToLower(typeString)
+	}
+	return strings.ToLower(parts[0])
+}
+
+func versionFromTypeString(typeString string) string {
+	parts := strings.SplitN(typeString, "@", 2)
+	if len(parts) < 2 {
+		return ""
+	}
+	return parts[1]
+}
+
+func typeSliceContains(slice []types.Type, candidate types.Type) bool {
+	for _, existing := range slice {
+		if existing == candidate {
+			return true
+		}
+	}
+	return false
+}
+
+func typeReferenceIndex(ref types.ITypeReference) (int, bool) {
+	switch concrete := ref.(type) {
+	case types.TypeReference:
+		return concrete.Ref, true
+	case *types.TypeReference:
+		return concrete.Ref, true
+	default:
+		return 0, false
+	}
+}
+
+func sortedKeys[T any](m map[string]T) []string {
+	keys := make([]string, 0, len(m))
+	for key := range m {
+		keys = append(keys, key)
+	}
+
+	sort.SliceStable(keys, func(i, j int) bool {
+		lowerI := strings.ToLower(keys[i])
+		lowerJ := strings.ToLower(keys[j])
+		if lowerI == lowerJ {
+			return keys[i] < keys[j]
+		}
+		return lowerI < lowerJ
+	})
+
+	return keys
+}
+
+func relativeMarkdownPath(ref types.ITypeReference) string {
+	switch concrete := ref.(type) {
+	case types.CrossFileTypeReference:
+		return convertJsonPathToMarkdown(concrete.RelativePath)
+	case *types.CrossFileTypeReference:
+		return convertJsonPathToMarkdown(concrete.RelativePath)
+	default:
+		return ""
+	}
+}
+
+func convertJsonPathToMarkdown(path string) string {
+	lower := strings.ToLower(path)
+	idx := strings.LastIndex(lower, ".json")
+	if idx == -1 {
+		return path
+	}
+
+	return path[:idx] + ".md"
 }

@@ -9,7 +9,6 @@ import (
 	"os"
 
 	"github.com/Azure/bicep-types/src/bicep-types-go/factory"
-	"github.com/Azure/bicep-types/src/bicep-types-go/loader"
 	"github.com/Azure/bicep-types/src/bicep-types-go/types"
 	"github.com/Azure/bicep-types/src/bicep-types-go/writers"
 )
@@ -30,8 +29,7 @@ func main() {
 	}
 
 	// Load types from input file
-	typeLoader := loader.NewTypeLoader()
-	types, err := typeLoader.LoadTypesFromFile(*inputFile)
+	types, err := loadTypesFromFile(*inputFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading types: %v\n", err)
 		os.Exit(1)
@@ -125,9 +123,7 @@ func validateCommand() {
 	}
 
 	filename := os.Args[2]
-	typeLoader := loader.NewTypeLoader()
-
-	types, err := typeLoader.LoadTypesFromFile(filename)
+	types, err := loadTypesFromFile(filename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Validation failed: %v\n", err)
 		os.Exit(1)
@@ -201,4 +197,27 @@ func generateCommand() {
 
 func int64Ptr(v int64) *int64 {
 	return &v
+}
+
+func loadTypesFromFile(path string) ([]types.Type, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read types file %s: %w", path, err)
+	}
+
+	var raw []json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal types array: %w", err)
+	}
+
+	result := make([]types.Type, len(raw))
+	for i, r := range raw {
+		typ, err := types.UnmarshalType(r)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal type at index %d: %w", i, err)
+		}
+		result[i] = typ
+	}
+
+	return result, nil
 }
