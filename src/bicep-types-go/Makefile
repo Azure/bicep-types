@@ -60,6 +60,9 @@ fmt:
 # Run linter (requires golangci-lint)
 lint:
 	@echo "Running linter..."
+	@if find . -name '*.go' ! -path './vendor/*' -exec sh -c 'grep -q "Copyright (c) Microsoft Corporation." "$$1" && grep -q "Licensed under the MIT License." "$$1" || echo "$$1"' sh {} \; | grep .; then \
+        echo "Files missing copyright header."; exit 1; \
+	fi
 	@which golangci-lint > /dev/null || (echo "golangci-lint not found, install with: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest" && exit 1)
 	golangci-lint run
 
