@@ -117,3 +117,60 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+
+  build-go:
+    name: Build Go
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: go
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache-dependency-path: ./src/bicep-types-go/go.sum
+
+      - name: Verify dependencies
+        run: go mod verify
+        working-directory: ./src/bicep-types-go
+
+      - name: Download dependencies
+        run: go mod download
+        working-directory: ./src/bicep-types-go
+
+      - name: Install golangci-lint
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+      - name: Lint
+        run: golangci-lint run
+        working-directory: ./src/bicep-types-go
+
+      - name: Build
+        run: go build -v ./...
+        working-directory: ./src/bicep-types-go
+
+      - name: Test (Unit)
+        run: go test -v -race -coverprofile=coverage.out ./...
+        working-directory: ./src/bicep-types-go
+
+      - name: Build CLI binary
+        run: |
+          go build -o bicep-types ./cmd/bicep-types
+          chmod +x bicep-types
+        working-directory: ./src/bicep-types-go
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
