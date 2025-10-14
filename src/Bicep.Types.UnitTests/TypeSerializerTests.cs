@@ -8,7 +8,9 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using Azure.Bicep.Types;
 using Azure.Bicep.Types.Concrete;
+using Azure.Bicep.Types.Index;
 using Azure.Bicep.Types.Serialization;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -412,6 +414,63 @@ namespace Azure.Bicep.Types.UnitTests
             // Legacy ScopeType.Unknown (0) should be interpreted as All for backward compatibility
             deserializedResource.ReadableScopes.Should().Be(ScopeType.All);
             deserializedResource.WritableScopes.Should().Be(ScopeType.All);
+        }
+
+        [TestMethod]
+        public void ResourceType_with_modern_scopes_should_not_serialize_null_legacy_properties()
+        {
+            var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
+            var stringType = factory.Create(() => new StringType());
+            var objectType = factory.Create(() => new ObjectType(
+                name: "request@v1",
+                properties: new Dictionary<string, ObjectTypeProperty>
+                {
+                    ["uri"] = new(factory.GetReference(stringType), ObjectTypePropertyFlags.Required, "The HTTP request URI")
+                },
+                additionalProperties: null));
+
+            // Create ResourceType with ONLY modern properties
+            var resourceType = factory.Create(() => new ResourceType(
+                name: "request@v1",
+                body: factory.GetReference(objectType),
+                functions: null,
+                writableScopes_in: ScopeType.All,
+                readableScopes_in: ScopeType.All));
+
+            // Serialize
+            string serializedJson;
+            using (var stream = new MemoryStream())
+            {
+                TypeSerializer.Serialize(stream, factory.GetTypes());
+                serializedJson = Encoding.UTF8.GetString(stream.ToArray());
+            }
+
+            var doc = JsonDocument.Parse(serializedJson);
+            var resourceElement = doc.RootElement.EnumerateArray()
+                .First(e => e.TryGetProperty("$type", out var typeVal) && typeVal.GetString() == "ResourceType");
+
+            // Check for legacy properties
+            bool hasScopeType = resourceElement.TryGetProperty("scopeType", out _);
+            bool hasReadOnlyScopes = resourceElement.TryGetProperty("readOnlyScopes", out _);
+            bool hasFlags = resourceElement.TryGetProperty("flags", out _);
+
+            // Verify modern properties are present
+            bool hasReadableScopes = resourceElement.TryGetProperty("readableScopes", out var readableVal);
+            bool hasWritableScopes = resourceElement.TryGetProperty("writableScopes", out var writableVal);
+
+            // Assert: Modern properties should be present
+            Assert.IsTrue(hasReadableScopes, "readableScopes should be present in JSON");
+            Assert.IsTrue(hasWritableScopes, "writableScopes should be present in JSON");
+            Assert.AreEqual(31, readableVal.GetInt32(), "readableScopes should be 31 (All)");
+            Assert.AreEqual(31, writableVal.GetInt32(), "writableScopes should be 31 (All)");
+
+            // Assert: Legacy properties should NOT be present (they are null and should be omitted)
+            Assert.IsFalse(hasScopeType, 
+                "scopeType should not be serialized when null (JsonIgnoreCondition.WhenWritingNull)");
+            Assert.IsFalse(hasReadOnlyScopes, 
+                "readOnlyScopes should not be serialized when null (JsonIgnoreCondition.WhenWritingNull)");
+            Assert.IsFalse(hasFlags, 
+                "flags should not be serialized when null (JsonIgnoreCondition.WhenWritingNull)");
         }
 
         private static Stream BuildStream(Action<Stream> writeFunc)
