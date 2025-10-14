@@ -473,6 +473,100 @@ namespace Azure.Bicep.Types.UnitTests
                 "flags should not be serialized when null (JsonIgnoreCondition.WhenWritingNull)");
         }
 
+        [TestMethod]
+        public void ResourceType_with_legacy_scopes_should_serialize_and_deserialize_correctly()
+        {
+            var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
+            var stringType = factory.Create(() => new StringType());
+            var objectType = factory.Create(() => new ObjectType(
+                name: "legacy@v1",
+                properties: new Dictionary<string, ObjectTypeProperty>
+                {
+                    ["id"] = new(factory.GetReference(stringType), ObjectTypePropertyFlags.Required, "Resource ID")
+                },
+                additionalProperties: null));
+
+            // Create with legacy properties
+            var resourceType = factory.Create(() => new ResourceType(
+                name: "legacy@v1",
+                body: factory.GetReference(objectType),
+                functions: null,
+                scopeType: ScopeType.ResourceGroup,
+                readOnlyScopes: null,
+                flags: ResourceFlags.None));
+
+            // Serialize
+            string serializedJson;
+            using (var stream = new MemoryStream())
+            {
+                TypeSerializer.Serialize(stream, factory.GetTypes());
+                serializedJson = Encoding.UTF8.GetString(stream.ToArray());
+            }
+
+            var doc = JsonDocument.Parse(serializedJson);
+            var resourceElement = doc.RootElement.EnumerateArray()
+                .First(e => e.TryGetProperty("$type", out var typeVal) && typeVal.GetString() == "ResourceType");
+
+            // Deserialize
+            TypeBase[] deserializedTypes;
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(serializedJson)))
+            {
+                deserializedTypes = TypeSerializer.Deserialize(stream);
+            }
+
+            var deserialized = deserializedTypes.OfType<ResourceType>().First();
+
+            Assert.AreEqual(ScopeType.ResourceGroup, deserialized.ReadableScopes);
+            Assert.AreEqual(ScopeType.ResourceGroup, deserialized.WritableScopes);
+        }
+
+        [TestMethod]
+        public void ResourceType_modern_scopes_roundtrip_preserves_values()
+        {
+            var factory = new TypeFactory(Enumerable.Empty<TypeBase>());
+            var stringType = factory.Create(() => new StringType());
+            var objectType = factory.Create(() => new ObjectType(
+                name: "roundtrip@v1",
+                properties: new Dictionary<string, ObjectTypeProperty>
+                {
+                    ["name"] = new(factory.GetReference(stringType), ObjectTypePropertyFlags.Required, "Name")
+                },
+                additionalProperties: null));
+
+            // Create with modern properties
+            var original = factory.Create(() => new ResourceType(
+                name: "roundtrip@v1",
+                body: factory.GetReference(objectType),
+                functions: null,
+                writableScopes_in: ScopeType.Subscription | ScopeType.ResourceGroup,
+                readableScopes_in: ScopeType.All));
+
+            // Serialize
+            string serializedJson;
+            using (var stream = new MemoryStream())
+            {
+                TypeSerializer.Serialize(stream, factory.GetTypes());
+                serializedJson = Encoding.UTF8.GetString(stream.ToArray());
+            }
+
+            // Deserialize
+            TypeBase[] deserializedTypes;
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(serializedJson)))
+            {
+                deserializedTypes = TypeSerializer.Deserialize(stream);
+            }
+
+            var deserialized = deserializedTypes.OfType<ResourceType>().First();
+
+            // Verify scopes match exactly
+            Assert.AreEqual(original.ReadableScopes, deserialized.ReadableScopes, 
+                "ReadableScopes should be preserved through roundtrip");
+            Assert.AreEqual(original.WritableScopes, deserialized.WritableScopes,
+                "WritableScopes should be preserved through roundtrip");
+            Assert.AreEqual(ScopeType.All, deserialized.ReadableScopes);
+            Assert.AreEqual(ScopeType.Subscription | ScopeType.ResourceGroup, deserialized.WritableScopes);
+        }
+
         private static Stream BuildStream(Action<Stream> writeFunc)
         {
             var memoryStream = new MemoryStream();
