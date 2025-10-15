@@ -49,11 +49,11 @@
       },
       "MSTest.TestFramework": {
         "type": "Direct",
-        "requested": "[3.10.4, )",
-        "resolved": "3.10.4",
-        "contentHash": "i6P4/1d2Nc4O5eOcTfvjqc/psgNNuyfMPNNU3cTvQe56bznykTZ1X88eB8JmYa+V3UiTTBKXyDP9yUb8oezLoQ==",
+        "requested": "[4.0.0, )",
+        "resolved": "4.0.0",
+        "contentHash": "K1CZFvX4zfoqzNuB6Lk9I1ZvZfHlb2e1iqtZwtxSvN0rY5dRvplMVujObQuK7VaUim8AcxS3yz7IltixMWbTVg==",
         "dependencies": {
-          "MSTest.Analyzers": "3.10.4"
+          "MSTest.Analyzers": "4.0.0"
         }
       },
       "Nerdbank.GitVersioning": {
@@ -165,8 +165,8 @@
       },
       "MSTest.Analyzers": {
         "type": "Transitive",
-        "resolved": "3.10.4",
-        "contentHash": "a3IHTsbd+iS0pZUI7KC6nCCQgTOhjPyqDwPOtKLGCwjRifQ9N4K40qTqCaQlPOxwKaIxVwDLRYFvdY9NTDVi0w=="
+        "resolved": "4.0.0",
+        "contentHash": "2LXqNrvqG3IkMG1tIz8kUsoWT8NXdClPynqQtDI8lyXWasOf0UiaaooucwYvZ4VUrF099G8dCR1IOm15GrtTmA=="
       },
       "Newtonsoft.Json": {
         "type": "Transitive",
