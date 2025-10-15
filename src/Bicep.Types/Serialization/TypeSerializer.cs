@@ -3,6 +3,7 @@
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Azure.Bicep.Types.Concrete;
 using Azure.Bicep.Types.Index;
@@ -23,6 +24,7 @@ public static class TypeSerializer
             },
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             TypeInfoResolver = TypeJsonContext.Default,
         };
     }
