@@ -139,7 +139,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.21'
+          go-version: '1.25.4'
           cache-dependency-path: ./src/bicep-types-go/go.sum
 
       - name: Verify dependencies
