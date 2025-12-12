@@ -34,6 +34,15 @@ namespace Azure.Bicep.Types
             return resourceFunctionType;
         }
 
+        public NamespaceFunctionType LoadNamespaceFunctionType(CrossFileTypeReference reference)
+        {
+            if (LoadType(reference) is not NamespaceFunctionType namespaceFunctionType)
+            {
+                throw new ArgumentException($"Unable to locate namespace function type at index {reference.Index} in \"{reference.RelativePath}\" resource");
+            }
+            return namespaceFunctionType;
+        }
+
         public TypeIndex LoadTypeIndex()
         {
             using var contentStream = GetContentStreamAtPath(TypeIndexResourceName);
