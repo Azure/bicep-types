@@ -106,8 +106,8 @@ namespace Azure.Bicep.Types.UnitTests
             var stringLiteralType = factory.Create(() => new StringLiteralType("abcdef"));
             var discriminatedObjectType = factory.Create(() => new DiscriminatedObjectType("disctest", "disctest", new Dictionary<string, ObjectTypeProperty>(), new Dictionary<string, ITypeReference>()));
             var resourceFunctionType = factory.Create(() => new ResourceFunctionType("listTest", "zona", "2020-01-01", factory.GetReference(objectType), factory.GetReference(objectType)));
-            var namespaceFunctionType = factory.Create(() => new NamespaceFunctionType("foo", factory.GetReference(resourceMethodType), null));
             var anyType = factory.Create(() => new AnyType());
+            var namespaceFunctionType = factory.Create(() => new NamespaceFunctionType("binding", null, "[externalInputs('binding', parameters('bindingKey'))]", [new FunctionParameter("bindingKey", factory.GetReference(stringType), null)], factory.GetReference(anyType), NamespaceFunctionTypeFlags.ExternalInput, NamespaceFunctionTypeFileVisibilityFlags.Bicepparam));
             var nullType = factory.Create(() => new NullType());
             var booleanType = factory.Create(() => new BooleanType());
             var intType = factory.Create(() => new IntegerType(-10, 10));
@@ -149,7 +149,8 @@ namespace Azure.Bicep.Types.UnitTests
             discriminatedObjectTypeDeserialized.Name.Should().Be(discriminatedObjectType.Name);
             apiAgnosticResourceFunctionTypeDeserialized.Name.Should().Be(resourceFunctionType.Name);
             namespaceFunctionTypeDeserialized.Name.Should().Be(namespaceFunctionType.Name);
-            namespaceFunctionTypeDeserialized.Type.Type.Should().Be(resourceMethodTypeDeserialized);
+            namespaceFunctionTypeDeserialized.Flags.Should().Be(NamespaceFunctionTypeFlags.ExternalInput);
+            namespaceFunctionTypeDeserialized.FileVisibilityFlags.Should().Be(NamespaceFunctionTypeFileVisibilityFlags.Bicepparam);
             integerTypeDeserialized.MinValue.Should().Be(-10);
             integerTypeDeserialized.MaxValue.Should().Be(10);
             sensitiveObjectTypeDeserialized.Name.Should().Be(sensitiveObjectType.Name);
