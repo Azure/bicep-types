@@ -150,7 +150,7 @@ namespace Azure.Bicep.Types.UnitTests
             apiAgnosticResourceFunctionTypeDeserialized.Name.Should().Be(resourceFunctionType.Name);
             namespaceFunctionTypeDeserialized.Name.Should().Be(namespaceFunctionType.Name);
             namespaceFunctionTypeDeserialized.Flags.Should().Be(NamespaceFunctionTypeFlags.ExternalInput);
-            namespaceFunctionTypeDeserialized.FileVisibilityFlags.Should().Be(NamespaceFunctionTypeFileVisibility.Bicepparam);
+            namespaceFunctionTypeDeserialized.FileVisibility.Should().Be(NamespaceFunctionTypeFileVisibility.Bicepparam);
             integerTypeDeserialized.MinValue.Should().Be(-10);
             integerTypeDeserialized.MaxValue.Should().Be(10);
             sensitiveObjectTypeDeserialized.Name.Should().Be(sensitiveObjectType.Name);
