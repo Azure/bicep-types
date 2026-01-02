@@ -126,8 +126,8 @@ namespace Azure.Bicep.Types.UnitTests
             var stringLiteralTypeDeserialized = deserialized[7].Should().BeOfType<StringLiteralType>().Subject;
             var discriminatedObjectTypeDeserialized = deserialized[8].Should().BeOfType<DiscriminatedObjectType>().Subject;
             var apiAgnosticResourceFunctionTypeDeserialized = deserialized[9].Should().BeOfType<ResourceFunctionType>().Subject;
-            var namespaceFunctionTypeDeserialized = deserialized[10].Should().BeOfType<NamespaceFunctionType>().Subject;
-            var anyTypeDeserialized = deserialized[11].Should().BeOfType<AnyType>().Subject;
+            var anyTypeDeserialized = deserialized[10].Should().BeOfType<AnyType>().Subject;
+            var namespaceFunctionTypeDeserialized = deserialized[11].Should().BeOfType<NamespaceFunctionType>().Subject;
             var nullTypeDeserialized = deserialized[12].Should().BeOfType<NullType>().Subject;
             var booleanTypeDeserialized = deserialized[13].Should().BeOfType<BooleanType>().Subject;
             var integerTypeDeserialized = deserialized[14].Should().BeOfType<IntegerType>().Subject;

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -16,8 +17,8 @@ public class NamespaceFunctionType : TypeBase
         IReadOnlyList<FunctionParameter> parameters,
         ITypeReference output,
         NamespaceFunctionTypeFlags flags,
-        NamespaceFunctionTypeFileVisibility fileVisibilityFlags)
-        => (Name, Description, EvaluatesTo, Parameters, Output, Flags, FileVisibility) = (name, description, evaluatesTo, parameters, output, flags, fileVisibilityFlags);
+        NamespaceFunctionTypeFileVisibility fileVisibility)
+        => (Name, Description, EvaluatesTo, Parameters, Output, Flags, FileVisibility) = (name, description, evaluatesTo, parameters, output, flags, fileVisibility);
 
     public string Name { get; }
     public string? Description { get; }
@@ -34,6 +35,7 @@ public enum NamespaceFunctionTypeFileVisibility
     Bicepparam,
 }
 
+[Flags]
 public enum NamespaceFunctionTypeFlags
 {
     Default = 0,
