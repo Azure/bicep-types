@@ -16,7 +16,7 @@ public class NamespaceFunctionType : TypeBase
         IReadOnlyList<FunctionParameter> parameters,
         ITypeReference output,
         NamespaceFunctionTypeFlags flags,
-        NamespaceFunctionTypeFileVisibilityFlags fileVisibilityFlags)
+        NamespaceFunctionTypeFileVisibility fileVisibilityFlags)
         => (Name, Description, EvaluatesTo, Parameters, Output, Flags, FileVisibilityFlags) = (name, description, evaluatesTo, parameters, output, flags, fileVisibilityFlags);
 
     public string Name { get; }
@@ -25,14 +25,13 @@ public class NamespaceFunctionType : TypeBase
     public IReadOnlyList<FunctionParameter> Parameters { get; }
     public ITypeReference Output { get; }
     public NamespaceFunctionTypeFlags Flags { get; }
-    public NamespaceFunctionTypeFileVisibilityFlags FileVisibilityFlags { get; }
+    public NamespaceFunctionTypeFileVisibility FileVisibilityFlags { get; }
 }
 
-public enum NamespaceFunctionTypeFileVisibilityFlags
+public enum NamespaceFunctionTypeFileVisibility
 {
-    None = 0,
-    Bicep = 1 << 0,
-    Bicepparam = 1 << 1,
+    Bicep,
+    Bicepparam,
 }
 
 public enum NamespaceFunctionTypeFlags
