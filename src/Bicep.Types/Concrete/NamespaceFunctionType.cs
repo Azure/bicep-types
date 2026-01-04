@@ -14,30 +14,53 @@ public class NamespaceFunctionType : TypeBase
         string name,
         string? description,
         string? evaluatesTo,
-        IReadOnlyList<FunctionParameter> parameters,
+        IReadOnlyList<NamespaceFunctionParameter> parameters,
         ITypeReference output,
-        NamespaceFunctionTypeFlags flags,
-        NamespaceFunctionTypeFileVisibility fileVisibility)
+        NamespaceFunctionFlags flags,
+        NamespaceFunctionFileVisibility fileVisibility)
         => (Name, Description, EvaluatesTo, Parameters, Output, Flags, FileVisibility) = (name, description, evaluatesTo, parameters, output, flags, fileVisibility);
 
     public string Name { get; }
     public string? Description { get; }
     public string? EvaluatesTo { get; }
-    public IReadOnlyList<FunctionParameter> Parameters { get; }
+    public IReadOnlyList<NamespaceFunctionParameter> Parameters { get; }
     public ITypeReference Output { get; }
-    public NamespaceFunctionTypeFlags Flags { get; }
-    public NamespaceFunctionTypeFileVisibility FileVisibility { get; }
+    public NamespaceFunctionFlags Flags { get; }
+    public NamespaceFunctionFileVisibility FileVisibility { get; }
 }
 
-public enum NamespaceFunctionTypeFileVisibility
+public class NamespaceFunctionParameter
 {
-    Bicep,
-    Bicepparam,
+    [JsonConstructor]
+    public NamespaceFunctionParameter(string name, ITypeReference type, string? description, NamespaceFunctionParameterFlags flags)
+        => (Name, Type, Description, Flags) = (name, type, description, flags);
+
+    public string Name { get; }
+
+    public ITypeReference Type { get; }
+
+    public string? Description { get; }
+
+    public NamespaceFunctionParameterFlags Flags { get; }
 }
 
 [Flags]
-public enum NamespaceFunctionTypeFlags
+public enum NamespaceFunctionFlags
 {
     Default = 0,
     ExternalInput = 1 << 0
+}
+
+[Flags]
+public enum NamespaceFunctionParameterFlags
+{
+    None = 0,
+    Required = 1 << 0,
+    Constant = 1 << 1
+}
+
+public enum NamespaceFunctionFileVisibility
+{
+    Bicep,
+    Bicepparam,
 }
