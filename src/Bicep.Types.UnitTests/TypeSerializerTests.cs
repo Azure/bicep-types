@@ -107,7 +107,7 @@ namespace Azure.Bicep.Types.UnitTests
             var discriminatedObjectType = factory.Create(() => new DiscriminatedObjectType("disctest", "disctest", new Dictionary<string, ObjectTypeProperty>(), new Dictionary<string, ITypeReference>()));
             var resourceFunctionType = factory.Create(() => new ResourceFunctionType("listTest", "zona", "2020-01-01", factory.GetReference(objectType), factory.GetReference(objectType)));
             var anyType = factory.Create(() => new AnyType());
-            var namespaceFunctionType = factory.Create(() => new NamespaceFunctionType("binding", null, "[externalInputs('binding', parameters('bindingKey'))]", [new NamespaceFunctionParameter("bindingKey", factory.GetReference(stringType), null, NamespaceFunctionParameterFlags.Required)], factory.GetReference(anyType), NamespaceFunctionFlags.ExternalInput, NamespaceFunctionFileVisibilityRestriction.Bicepparam));
+            var namespaceFunctionType = factory.Create(() => new NamespaceFunctionType("binding", null, "[externalInputs('binding', parameters('bindingKey'))]", [new NamespaceFunctionParameter("bindingKey", factory.GetReference(stringType), null, NamespaceFunctionParameterFlags.Required)], factory.GetReference(anyType), NamespaceFunctionFlags.ExternalInput, BicepSourceFileKind.ParamsFile));
             var nullType = factory.Create(() => new NullType());
             var booleanType = factory.Create(() => new BooleanType());
             var intType = factory.Create(() => new IntegerType(-10, 10));
@@ -150,11 +150,11 @@ namespace Azure.Bicep.Types.UnitTests
             apiAgnosticResourceFunctionTypeDeserialized.Name.Should().Be(resourceFunctionType.Name);
             namespaceFunctionTypeDeserialized.Name.Should().Be(namespaceFunctionType.Name);
             namespaceFunctionTypeDeserialized.Flags.Should().Be(NamespaceFunctionFlags.ExternalInput);
-            namespaceFunctionTypeDeserialized.FileVisibilityRestriction.Should().Be(NamespaceFunctionFileVisibilityRestriction.Bicepparam);
+            namespaceFunctionTypeDeserialized.FileKindVisibility.Should().Be(BicepSourceFileKind.ParamsFile);
             namespaceFunctionTypeDeserialized.Parameters[0].Name.Should().Be("bindingKey");
             namespaceFunctionTypeDeserialized.Parameters[0].Type.Type.Should().Be(stringTypeDeserialized);
             namespaceFunctionTypeDeserialized.Parameters[0].Flags.Should().Be(NamespaceFunctionParameterFlags.Required);
-            namespaceFunctionTypeDeserialized.FileVisibilityRestriction.Should().Be(NamespaceFunctionFileVisibilityRestriction.Bicepparam);
+            namespaceFunctionTypeDeserialized.FileKindVisibility.Should().Be(BicepSourceFileKind.ParamsFile);
             namespaceFunctionTypeDeserialized.Flags.Should().Be(NamespaceFunctionFlags.ExternalInput);
             integerTypeDeserialized.MinValue.Should().Be(-10);
             integerTypeDeserialized.MaxValue.Should().Be(10);

@@ -13,20 +13,30 @@ public class NamespaceFunctionType : TypeBase
     public NamespaceFunctionType(
         string name,
         string? description,
-        string? evaluatesTo,
+        string? evaluatedLanguageExpression,
         IReadOnlyList<NamespaceFunctionParameter> parameters,
-        ITypeReference output,
-        NamespaceFunctionFlags flags,
-        NamespaceFunctionFileVisibilityRestriction? fileVisibilityRestriction)
-        => (Name, Description, EvaluatesTo, Parameters, Output, Flags, FileVisibilityRestriction) = (name, description, evaluatesTo, parameters, output, flags, fileVisibilityRestriction);
+        ITypeReference outputType,
+        BicepSourceFileKind? fileKindVisibility)
+        => (Name, Description, EvaluatedLanguageExpression, Parameters, OutputType, FileKindVisibility) = (name, description, evaluatedLanguageExpression, parameters, outputType, fileKindVisibility);
 
     public string Name { get; }
     public string? Description { get; }
-    public string? EvaluatesTo { get; }
+
+    /// <summary>
+    /// The language expression that this function should be reduced to at compile time.
+    /// When <code>null</code>, the function is evaluated at runtime via the extensibility framework.
+    /// </summary>
+    public string? EvaluatedLanguageExpression { get; }
+
     public IReadOnlyList<NamespaceFunctionParameter> Parameters { get; }
-    public ITypeReference Output { get; }
-    public NamespaceFunctionFlags Flags { get; }
-    public NamespaceFunctionFileVisibilityRestriction? FileVisibilityRestriction { get; }
+
+    public ITypeReference OutputType { get; }
+
+    /// <summary>
+    /// The kind of Bicep source file this function is visible in.
+    /// If <code>null</code>, the function is visible in all bicep file kinds.
+    /// </summary>
+    public BicepSourceFileKind? FileKindVisibility { get; }
 }
 
 public class NamespaceFunctionParameter
@@ -45,22 +55,28 @@ public class NamespaceFunctionParameter
 }
 
 [Flags]
-public enum NamespaceFunctionFlags
-{
-    Default = 0,
-    ExternalInput = 1 << 0
-}
-
-[Flags]
 public enum NamespaceFunctionParameterFlags
 {
     None = 0,
-    Required = 1 << 0,
-    Constant = 1 << 1
+
+    /// <summary>
+    /// An argument for this parameter must be supplied when the function is called.
+    /// </summary>
+    Required = 1,
+
+    /// <summary>
+    /// The argument supplied for this parameter must be a compile-time constant value. Expressions are not permitted.
+    /// </summary>
+    CompileTimeConstant = 1 << 1,
+
+    /// <summary>
+    /// The property only accepts deploy-time constants whose values must be known at the start of the deployment, and do not require inlining. Expressions are permitted, but they must be resolvable during template preprocessing.
+    /// </summary>
+    DeployTimeConstant = 1 << 2,
 }
 
-public enum NamespaceFunctionFileVisibilityRestriction
+public enum BicepSourceFileKind
 {
-    Bicep,
-    Bicepparam,
+    BicepFile,
+    ParamsFile
 }
