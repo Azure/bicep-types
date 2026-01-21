@@ -16,14 +16,14 @@ public class NamespaceFunctionType : TypeBase
         string? evaluatedLanguageExpression,
         IReadOnlyList<NamespaceFunctionParameter> parameters,
         ITypeReference outputType,
-        BicepSourceFileKind? fileKindVisibility)
-        => (Name, Description, EvaluatedLanguageExpression, Parameters, OutputType, FileKindVisibility) = (name, description, evaluatedLanguageExpression, parameters, outputType, fileKindVisibility);
+        BicepSourceFileKind? visibleInFileKind)
+        => (Name, Description, EvaluatedLanguageExpression, Parameters, OutputType, VisibleInFileKind) = (name, description, evaluatedLanguageExpression, parameters, outputType, visibleInFileKind);
 
     public string Name { get; }
     public string? Description { get; }
 
     /// <summary>
-    /// The language expression that this function should be reduced to at compile time.
+    /// The ARM language expression that this function should be reduced to at compile time.
     /// When <code>null</code>, the function is evaluated at runtime via the extensibility framework.
     /// </summary>
     public string? EvaluatedLanguageExpression { get; }
@@ -36,7 +36,7 @@ public class NamespaceFunctionType : TypeBase
     /// The kind of Bicep source file this function is visible in.
     /// If <code>null</code>, the function is visible in all bicep file kinds.
     /// </summary>
-    public BicepSourceFileKind? FileKindVisibility { get; }
+    public BicepSourceFileKind? VisibleInFileKind { get; }
 }
 
 public class NamespaceFunctionParameter
@@ -77,6 +77,6 @@ public enum NamespaceFunctionParameterFlags
 
 public enum BicepSourceFileKind
 {
-    BicepFile,
-    ParamsFile
+    BicepFile = 1,
+    ParamsFile = 2
 }

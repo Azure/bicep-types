@@ -104,6 +104,26 @@
     }
   },
   {
+    "$type": "NamespaceFunctionType",
+    "name": "binding",
+    "description": "Binding function",
+    "evaluatedLanguageExpression": "[externalInput('binding', parameters('bindingKey'))]",
+    "parameters": [
+      {
+        "name": "bindingKey",
+        "type": {
+          "$ref": "#/0"
+        },
+        "description": "The binding key parameter",
+        "flags": 1
+      }
+    ],
+    "outputType": {
+      "$ref": "#/4"
+    },
+    "visibleInFileKind": 2
+  },
+  {
     "$type": "ResourceType",
     "name": "foo@v1",
     "body": {

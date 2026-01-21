@@ -107,6 +107,29 @@ func buildFooScenario(t *testing.T) *baselineScenario {
 	funcType := fac.CreateFunctionType(funcArgs, boolRef)
 	funcRef := fac.GetReference(funcType)
 
+	// Create a NamespaceFunctionType to test serialization
+	namespaceFunctionParams := []types.NamespaceFunctionParameter{
+		{
+			Name:        "bindingKey",
+			Type:        stringRef,
+			Description: "The binding key parameter",
+			Flags:       types.NamespaceFunctionParameterFlagsRequired,
+		},
+	}
+	evaluatedLangExpr := "[externalInput('binding', parameters('bindingKey'))]"
+	description := "Binding function"
+	fileKind := types.BicepSourceFileKindParamsFile
+	namespaceFuncType := &types.NamespaceFunctionType{
+		Name:                        "binding",
+		Description:                 description,
+		EvaluatedLanguageExpression: evaluatedLangExpr,
+		Parameters:                  namespaceFunctionParams,
+		OutputType:                  anyRef,
+		VisibleInFileKind:           &fileKind,
+	}
+	// Add to factory to include in serialization tests
+	fac.GetReference(namespaceFuncType)
+
 	functions := map[string]types.ResourceTypeFunction{
 		"doSomething": {
 			Type: funcRef,
@@ -281,7 +304,7 @@ func verifyScenario(t *testing.T, scenario *baselineScenario) {
 	mdWriter := writers.NewMarkdownWriter()
 	mdWriter.SetIncludeTableOfContents(false)
 	var idxBuf bytes.Buffer
-	require.NoError(t, mdWriter.WriteTypeIndex(&idxBuf, scenario.idx))
+	require.NoError(t, mdWriter.WriteTypeIndex(&idxBuf, scenario.idx, scenario.typeFiles))
 	assertMarkdownBaseline(t, baseDir, scenario.name, "index.md", idxBuf.String())
 }
 

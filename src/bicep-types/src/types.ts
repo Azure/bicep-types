@@ -92,6 +92,35 @@ export function getObjectTypePropertyFlagsLabels(input: ObjectTypePropertyFlags)
   return types;
 }
 
+export enum NamespaceFunctionParameterFlags {
+  None = 0,
+  Required = 1 << 0,
+  CompileTimeConstant = 1 << 1,
+  DeployTimeConstant = 1 << 2,
+}
+
+const NamespaceFunctionParameterFlagsLabel = new Map<NamespaceFunctionParameterFlags, string>([
+  [NamespaceFunctionParameterFlags.Required, 'Required'],
+  [NamespaceFunctionParameterFlags.CompileTimeConstant, 'CompileTimeConstant'],
+  [NamespaceFunctionParameterFlags.DeployTimeConstant, 'DeployTimeConstant'],
+]);
+
+export function getNamespaceFunctionParameterFlagsLabels(input: NamespaceFunctionParameterFlags) {
+  const types = [];
+  for (const [key, value] of NamespaceFunctionParameterFlagsLabel) {
+    if ((key & input) === key) {
+      types.push(value);
+    }
+  }
+
+  return types;
+}
+
+export enum BicepSourceFileKind {
+  BicepFile = 1,
+  ParamsFile = 2,
+}
+
 export enum TypeBaseKind {
   BuiltInType = 'BuiltInType',
   ObjectType = 'ObjectType',
@@ -107,6 +136,7 @@ export enum TypeBaseKind {
   IntegerType = 'IntegerType',
   StringType = 'StringType',
   FunctionType = 'FunctionType',
+  NamespaceFunctionType = 'NamespaceFunctionType',
 }
 
 export function getTypeBaseKindLabel(input: TypeBaseKind): string {
@@ -171,6 +201,22 @@ export type FunctionType = TypeBase<TypeBaseKind.FunctionType, {
   output: TypeReference;
 }>
 
+export type NamespaceFunctionParameter = {
+  name: string;
+  type: TypeReference;
+  description?: string;
+  flags: NamespaceFunctionParameterFlags;
+}
+
+export type NamespaceFunctionType = TypeBase<TypeBaseKind.NamespaceFunctionType, {
+  name: string;
+  description?: string;
+  evaluatedLanguageExpression?: string;
+  parameters: NamespaceFunctionParameter[];
+  outputType: TypeReference;
+  visibleInFileKind?: BicepSourceFileKind;
+}>
+
 export type DiscriminatedObjectType = TypeBase<TypeBaseKind.DiscriminatedObjectType, {
   name: string;
   discriminator: string;
@@ -215,7 +261,8 @@ export type BicepType = BuiltInType |
   ObjectType |
   DiscriminatedObjectType |
   ArrayType |
-  FunctionType;
+  FunctionType |
+  NamespaceFunctionType;
 
 export type ObjectTypeProperty = {
   type: TypeReference;
@@ -409,11 +456,31 @@ export class TypeFactory {
       output,
     });
   }
+
+  public addNamespaceFunctionType(
+    name: string,
+    parameters: NamespaceFunctionParameter[],
+    outputType: TypeReference,
+    description?: string,
+    evaluatedLanguageExpression?: string,
+    visibleInFileKind?: BicepSourceFileKind,
+  ) {
+    return this.addType({
+      type: TypeBaseKind.NamespaceFunctionType,
+      name,
+      description,
+      evaluatedLanguageExpression,
+      parameters,
+      outputType,
+      visibleInFileKind,
+    });
+  }
 }
 
 export interface TypeIndex {
   resources: Record<string, CrossFileTypeReference>;
   resourceFunctions: Record<string, Record<string, CrossFileTypeReference[]>>;
+  namespaceFunctions: CrossFileTypeReference[];
   settings?: TypeSettings;
   fallbackResourceType?: CrossFileTypeReference;
 }

@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ResourceFunctionType, ResourceType, TypeBaseKind, TypeFile, TypeIndex, CrossFileTypeReference, TypeSettings } from "./types";
+import { ResourceFunctionType, ResourceType, TypeBaseKind, TypeFile, TypeIndex, CrossFileTypeReference, TypeSettings, NamespaceFunctionType } from "./types";
 import { orderBy } from "./utils";
 
 export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void, settings?: TypeSettings, fallbackResourceType?: CrossFileTypeReference): TypeIndex {
   const resourceTypes = new Set<string>();
   const resourceFunctions = new Set<string>();
+  const namespaceFunctionNames = new Set<string>();
   const resDictionary: Record<string, CrossFileTypeReference> = {};
   const funcDictionary: Record<string, Record<string, CrossFileTypeReference[]>> = {};
+  const namespaceFunctions: CrossFileTypeReference[] = [];
 
   // Use a consistent sort order so that file system differences don't generate changes
   for (const typeFile of orderBy(typeFiles, f => f.relativePath.toLowerCase())) {
@@ -46,12 +48,27 @@ export function buildIndex(typeFiles: TypeFile[], logFunc: (val: string) => void
 
         continue;
       }
+
+      if (type.type == TypeBaseKind.NamespaceFunctionType) {
+        const namespaceFunction = type as NamespaceFunctionType;
+        const funcName = namespaceFunction.name.toLowerCase();
+        
+        if (namespaceFunctionNames.has(funcName)) {
+          logFunc(`WARNING: Found duplicate namespace function "${namespaceFunction.name}"`);
+          continue;
+        }
+        namespaceFunctionNames.add(funcName);
+        
+        namespaceFunctions.push(new CrossFileTypeReference(typeFile.relativePath, types.indexOf(type)));
+        continue;
+      }
     }
   }
 
   return {
     resources: resDictionary,
     resourceFunctions: funcDictionary,
+    namespaceFunctions: namespaceFunctions,
     settings: settings,
     fallbackResourceType: fallbackResourceType,
   }

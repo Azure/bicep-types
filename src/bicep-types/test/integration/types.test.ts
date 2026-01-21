@@ -4,7 +4,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
-import { CrossFileTypeReference, FunctionParameter, ObjectTypePropertyFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings, ResourceType, AllExceptExtension, All } from '../../src/types';
+import { CrossFileTypeReference, FunctionParameter, ObjectTypePropertyFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings, ResourceType, AllExceptExtension, All, NamespaceFunctionParameterFlags, BicepSourceFileKind, NamespaceFunctionType } from '../../src/types';
 import { readTypesJson, writeIndexJson, writeTypesJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
 import { buildIndex } from '../../src/indexer';
@@ -55,6 +55,23 @@ describe('types tests', () => {
     const funcArg: FunctionParameter = { name: 'arg', type: factory.addStringType() };
     const funcArg2: FunctionParameter = { name: 'arg2', type: factory.addStringType() };
     const func = factory.addFunctionType([funcArg, funcArg2], factory.addBooleanType());
+
+    // Add a NamespaceFunctionType to test serialization
+    factory.addNamespaceFunctionType(
+      'binding',
+      [
+        {
+          name: 'bindingKey',
+          type: factory.addStringType(),
+          description: 'The binding key parameter',
+          flags: NamespaceFunctionParameterFlags.Required,
+        },
+      ],
+      factory.addAnyType(),
+      'Binding function',
+      "[externalInput('binding', parameters('bindingKey'))]",
+      BicepSourceFileKind.ParamsFile,
+    );
 
     const res = factory.addResourceType('foo@v1', props, ScopeType.None, ScopeType.None, { doSomething: { type: func } });
 
@@ -205,7 +222,7 @@ async function verifyBaselines(factory: TypeFactory, typesPath: string, testName
 async function expectFiles(testName: string, typeFiles: TypeFile[], index: TypeIndex) {
   const baseDir = `${baselinesDir}/${testName}`;
   await expectFileContents(`${baseDir}/index.json`, writeIndexJson(index));
-  await expectFileContents(`${baseDir}/index.md`, writeIndexMarkdown(index));
+  await expectFileContents(`${baseDir}/index.md`, writeIndexMarkdown(index, typeFiles));
   for (const { types, relativePath } of typeFiles) {
     await expectFileContents(`${baseDir}/${relativePath}`, writeTypesJson(types));
     await expectFileContents(`${baseDir}/${relativePath.substring(0, relativePath.lastIndexOf('.'))}.md`, writeMarkdown(types));

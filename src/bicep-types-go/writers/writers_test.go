@@ -146,7 +146,7 @@ func TestMarkdownWriter_WriteTypeIndex(t *testing.T) {
 	idx.AddResource("Microsoft.Test/resources", "2023-02-01", types.CrossFileTypeReference{RelativePath: "providers/Microsoft.Test/resources.json", Ref: 1})
 
 	var buf bytes.Buffer
-	err := writer.WriteTypeIndex(&buf, idx)
+	err := writer.WriteTypeIndex(&buf, idx, nil)
 	require.NoError(t, err)
 
 	output := buf.String()

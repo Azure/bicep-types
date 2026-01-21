@@ -4,5 +4,6 @@
       "$ref": "http/v1/types.json#/8"
     }
   },
-  "resourceFunctions": {}
+  "resourceFunctions": {},
+  "namespaceFunctions": []
 }

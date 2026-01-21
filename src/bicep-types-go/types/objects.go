@@ -147,6 +147,110 @@ func (t *ResourceFunctionType) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// NamespaceFunctionParameter represents a parameter of a namespace function
+type NamespaceFunctionParameter struct {
+	Name        string                          `json:"name"`
+	Type        ITypeReference                  `json:"type"`
+	Description string                          `json:"description,omitempty"`
+	Flags       NamespaceFunctionParameterFlags `json:"flags"`
+}
+
+// NamespaceFunctionType represents a namespace function type
+type NamespaceFunctionType struct {
+	Name                        string                       `json:"name"`
+	Description                 string                       `json:"description,omitempty"`
+	EvaluatedLanguageExpression string                       `json:"evaluatedLanguageExpression,omitempty"`
+	Parameters                  []NamespaceFunctionParameter `json:"parameters"`
+	OutputType                  ITypeReference               `json:"outputType"`
+	VisibleInFileKind           *BicepSourceFileKind         `json:"visibleInFileKind,omitempty"`
+}
+
+func (*NamespaceFunctionType) Type() string { return "NamespaceFunctionType" }
+
+func (t *NamespaceFunctionType) MarshalJSON() ([]byte, error) {
+	return marshalTypeWithDiscriminator(t.Type(), struct {
+		Name                        string                       `json:"name"`
+		Description                 string                       `json:"description,omitempty"`
+		EvaluatedLanguageExpression string                       `json:"evaluatedLanguageExpression,omitempty"`
+		Parameters                  []NamespaceFunctionParameter `json:"parameters"`
+		OutputType                  ITypeReference               `json:"outputType"`
+		VisibleInFileKind           *BicepSourceFileKind         `json:"visibleInFileKind,omitempty"`
+	}{
+		Name:                        t.Name,
+		Description:                 t.Description,
+		EvaluatedLanguageExpression: t.EvaluatedLanguageExpression,
+		Parameters:                  t.Parameters,
+		OutputType:                  t.OutputType,
+		VisibleInFileKind:           t.VisibleInFileKind,
+	})
+}
+
+// UnmarshalJSON for NamespaceFunctionParameter
+func (p *NamespaceFunctionParameter) UnmarshalJSON(data []byte) error {
+	var temp struct {
+		Name        string                          `json:"name"`
+		Type        json.RawMessage                 `json:"type"`
+		Description string                          `json:"description,omitempty"`
+		Flags       NamespaceFunctionParameterFlags `json:"flags"`
+	}
+
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+
+	// Unmarshal type reference
+	ref, err := unmarshalTypeReference(temp.Type)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal namespace function parameter type: %w", err)
+	}
+
+	p.Name = temp.Name
+	p.Type = ref
+	p.Description = temp.Description
+	p.Flags = temp.Flags
+
+	return nil
+}
+
+// UnmarshalJSON for NamespaceFunctionType
+func (t *NamespaceFunctionType) UnmarshalJSON(data []byte) error {
+	var temp struct {
+		Name                        string               `json:"name"`
+		Description                 string               `json:"description,omitempty"`
+		EvaluatedLanguageExpression string               `json:"evaluatedLanguageExpression,omitempty"`
+		Parameters                  []json.RawMessage    `json:"parameters"`
+		OutputType                  json.RawMessage      `json:"outputType"`
+		VisibleInFileKind           *BicepSourceFileKind `json:"visibleInFileKind,omitempty"`
+	}
+
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+
+	// Unmarshal parameters
+	params := make([]NamespaceFunctionParameter, len(temp.Parameters))
+	for i, paramData := range temp.Parameters {
+		if err := json.Unmarshal(paramData, &params[i]); err != nil {
+			return fmt.Errorf("failed to unmarshal namespace function parameter %d: %w", i, err)
+		}
+	}
+
+	// Unmarshal output type reference
+	outputRef, err := unmarshalTypeReference(temp.OutputType)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal namespace function output type: %w", err)
+	}
+
+	t.Name = temp.Name
+	t.Description = temp.Description
+	t.EvaluatedLanguageExpression = temp.EvaluatedLanguageExpression
+	t.Parameters = params
+	t.OutputType = outputRef
+	t.VisibleInFileKind = temp.VisibleInFileKind
+
+	return nil
+}
+
 // UnmarshalJSON for ObjectTypeProperty
 func (p *ObjectTypeProperty) UnmarshalJSON(data []byte) error {
 	var temp struct {
