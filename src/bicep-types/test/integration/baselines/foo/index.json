@@ -1,10 +1,15 @@
 {
   "resources": {
     "foo@v1": {
-      "$ref": "foo/types.json#/9"
+      "$ref": "foo/types.json#/10"
     }
   },
   "resourceFunctions": {},
+  "namespaceFunctions": [
+    {
+      "$ref": "foo/types.json#/9"
+    }
+  ],
   "settings": {
     "name": "Foo",
     "isSingleton": true,

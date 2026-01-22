@@ -17,6 +17,12 @@
 0. **arg**: string
 1. **arg2**: string
 
+## Namespace Function binding
+* **Description**: Binding function
+### Parameters
+1. **bindingKey**: string
+* **Output**: any
+
 ## def
 ### Properties
 

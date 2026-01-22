@@ -38,8 +38,8 @@ func (w *MarkdownWriter) WriteTypes(writer io.Writer, typesList []types.Type) er
 }
 
 // WriteTypeIndex writes the provided type index to markdown using the TypeScript formatting.
-func (w *MarkdownWriter) WriteTypeIndex(writer io.Writer, idx *index.TypeIndex) error {
-	content := generateIndexMarkdown(idx)
+func (w *MarkdownWriter) WriteTypeIndex(writer io.Writer, idx *index.TypeIndex, typeFiles []index.TypeFile) error {
+	content := generateIndexMarkdown(idx, typeFiles)
 	_, err := io.WriteString(writer, content)
 	return err
 }
@@ -102,6 +102,7 @@ func generateTypesMarkdown(typesList []types.Type, fileHeading string) (string, 
 
 	var resourceTypes []*types.ResourceType
 	var resourceFunctionTypes []*types.ResourceFunctionType
+	var namespaceFunctionTypes []*types.NamespaceFunctionType
 
 	for _, t := range typesList {
 		switch concrete := t.(type) {
@@ -109,6 +110,8 @@ func generateTypesMarkdown(typesList []types.Type, fileHeading string) (string, 
 			resourceTypes = append(resourceTypes, concrete)
 		case *types.ResourceFunctionType:
 			resourceFunctionTypes = append(resourceFunctionTypes, concrete)
+		case *types.NamespaceFunctionType:
+			namespaceFunctionTypes = append(namespaceFunctionTypes, concrete)
 		}
 	}
 
@@ -146,15 +149,29 @@ func generateTypesMarkdown(typesList []types.Type, fileHeading string) (string, 
 		findTypesToWrite(typesList, &typesToWrite, fn.Output)
 	}
 
+	for _, nfn := range namespaceFunctionTypes {
+		if nfn.Parameters != nil {
+			for _, param := range nfn.Parameters {
+				appendTypeForReference(typesList, &typesToWrite, param.Type)
+				findTypesToWrite(typesList, &typesToWrite, param.Type)
+			}
+		}
+		appendTypeForReference(typesList, &typesToWrite, nfn.OutputType)
+		findTypesToWrite(typesList, &typesToWrite, nfn.OutputType)
+	}
+
 	deduped := dedupeTypes(typesToWrite)
 	sortTypesByName(deduped)
 
-	combined := make([]types.Type, 0, len(resourceTypes)+len(resourceFunctionTypes)+len(deduped))
+	combined := make([]types.Type, 0, len(resourceTypes)+len(resourceFunctionTypes)+len(namespaceFunctionTypes)+len(deduped))
 	for _, rt := range resourceTypes {
 		combined = append(combined, rt)
 	}
 	for _, rft := range resourceFunctionTypes {
 		combined = append(combined, rft)
+	}
+	for _, nft := range namespaceFunctionTypes {
+		combined = append(combined, nft)
 	}
 	combined = append(combined, deduped...)
 
@@ -167,7 +184,7 @@ func generateTypesMarkdown(typesList []types.Type, fileHeading string) (string, 
 	return md.String(), nil
 }
 
-func generateIndexMarkdown(idx *index.TypeIndex) string {
+func generateIndexMarkdown(idx *index.TypeIndex, typeFiles []index.TypeFile) string {
 	md := &markdownBuilder{}
 	md.writeHeading(1, "Bicep Types")
 
@@ -225,6 +242,38 @@ func generateIndexMarkdown(idx *index.TypeIndex) string {
 		}
 	}
 
+	if len(idx.NamespaceFunctions) > 0 {
+		md.writeHeading(2, "Namespace Functions")
+
+		for _, ref := range idx.NamespaceFunctions {
+			mdPath := relativeMarkdownPath(ref)
+
+			// Find the function name from typeFiles if available
+			functionName := "#unknown"
+			for _, tf := range typeFiles {
+				if tf.RelativePath == getRelativePath(ref) {
+					refIndex := getRefIndex(ref)
+					if refIndex >= 0 && refIndex < len(tf.Types) {
+						if nft, ok := tf.Types[refIndex].(*types.NamespaceFunctionType); ok {
+							functionName = nft.Name
+						}
+					}
+					break
+				}
+			}
+
+			// Generate anchor from heading text "Namespace Function <name>"
+			headingText := fmt.Sprintf("Namespace Function %s", functionName)
+			anchor := strings.ToLower(strings.ReplaceAll(headingText, " ", "-"))
+			anchor = anchorize(anchor)
+
+			md.writeHeading(3, functionName)
+			md.writeBullet("Link", fmt.Sprintf("[%s](%s#%s)", functionName, mdPath, anchor))
+		}
+
+		md.writeNewLine()
+	}
+
 	return md.String()
 }
 
@@ -272,6 +321,31 @@ func writeComplexType(md *markdownBuilder, typesList []types.Type, t types.Type,
 			return err
 		}
 		md.writeBullet("Output", output)
+		md.writeNewLine()
+	case *types.NamespaceFunctionType:
+		md.writeHeading(nesting, fmt.Sprintf("Namespace Function %s", concrete.Name))
+		description := "(none)"
+		if concrete.Description != "" {
+			description = concrete.Description
+		}
+		md.writeBullet("Description", description)
+
+		if len(concrete.Parameters) > 0 {
+			md.writeHeading(nesting+1, "Parameters")
+			for i, param := range concrete.Parameters {
+				paramTypeName, err := getTypeName(md, typesList, param.Type)
+				if err != nil {
+					return err
+				}
+				md.writeNumbered(i+1, param.Name, paramTypeName)
+			}
+		}
+
+		outputTypeName, err := getTypeName(md, typesList, concrete.OutputType)
+		if err != nil {
+			return err
+		}
+		md.writeBullet("Output", outputTypeName)
 		md.writeNewLine()
 	case *types.ObjectType:
 		if includeHeader {
@@ -768,4 +842,30 @@ func convertJsonPathToMarkdown(path string) string {
 	}
 
 	return path[:idx] + ".md"
+}
+
+func getRelativePath(ref types.ITypeReference) string {
+	switch concrete := ref.(type) {
+	case types.CrossFileTypeReference:
+		return concrete.RelativePath
+	case *types.CrossFileTypeReference:
+		return concrete.RelativePath
+	default:
+		return ""
+	}
+}
+
+func getRefIndex(ref types.ITypeReference) int {
+	switch concrete := ref.(type) {
+	case types.CrossFileTypeReference:
+		return concrete.Ref
+	case *types.CrossFileTypeReference:
+		return concrete.Ref
+	case types.TypeReference:
+		return concrete.Ref
+	case *types.TypeReference:
+		return concrete.Ref
+	default:
+		return -1
+	}
 }

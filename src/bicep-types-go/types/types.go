@@ -63,6 +63,24 @@ const (
 	TypePropertyFlagsIdentifier         TypePropertyFlags = 1 << 4
 )
 
+// NamespaceFunctionParameterFlags represents flags for namespace function parameters
+type NamespaceFunctionParameterFlags int
+
+const (
+	NamespaceFunctionParameterFlagsNone                NamespaceFunctionParameterFlags = 0
+	NamespaceFunctionParameterFlagsRequired            NamespaceFunctionParameterFlags = 1 << 0
+	NamespaceFunctionParameterFlagsCompileTimeConstant NamespaceFunctionParameterFlags = 1 << 1
+	NamespaceFunctionParameterFlagsDeployTimeConstant  NamespaceFunctionParameterFlags = 1 << 2
+)
+
+// BicepSourceFileKind represents the kind of Bicep source file
+type BicepSourceFileKind int
+
+const (
+	BicepSourceFileKindBicepFile  BicepSourceFileKind = 1
+	BicepSourceFileKindParamsFile BicepSourceFileKind = 2
+)
+
 // ObjectTypePropertyFlags represents flags specific to object type properties
 // type ObjectTypePropertyFlags int
 
@@ -309,6 +327,12 @@ func UnmarshalType(data []byte) (Type, error) {
 		return &t, nil
 	case "ResourceFunctionType":
 		var t ResourceFunctionType
+		if err := json.Unmarshal(data, &t); err != nil {
+			return nil, err
+		}
+		return &t, nil
+	case "NamespaceFunctionType":
+		var t NamespaceFunctionType
 		if err := json.Unmarshal(data, &t); err != nil {
 			return nil, err
 		}

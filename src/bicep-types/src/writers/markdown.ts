@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectTypePropertyFlagsLabels, getScopeTypeLabels, ObjectTypeProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, StringType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType, IntegerType, FunctionType } from '../types';
+import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectTypePropertyFlagsLabels, getScopeTypeLabels, ObjectTypeProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, StringType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType, IntegerType, FunctionType, NamespaceFunctionType, TypeFile } from '../types';
 import { groupBy, orderBy } from '../utils';
 
 class MarkdownFile {
@@ -218,6 +218,22 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
         md.writeNewLine();
         return;
       }
+      case TypeBaseKind.NamespaceFunctionType: {
+        const namespaceFunctionType = type as NamespaceFunctionType;
+        md.writeHeading(nesting, `Namespace Function ${namespaceFunctionType.name}`);
+        md.writeBullet("Description", namespaceFunctionType.description || "(none)");
+        if (namespaceFunctionType.parameters && namespaceFunctionType.parameters.length > 0) {
+          md.writeHeading(nesting + 1, "Parameters");
+          for (let i = 0; i < namespaceFunctionType.parameters.length; i++) {
+            const param = namespaceFunctionType.parameters[i];
+            md.writeNumbered(i + 1, param.name, getTypeName(types, param.type));
+          }
+        }
+        md.writeBullet("Output", getTypeName(types, namespaceFunctionType.outputType));
+
+        md.writeNewLine();
+        return;
+      }
       case TypeBaseKind.ObjectType: {
         const objectType = type as ObjectType;
         if (includeHeader) {
@@ -274,6 +290,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
 
     const resourceTypes = orderBy(types.filter(t => t.type == TypeBaseKind.ResourceType) as ResourceType[], x => x.name.split('@')[0].toLowerCase());
     const resourceFunctionTypes = orderBy(types.filter(t => t.type == TypeBaseKind.ResourceFunctionType) as ResourceFunctionType[], x => x.name.split('@')[0].toLowerCase());
+    const namespaceFunctionTypes = orderBy(types.filter(t => t.type == TypeBaseKind.NamespaceFunctionType) as NamespaceFunctionType[], x => x.name.toLowerCase());
     const typesToWrite: BicepType[] = []
 
     for (const resourceType of resourceTypes) {
@@ -288,6 +305,17 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       }
       typesToWrite.push(types[resourceFunctionType.output.index]);
       findTypesToWrite(types, typesToWrite, resourceFunctionType.output);
+    }
+
+    for (const namespaceFunctionType of namespaceFunctionTypes) {
+      if (namespaceFunctionType.parameters) {
+        for (const param of namespaceFunctionType.parameters) {
+          typesToWrite.push(types[param.type.index]);
+          findTypesToWrite(types, typesToWrite, param.type);
+        }
+      }
+      typesToWrite.push(types[namespaceFunctionType.outputType.index]);
+      findTypesToWrite(types, typesToWrite, namespaceFunctionType.outputType);
     }
 
     // There could be duplicates in typesToWrite. Dedupe by object reference here.
@@ -305,7 +333,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
       return 0;
     });
 
-    for (const type of (resourceTypes as BicepType[]).concat(resourceFunctionTypes).concat(dedupedTypesToWrite)) {
+    for (const type of (resourceTypes as BicepType[]).concat(resourceFunctionTypes).concat(namespaceFunctionTypes).concat(dedupedTypesToWrite)) {
       writeComplexType(types, type, 2, true);
     }
 
@@ -315,7 +343,7 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
   return generateMarkdown(types);
 }
 
-export function writeIndexMarkdown(index: TypeIndex) {
+export function writeIndexMarkdown(index: TypeIndex, typeFiles?: TypeFile[]) {
   const md = new MarkdownFile();
   md.writeHeading(1, 'Bicep Types');
 
@@ -339,6 +367,35 @@ export function writeIndexMarkdown(index: TypeIndex) {
 
       md.writeNewLine();
     }
+  }
+
+  if (index.namespaceFunctions && index.namespaceFunctions.length > 0) {
+    md.writeHeading(2, 'Namespace Functions');
+    
+    for (let i = 0; i < index.namespaceFunctions.length; i++) {
+      const ref = index.namespaceFunctions[i];
+      const jsonPath = ref.relativePath;
+      const mdPath = jsonPath.substring(0, jsonPath.toLowerCase().lastIndexOf('.json')) + '.md';
+      
+      // Find the function name from typeFiles if available
+      let functionName = `#${ref.index}`;
+      if (typeFiles) {
+        const typeFile = typeFiles.find(tf => tf.relativePath === ref.relativePath);
+        if (typeFile && typeFile.types[ref.index]) {
+          const type = typeFile.types[ref.index];
+          if (type.type === TypeBaseKind.NamespaceFunctionType) {
+            functionName = (type as NamespaceFunctionType).name;
+          }
+        }
+      }
+      
+      const anchor = `namespace-function-${functionName.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase()}`;
+      
+      md.writeHeading(3, functionName);
+      md.writeBullet('Link', `[${functionName}](${mdPath}#${anchor})`);
+    }
+    
+    md.writeNewLine();
   }
 
   return md.toString();

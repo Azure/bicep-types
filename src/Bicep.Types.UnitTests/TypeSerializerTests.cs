@@ -107,6 +107,7 @@ namespace Azure.Bicep.Types.UnitTests
             var discriminatedObjectType = factory.Create(() => new DiscriminatedObjectType("disctest", "disctest", new Dictionary<string, ObjectTypeProperty>(), new Dictionary<string, ITypeReference>()));
             var resourceFunctionType = factory.Create(() => new ResourceFunctionType("listTest", "zona", "2020-01-01", factory.GetReference(objectType), factory.GetReference(objectType)));
             var anyType = factory.Create(() => new AnyType());
+            var namespaceFunctionType = factory.Create(() => new NamespaceFunctionType("binding", null, "[externalInput('binding', parameters('bindingKey'))]", [new NamespaceFunctionParameter("bindingKey", factory.GetReference(stringType), null, NamespaceFunctionParameterFlags.Required)], factory.GetReference(anyType), BicepSourceFileKind.ParamsFile));
             var nullType = factory.Create(() => new NullType());
             var booleanType = factory.Create(() => new BooleanType());
             var intType = factory.Create(() => new IntegerType(-10, 10));
@@ -126,10 +127,11 @@ namespace Azure.Bicep.Types.UnitTests
             var discriminatedObjectTypeDeserialized = deserialized[8].Should().BeOfType<DiscriminatedObjectType>().Subject;
             var apiAgnosticResourceFunctionTypeDeserialized = deserialized[9].Should().BeOfType<ResourceFunctionType>().Subject;
             var anyTypeDeserialized = deserialized[10].Should().BeOfType<AnyType>().Subject;
-            var nullTypeDeserialized = deserialized[11].Should().BeOfType<NullType>().Subject;
-            var booleanTypeDeserialized = deserialized[12].Should().BeOfType<BooleanType>().Subject;
-            var integerTypeDeserialized = deserialized[13].Should().BeOfType<IntegerType>().Subject;
-            var sensitiveObjectTypeDeserialized = deserialized[14].Should().BeOfType<ObjectType>().Subject;
+            var namespaceFunctionTypeDeserialized = deserialized[11].Should().BeOfType<NamespaceFunctionType>().Subject;
+            var nullTypeDeserialized = deserialized[12].Should().BeOfType<NullType>().Subject;
+            var booleanTypeDeserialized = deserialized[13].Should().BeOfType<BooleanType>().Subject;
+            var integerTypeDeserialized = deserialized[14].Should().BeOfType<IntegerType>().Subject;
+            var sensitiveObjectTypeDeserialized = deserialized[15].Should().BeOfType<ObjectType>().Subject;
 
             builtInTypeDeserialized.Kind.Should().Be(builtInType.Kind);
             objectTypeDeserialized.Name.Should().Be(objectType.Name);
@@ -146,6 +148,12 @@ namespace Azure.Bicep.Types.UnitTests
             stringLiteralTypeDeserialized.Value.Should().Be(stringLiteralType.Value);
             discriminatedObjectTypeDeserialized.Name.Should().Be(discriminatedObjectType.Name);
             apiAgnosticResourceFunctionTypeDeserialized.Name.Should().Be(resourceFunctionType.Name);
+            namespaceFunctionTypeDeserialized.Name.Should().Be(namespaceFunctionType.Name);
+            namespaceFunctionTypeDeserialized.VisibleInFileKind.Should().Be(BicepSourceFileKind.ParamsFile);
+            namespaceFunctionTypeDeserialized.Parameters[0].Name.Should().Be("bindingKey");
+            namespaceFunctionTypeDeserialized.Parameters[0].Type.Type.Should().Be(stringTypeDeserialized);
+            namespaceFunctionTypeDeserialized.Parameters[0].Flags.Should().Be(NamespaceFunctionParameterFlags.Required);
+            namespaceFunctionTypeDeserialized.VisibleInFileKind.Should().Be(BicepSourceFileKind.ParamsFile);
             integerTypeDeserialized.MinValue.Should().Be(-10);
             integerTypeDeserialized.MaxValue.Should().Be(10);
             sensitiveObjectTypeDeserialized.Name.Should().Be(sensitiveObjectType.Name);
