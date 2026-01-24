@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Bicep.Types.Concrete;
 using Azure.Bicep.Types.Index;
@@ -23,7 +24,7 @@ namespace Azure.Bicep.Types.Serialization;
 [JsonSerializable(typeof(BooleanType))]
 [JsonSerializable(typeof(IntegerType))]
 [JsonSerializable(typeof(StringType))]
-[JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault)]
+[JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 internal partial class TypeJsonContext : JsonSerializerContext
 {
 }
