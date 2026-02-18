@@ -19,9 +19,11 @@
 
 ## Namespace Function binding
 * **Description**: Binding function
+* **Evaluated language expression**: `[externalInput('binding', parameters('bindingKey'))]`
+* **Visible only in bicep file kind**: ParamsFile
 ### Parameters
-1. **bindingKey**: string
-* **Output**: any
+1. **bindingKey**: string (Required): The binding key parameter
+* **Output type**: any
 
 ## def
 ### Properties

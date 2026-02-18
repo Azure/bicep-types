@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getObjectTypePropertyFlagsLabels, getScopeTypeLabels, ObjectTypeProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, StringType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType, IntegerType, FunctionType, NamespaceFunctionType, TypeFile } from '../types';
+import { ArrayType, BuiltInType, DiscriminatedObjectType, getBuiltInTypeKindLabel, getNamespaceFunctionParameterFlagsLabels, getObjectTypePropertyFlagsLabels, getScopeTypeLabels, ObjectTypeProperty, ObjectType, ResourceFunctionType, ResourceType, StringLiteralType, StringType, BicepType, TypeBaseKind, TypeIndex, TypeReference, UnionType, IntegerType, FunctionType, NamespaceFunctionType, BicepSourceFileKind, TypeFile } from '../types';
 import { groupBy, orderBy } from '../utils';
 
 class MarkdownFile {
@@ -222,14 +222,22 @@ export function writeMarkdown(types: BicepType[], fileHeading?: string) {
         const namespaceFunctionType = type as NamespaceFunctionType;
         md.writeHeading(nesting, `Namespace Function ${namespaceFunctionType.name}`);
         md.writeBullet("Description", namespaceFunctionType.description || "(none)");
+        if (namespaceFunctionType.evaluatedLanguageExpression !== undefined) {
+          md.writeBullet("Evaluated language expression", `\`${namespaceFunctionType.evaluatedLanguageExpression}\``);
+        }
+        if (namespaceFunctionType.visibleInFileKind !== undefined) {
+          md.writeBullet("Visible only in bicep file kind", BicepSourceFileKind[namespaceFunctionType.visibleInFileKind]);
+        }
         if (namespaceFunctionType.parameters && namespaceFunctionType.parameters.length > 0) {
           md.writeHeading(nesting + 1, "Parameters");
           for (let i = 0; i < namespaceFunctionType.parameters.length; i++) {
             const param = namespaceFunctionType.parameters[i];
-            md.writeNumbered(i + 1, param.name, getTypeName(types, param.type));
+            const flagsString = param.flags ? ` (${getNamespaceFunctionParameterFlagsLabels(param.flags).join(', ')})` : '';
+            const descriptionString = param.description ? `: ${param.description}` : '';
+            md.writeNumbered(i + 1, param.name, `${getTypeName(types, param.type)}${flagsString}${descriptionString}`);
           }
         }
-        md.writeBullet("Output", getTypeName(types, namespaceFunctionType.outputType));
+        md.writeBullet("Output type", getTypeName(types, namespaceFunctionType.outputType));
 
         md.writeNewLine();
         return;
