@@ -330,6 +330,14 @@ func writeComplexType(md *markdownBuilder, typesList []types.Type, t types.Type,
 		}
 		md.writeBullet("Description", description)
 
+		if concrete.EvaluatedLanguageExpression != "" {
+			md.writeBullet("Evaluated language expression", fmt.Sprintf("`%s`", concrete.EvaluatedLanguageExpression))
+		}
+
+		if concrete.VisibleInFileKind != nil {
+			md.writeBullet("Visible only in bicep file kind", formatBicepSourceFileKind(*concrete.VisibleInFileKind))
+		}
+
 		if len(concrete.Parameters) > 0 {
 			md.writeHeading(nesting+1, "Parameters")
 			for i, param := range concrete.Parameters {
@@ -337,7 +345,14 @@ func writeComplexType(md *markdownBuilder, typesList []types.Type, t types.Type,
 				if err != nil {
 					return err
 				}
-				md.writeNumbered(i+1, param.Name, paramTypeName)
+				value := paramTypeName
+				if flags := formatNamespaceFunctionParameterFlags(param.Flags); flags != "" {
+					value += fmt.Sprintf(" (%s)", flags)
+				}
+				if param.Description != "" {
+					value += ": " + param.Description
+				}
+				md.writeNumbered(i+1, param.Name, value)
 			}
 		}
 
@@ -345,7 +360,7 @@ func writeComplexType(md *markdownBuilder, typesList []types.Type, t types.Type,
 		if err != nil {
 			return err
 		}
-		md.writeBullet("Output", outputTypeName)
+		md.writeBullet("Output type", outputTypeName)
 		md.writeNewLine()
 	case *types.ObjectType:
 		if includeHeader {
@@ -610,6 +625,37 @@ func getScopeTypeLabels(scope types.ScopeType) []string {
 	}
 
 	return result
+}
+
+func formatBicepSourceFileKind(kind types.BicepSourceFileKind) string {
+	switch kind {
+	case types.BicepSourceFileKindBicepFile:
+		return "BicepFile"
+	case types.BicepSourceFileKindParamsFile:
+		return "ParamsFile"
+	default:
+		return fmt.Sprintf("Unknown(%d)", int(kind))
+	}
+}
+
+func formatNamespaceFunctionParameterFlags(flags types.NamespaceFunctionParameterFlags) string {
+	labels := []struct {
+		flag  types.NamespaceFunctionParameterFlags
+		label string
+	}{
+		{types.NamespaceFunctionParameterFlagsRequired, "Required"},
+		{types.NamespaceFunctionParameterFlagsCompileTimeConstant, "CompileTimeConstant"},
+		{types.NamespaceFunctionParameterFlagsDeployTimeConstant, "DeployTimeConstant"},
+	}
+
+	names := make([]string, 0, len(labels))
+	for _, entry := range labels {
+		if flags&entry.flag == entry.flag {
+			names = append(names, entry.label)
+		}
+	}
+
+	return strings.Join(names, ", ")
 }
 
 func formatPropertyFlags(flags types.TypePropertyFlags) string {
