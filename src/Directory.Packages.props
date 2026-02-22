@@ -8,7 +8,7 @@
     <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.103" PrivateAssets="All"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="System.Text.Json" Version="10.0.2" />
+    <PackageVersion Include="System.Text.Json" Version="10.0.3" />
     <PackageVersion Include="FluentAssertions" Version="7.2.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="MSTest.TestAdapter" Version="3.10.4" />
