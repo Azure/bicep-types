@@ -34,6 +34,7 @@ export enum ScopeType {
   Subscription = 1 << 2,
   ResourceGroup = 1 << 3,
   Extension = 1 << 4,
+  DesiredStateConfiguration = 1 << 5,
 }
 
 export const AllExceptExtension = ScopeType.Tenant | ScopeType.ManagementGroup | ScopeType.Subscription | ScopeType.ResourceGroup;
@@ -45,6 +46,7 @@ const ScopeTypeLabel = new Map<ScopeType, string>([
   [ScopeType.Subscription, 'Subscription'],
   [ScopeType.ResourceGroup, 'ResourceGroup'],
   [ScopeType.Extension, 'Extension'],
+  [ScopeType.DesiredStateConfiguration, 'DesiredStateConfiguration'],
 ]);
 
 export function getScopeTypeLabels(input: ScopeType, ...scopeLabels: [ScopeType | undefined, string][]) {
