@@ -128,9 +128,8 @@ func TestBuildIndex_Basic(t *testing.T) {
 	require.True(t, exists)
 	funcs, exists := funcVersions["2023-01-01"]
 	require.True(t, exists)
-	funcRef, exists := funcs["list"]
-	require.True(t, exists)
-	crossFunc, ok := funcRef.(types.CrossFileTypeReference)
+	require.Len(t, funcs, 1)
+	crossFunc, ok := funcs[0].(types.CrossFileTypeReference)
 	require.True(t, ok)
 	assert.Equal(t, "foo/types.json", crossFunc.RelativePath)
 	assert.Equal(t, 2, crossFunc.Ref)
