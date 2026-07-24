@@ -38,6 +38,26 @@ namespace Azure.Bicep.Types.Validation.Graph
         /// <summary>All diagnostics accumulated across loaded type files.</summary>
         public IReadOnlyList<TypeValidationDiagnostic> LoadDiagnostics => loadDiagnostics;
 
+        /// <summary>
+        /// Returns the type files that graph traversal loaded and that parsed into a usable
+        /// type-file array.  Policy validation inspects every structurally usable element of
+        /// these reached files (including elements at unreferenced indices), which is why this
+        /// exposes the whole reached file rather than only graph-visited nodes.  The index
+        /// document (served for same-file references) is excluded because its root is an object.
+        /// </summary>
+        public IEnumerable<PackageDocumentProviderResult> GetReachedUsableTypeFiles()
+        {
+            foreach (var result in cache.Values)
+            {
+                if (result.IsStructurallyUsable &&
+                    result.Document != null &&
+                    result.Document.Kind == PackageDocumentKind.TypeFile)
+                {
+                    yield return result;
+                }
+            }
+        }
+
         /// <summary>Loads (or returns the cached result for) a type file by package-relative path.</summary>
         public PackageDocumentProviderResult GetTypeFile(string packageRelativePath)
         {

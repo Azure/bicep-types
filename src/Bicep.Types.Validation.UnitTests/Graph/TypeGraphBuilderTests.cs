@@ -201,6 +201,59 @@ public class TypeGraphBuilderTests
         edges.Single(e => e.Role == TypeReferenceRole.DiscriminatedObjectElement).MemberName.Should().Be("a");
     }
 
+    [TestMethod]
+    public void ExtractEdges_reads_function_type_parameters_and_output()
+    {
+        const string json = @"[
+  { ""$type"": ""FunctionType"",
+    ""parameters"": [
+      { ""name"": ""a"", ""type"": { ""$ref"": ""#/1"" } },
+      { ""name"": ""b"", ""type"": { ""$ref"": ""#/2"" } }
+    ],
+    ""output"": { ""$ref"": ""#/3"" } }
+]";
+        var doc = GraphTestHelpers.Document("types.json", json);
+        var node = TypeGraphBuilder.BuildNodes(doc)![0]!;
+
+        var edges = TypeGraphBuilder.ExtractEdges(node);
+
+        edges.Select(e => e.Role).Should().BeEquivalentTo(new[]
+        {
+            TypeReferenceRole.FunctionParameter,
+            TypeReferenceRole.FunctionParameter,
+            TypeReferenceRole.FunctionOutput,
+        });
+        edges.Where(e => e.Role == TypeReferenceRole.FunctionParameter)
+            .Select(e => e.Reference.Index).Should().BeEquivalentTo(new[] { 1, 2 });
+        edges.Where(e => e.Role == TypeReferenceRole.FunctionParameter)
+            .Select(e => e.MemberName).Should().BeEquivalentTo(new[] { "[0]", "[1]" });
+        edges.Single(e => e.Role == TypeReferenceRole.FunctionOutput).Reference.Index.Should().Be(3);
+    }
+
+    [TestMethod]
+    public void ExtractEdges_function_type_skips_parameters_without_type_reference()
+    {
+        // A parameter that is not an object, or lacks a well-formed 'type' reference, yields no
+        // edge; a missing 'output' yields no output edge. The structural layer owns those shapes.
+        const string json = @"[
+  { ""$type"": ""FunctionType"",
+    ""parameters"": [
+      42,
+      { ""name"": ""noType"" },
+      { ""name"": ""bad"", ""type"": { ""$ref"": ""/rooted.json#/0"" } },
+      { ""name"": ""ok"", ""type"": { ""$ref"": ""#/1"" } }
+    ] }
+]";
+        var doc = GraphTestHelpers.Document("types.json", json);
+        var node = TypeGraphBuilder.BuildNodes(doc)![0]!;
+
+        var edges = TypeGraphBuilder.ExtractEdges(node);
+
+        edges.Should().ContainSingle()
+            .Which.Should().Match<TypeGraphEdge>(e =>
+                e.Role == TypeReferenceRole.FunctionParameter && e.Reference.Index == 1 && e.MemberName == "[3]");
+    }
+
     // ── Canonical reference-object shape ─────────────────────────────────────
 
     [TestMethod]

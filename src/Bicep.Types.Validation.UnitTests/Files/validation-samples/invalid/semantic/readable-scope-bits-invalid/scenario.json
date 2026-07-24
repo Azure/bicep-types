@@ -1,0 +1,9 @@
+{
+  "name": "readable-scope-bits-invalid",
+  "description": "A ResourceType readableScopes value has bits outside the known ScopeType mask (BCPVT029): error in canonicalWriter, warning in compatibleReader.",
+  "category": "invalid.semantic",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

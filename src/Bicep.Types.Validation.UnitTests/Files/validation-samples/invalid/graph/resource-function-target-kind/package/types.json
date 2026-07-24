@@ -1,0 +1,7 @@
+[
+  {
+    "$type": "ObjectType",
+    "name": "notAFunction",
+    "properties": {}
+  }
+]

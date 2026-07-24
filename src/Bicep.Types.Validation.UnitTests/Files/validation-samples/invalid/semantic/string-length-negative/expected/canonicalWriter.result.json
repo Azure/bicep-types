@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT027",
+      "severity": "error",
+      "message": "StringType.minLength at \u0027/2/minLength\u0027 in \u0027types.json\u0027 must be non-negative, but got -1.",
+      "path": "types.json",
+      "jsonPointer": "/2/minLength",
+      "line": 18,
+      "column": 5
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

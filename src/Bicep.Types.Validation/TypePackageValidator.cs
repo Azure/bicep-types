@@ -68,6 +68,17 @@ namespace Azure.Bicep.Types.Validation
                 var provider = new PackageDocumentProvider(readResult.FileSystem, indexDocument, effectiveOptions);
                 var graphDiagnostics = SemanticGraphValidator.Validate(provider, indexDocument, effectiveOptions);
                 diagnostics.AddRange(graphDiagnostics);
+
+                // Phase 5: scalar-semantic validation (value-domain constraints) over the type
+                // files graph traversal reached, before mode policy.
+                var scalarDiagnostics = Semantic.ScalarSemanticValidator.Validate(
+                    provider.GetReachedUsableTypeFiles(), effectiveOptions);
+                diagnostics.AddRange(scalarDiagnostics);
+
+                // Phase 4: mode-policy validation over the type files graph traversal reached.
+                var policyDiagnostics = Policy.PolicyValidator.Validate(
+                    provider.GetReachedUsableTypeFiles(), effectiveOptions);
+                diagnostics.AddRange(policyDiagnostics);
             }
 
             return TypePackageValidationResult.Create(effectiveOptions.Mode, diagnostics, effectiveOptions);

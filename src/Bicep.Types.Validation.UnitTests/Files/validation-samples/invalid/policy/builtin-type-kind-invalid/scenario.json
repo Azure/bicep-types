@@ -1,0 +1,1 @@
+{"name":"builtin-type-kind-invalid","description":"A BuiltInType.kind is outside the documented 1..8 range, which is an error in both modes (BCPVT025).","category":"invalid.policy","modes":["canonicalWriter","compatibleReader"]}

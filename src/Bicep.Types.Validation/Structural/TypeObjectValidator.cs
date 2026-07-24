@@ -57,22 +57,34 @@ namespace Azure.Bicep.Types.Validation.Structural
             }
 
             // Validate each described field.
-            // knownNames drives the unknown-property check below and is mode-aware:
-            // documented legacy fields are known in CompatibleReader but excluded (and
-            // therefore reported as unknown) in CanonicalWriter.
+            // knownNames drives the unknown-property check below. Documented legacy fields are
+            // known in both modes: the mode-policy layer (phase 4) owns their acceptance or
+            // rejection, so structural validation no longer reports them as unknown.
             var knownNames = new List<string>(descriptor.Fields.Count);
+
+            // CompatibleReader narrow relaxation: when a ResourceType uses a legacy scope field,
+            // the modern scope pair (readableScopes/writableScopes) is no longer required, mirroring
+            // the reader which accepts either the modern pair or a documented legacy form.
+            bool relaxModernScopeRequirement =
+                !context.IsCanonicalWriter &&
+                string.Equals(descriptor.Discriminator, "ResourceType", StringComparison.Ordinal) &&
+                (obj.TryGetProperty("scopeType", out _) ||
+                 obj.TryGetProperty("readOnlyScopes", out _) ||
+                 obj.TryGetProperty("flags", out _));
+
             foreach (var field in descriptor.Fields)
             {
-                // Legacy-compat-only fields: accept in CompatibleReader but treated as unknown in CanonicalWriter
-                if (field.LegacyCompatOnly && context.IsCanonicalWriter)
-                {
-                    // Will be caught by unknown-property check below
-                    continue;
-                }
-
                 knownNames.Add(field.Name);
 
-                if (field.Required)
+                bool required = field.Required;
+                if (relaxModernScopeRequirement &&
+                    (string.Equals(field.Name, "readableScopes", StringComparison.Ordinal) ||
+                     string.Equals(field.Name, "writableScopes", StringComparison.Ordinal)))
+                {
+                    required = false;
+                }
+
+                if (required)
                 {
                     if (!reader.RequireProperty(obj, jsonPointer, field.Name, out var fieldValue))
                     {
@@ -90,8 +102,8 @@ namespace Azure.Bicep.Types.Validation.Structural
             }
 
             // Unknown property check. Runs in both modes: genuinely unknown fields are
-            // rejected everywhere, while documented legacy fields are only in knownNames
-            // (and thus accepted) under CompatibleReader.
+            // rejected everywhere. Documented legacy fields are always in knownNames and are
+            // therefore accepted structurally in both modes (policy classifies them).
             var knownSet = new HashSet<string>(knownNames, StringComparer.Ordinal);
             knownSet.Add("$type");
 

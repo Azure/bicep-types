@@ -1,0 +1,39 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT010",
+      "severity": "error",
+      "message": "Required property \u0027readableScopes\u0027 is missing at \u0027/0\u0027 in \u0027types.json\u0027.",
+      "path": "types.json",
+      "jsonPointer": "/0",
+      "line": 2,
+      "column": 3
+    },
+    {
+      "code": "BCPVT010",
+      "severity": "error",
+      "message": "Required property \u0027writableScopes\u0027 is missing at \u0027/0\u0027 in \u0027types.json\u0027.",
+      "path": "types.json",
+      "jsonPointer": "/0",
+      "line": 2,
+      "column": 3
+    },
+    {
+      "code": "BCPVT022",
+      "severity": "error",
+      "message": "Property \u0027scopeType\u0027 at \u0027/0/scopeType\u0027 in \u0027types.json\u0027 is a legacy ResourceType scope field. CanonicalWriter packages must use \u0027readableScopes\u0027 and \u0027writableScopes\u0027.",
+      "path": "types.json",
+      "jsonPointer": "/0/scopeType",
+      "line": 6,
+      "column": 5
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 3,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

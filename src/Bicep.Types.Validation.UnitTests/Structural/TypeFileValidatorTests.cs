@@ -117,15 +117,15 @@ public class TypeFileValidatorTests
     }
 
     [TestMethod]
-    public void Legacy_field_is_rejected_as_unknown_in_canonical_mode()
+    public void Legacy_field_is_structurally_known_in_canonical_mode()
     {
-        // scopeType is a documented legacy field; CanonicalWriter treats it as unknown.
+        // scopeType is a documented legacy field. As of phase 4 the structural layer treats it as
+        // known in both modes; the mode-policy layer owns rejecting it in CanonicalWriter.
         var json = "[{\"$type\":\"ResourceType\",\"name\":\"X\",\"body\":{\"$ref\":\"#/0\"}," +
                    "\"readableScopes\":8,\"writableScopes\":8,\"scopeType\":0}]";
         var (ctx, reader) = CreateContext(json, TypePackageValidationMode.CanonicalWriter);
         TypeFileValidator.Validate(reader, ctx);
-        ctx.GetDiagnostics().Should().ContainSingle()
-            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.UnknownProperty);
+        ctx.GetDiagnostics().Should().BeEmpty();
     }
 
     [TestMethod]

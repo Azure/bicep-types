@@ -73,5 +73,33 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
 
         /// <summary>A nested type-object reference resolves to a kind not allowed for its role.</summary>
         public const string NestedTargetKindMismatch = "BCPVT021";
+
+        // ── Phase 4: mode policy ─────────────────────────────────────────────────
+
+        /// <summary>The package uses a documented legacy form that canonical writers must not emit.</summary>
+        public const string CanonicalFormViolation = "BCPVT022";
+
+        /// <summary>A compatible reader accepted a documented legacy form (warning).</summary>
+        public const string CompatibilityFormUsed = "BCPVT023";
+
+        /// <summary>A <c>ResourceType</c> mixes modern scope fields with effective legacy scope fields.</summary>
+        public const string ResourceScopeFormMixed = "BCPVT024";
+
+        /// <summary><c>BuiltInType.kind</c> is outside the documented serialized enum range.</summary>
+        public const string BuiltInTypeKindInvalid = "BCPVT025";
+
+        // ── Phase 5: semantic constraints ────────────────────────────────────────
+
+        /// <summary>A numeric range constraint has its minimum greater than its maximum.</summary>
+        public const string NumericRangeInvalid = "BCPVT026";
+
+        /// <summary>A length constraint (<c>minLength</c>/<c>maxLength</c>) is negative.</summary>
+        public const string LengthConstraintNegative = "BCPVT027";
+
+        /// <summary>An enum-valued field is outside its documented value set for this validator version.</summary>
+        public const string EnumValueInvalid = "BCPVT028";
+
+        /// <summary>A flags-valued field contains bits outside its known mask for this validator version.</summary>
+        public const string FlagsValueInvalid = "BCPVT029";
     }
 }

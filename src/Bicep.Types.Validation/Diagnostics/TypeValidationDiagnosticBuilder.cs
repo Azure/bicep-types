@@ -306,5 +306,158 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
                 column: column,
                 relatedLocations: relatedLocations);
         }
+
+        // ── Phase 4: mode policy ───────────────────────────────────────────────────
+
+        /// <summary>A legacy <c>ResourceType</c> scope field is present in a <c>CanonicalWriter</c> package.</summary>
+        public static TypeValidationDiagnostic CanonicalScopeFieldViolation(
+            string packageRelativePath, string jsonPointer, string fieldName, int line, int column)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.CanonicalFormViolation,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"Property '{fieldName}' at '{jsonPointer}' in '{packageRelativePath}' is a legacy ResourceType scope field. CanonicalWriter packages must use 'readableScopes' and 'writableScopes'.",
+                path: packageRelativePath,
+                jsonPointer: jsonPointer,
+                line: line,
+                column: column);
+        }
+
+        /// <summary>A legacy <c>ResourceType</c> scope field accepted for <c>CompatibleReader</c> (warning).</summary>
+        public static TypeValidationDiagnostic CompatibilityScopeFieldUsed(
+            string packageRelativePath, string jsonPointer, string fieldName, int line, int column)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.CompatibilityFormUsed,
+                severity: TypeValidationDiagnosticSeverity.Warning,
+                message: $"Property '{fieldName}' at '{jsonPointer}' in '{packageRelativePath}' is accepted only for CompatibleReader mode. Prefer canonical fields 'readableScopes' and 'writableScopes'.",
+                path: packageRelativePath,
+                jsonPointer: jsonPointer,
+                line: line,
+                column: column);
+        }
+
+        /// <summary>A <c>ResourceType</c> mixes modern scope fields with an effective legacy scope field.</summary>
+        public static TypeValidationDiagnostic ResourceScopeFormMixed(
+            string packageRelativePath, string jsonPointer, string legacyFieldName, int line, int column)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.ResourceScopeFormMixed,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"ResourceType at '{jsonPointer}' in '{packageRelativePath}' mixes modern scope fields with legacy scope field '{legacyFieldName}'. Use either the canonical modern pair or a documented legacy form, not both.",
+                path: packageRelativePath,
+                jsonPointer: jsonPointer,
+                line: line,
+                column: column);
+        }
+
+        /// <summary>A documented legacy <c>BuiltInType</c> kind is present in a <c>CanonicalWriter</c> package.</summary>
+        public static TypeValidationDiagnostic CanonicalBuiltInTypeViolation(
+            string packageRelativePath, string jsonPointer, long kind, string kindName, string? replacement, int line, int column)
+        {
+            string message = replacement != null
+                ? $"BuiltInType.kind at '{jsonPointer}' in '{packageRelativePath}' uses legacy built-in kind {kind} ('{kindName}'). CanonicalWriter packages must use '{replacement}'."
+                : $"BuiltInType.kind at '{jsonPointer}' in '{packageRelativePath}' uses reserved legacy built-in kind {kind} ('{kindName}'), which CanonicalWriter packages must not emit.";
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.CanonicalFormViolation,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: message,
+                path: packageRelativePath,
+                jsonPointer: jsonPointer,
+                line: line,
+                column: column);
+        }
+
+        /// <summary>A documented legacy <c>BuiltInType</c> kind accepted for <c>CompatibleReader</c> (warning).</summary>
+        public static TypeValidationDiagnostic CompatibilityBuiltInTypeUsed(
+            string packageRelativePath, string jsonPointer, long kind, string kindName, string? replacement, int line, int column)
+        {
+            string message = replacement != null
+                ? $"BuiltInType.kind at '{jsonPointer}' in '{packageRelativePath}' uses legacy built-in kind {kind} ('{kindName}') accepted only for CompatibleReader mode. Prefer '{replacement}'."
+                : $"BuiltInType.kind at '{jsonPointer}' in '{packageRelativePath}' uses reserved legacy built-in kind {kind} ('{kindName}'), accepted only for CompatibleReader mode.";
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.CompatibilityFormUsed,
+                severity: TypeValidationDiagnosticSeverity.Warning,
+                message: message,
+                path: packageRelativePath,
+                jsonPointer: jsonPointer,
+                line: line,
+                column: column);
+        }
+
+        /// <summary><c>BuiltInType.kind</c> is outside the documented serialized enum range (1..8).</summary>
+        public static TypeValidationDiagnostic BuiltInTypeKindInvalid(
+            string packageRelativePath, string jsonPointer, long kind, int line, int column)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.BuiltInTypeKindInvalid,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"BuiltInType.kind at '{jsonPointer}' in '{packageRelativePath}' must be one of 1..8, but got {kind}.",
+                path: packageRelativePath,
+                jsonPointer: jsonPointer,
+                line: line,
+                column: column);
+        }
+
+        // ── Phase 5: semantic constraints ────────────────────────────────────────
+
+        /// <summary>A numeric range constraint has its minimum greater than its maximum.</summary>
+        public static TypeValidationDiagnostic NumericRangeInvalid(
+            string packageRelativePath, string jsonPointer, string typeName,
+            string minFieldName, long minValue, string maxFieldName, long maxValue, int line, int column)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.NumericRangeInvalid,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"{typeName} at '{jsonPointer}' in '{packageRelativePath}' has {minFieldName} {minValue} greater than {maxFieldName} {maxValue}.",
+                path: packageRelativePath,
+                jsonPointer: jsonPointer,
+                line: line,
+                column: column);
+        }
+
+        /// <summary>A length constraint (<c>minLength</c>/<c>maxLength</c>) is negative.</summary>
+        public static TypeValidationDiagnostic LengthConstraintNegative(
+            string packageRelativePath, string jsonPointer, string typeName, string fieldName, long value, int line, int column)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.LengthConstraintNegative,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"{typeName}.{fieldName} at '{jsonPointer}' in '{packageRelativePath}' must be non-negative, but got {value}.",
+                path: packageRelativePath,
+                jsonPointer: jsonPointer,
+                line: line,
+                column: column);
+        }
+
+        /// <summary>An enum-valued field is outside its documented value set for this validator version.</summary>
+        public static TypeValidationDiagnostic EnumValueInvalid(
+            string packageRelativePath, string jsonPointer, string qualifiedFieldName, string allowedText, long value,
+            TypeValidationDiagnosticSeverity severity, int line, int column)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.EnumValueInvalid,
+                severity: severity,
+                message: $"{qualifiedFieldName} at '{jsonPointer}' in '{packageRelativePath}' must be one of {allowedText} for this validator version, but got {value}.",
+                path: packageRelativePath,
+                jsonPointer: jsonPointer,
+                line: line,
+                column: column);
+        }
+
+        /// <summary>A flags-valued field contains bits outside its known mask for this validator version.</summary>
+        public static TypeValidationDiagnostic FlagsValueInvalid(
+            string packageRelativePath, string jsonPointer, string description, long unknownBits, long knownMask,
+            TypeValidationDiagnosticSeverity severity, int line, int column)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.FlagsValueInvalid,
+                severity: severity,
+                message: $"{description} at '{jsonPointer}' in '{packageRelativePath}' contain unknown bits {unknownBits} for this validator version. Known mask is {knownMask}.",
+                path: packageRelativePath,
+                jsonPointer: jsonPointer,
+                line: line,
+                column: column);
+        }
     }
 }

@@ -1,0 +1,14 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "NamespaceFunctionType",
+    "name": "lookup",
+    "parameters": [],
+    "outputType": {
+      "$ref": "#/0"
+    },
+    "visibleInFileKind": 99
+  }
+]
