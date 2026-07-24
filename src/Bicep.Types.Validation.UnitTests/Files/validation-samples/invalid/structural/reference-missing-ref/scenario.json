@@ -1,0 +1,1 @@
+{"name":"reference-missing-ref","description":"A reference object is missing the required $ref property.","category":"structural","modes":["canonicalWriter","compatibleReader"]}

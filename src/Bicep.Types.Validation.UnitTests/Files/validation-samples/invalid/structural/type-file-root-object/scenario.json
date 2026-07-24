@@ -1,0 +1,1 @@
+{"name":"type-file-root-object","description":"A type file root is a JSON object instead of an array.","category":"structural","modes":["canonicalWriter","compatibleReader"]}

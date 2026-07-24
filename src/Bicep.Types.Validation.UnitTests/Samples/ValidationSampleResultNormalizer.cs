@@ -18,13 +18,19 @@ public static class ValidationSampleResultNormalizer
     private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
 
     /// <summary>Serializes a result into the deterministic baseline JSON shape.</summary>
-    public static string Normalize(TypePackageValidationResult result)
+    /// <param name="result">The validation result to normalize.</param>
+    /// <param name="temporaryRoot">
+    /// When provided, occurrences of this path (or its forward-slash equivalent) in diagnostic
+    /// messages are replaced with the stable placeholder <c>&lt;sample-root&gt;</c> so that
+    /// baselines are reproducible across machines and temp-directory locations.
+    /// </param>
+    public static string Normalize(TypePackageValidationResult result, string? temporaryRoot = null)
     {
         var root = new JsonObject
         {
             ["isValid"] = result.IsValid,
             ["mode"] = ModeToString(result.Mode),
-            ["diagnostics"] = BuildDiagnostics(result.Diagnostics),
+            ["diagnostics"] = BuildDiagnostics(result.Diagnostics, temporaryRoot),
             ["diagnosticsTruncated"] = result.DiagnosticsTruncated,
             ["summary"] = new JsonObject
             {
@@ -45,7 +51,7 @@ public static class ValidationSampleResultNormalizer
         return node.ToJsonString(SerializerOptions);
     }
 
-    private static JsonArray BuildDiagnostics(IReadOnlyList<TypeValidationDiagnostic> diagnostics)
+    private static JsonArray BuildDiagnostics(IReadOnlyList<TypeValidationDiagnostic> diagnostics, string? temporaryRoot)
     {
         var array = new JsonArray();
         foreach (var diagnostic in diagnostics)
@@ -54,7 +60,7 @@ public static class ValidationSampleResultNormalizer
             {
                 ["code"] = diagnostic.Code,
                 ["severity"] = SeverityToString(diagnostic.Severity),
-                ["message"] = diagnostic.Message,
+                ["message"] = RedactPath(diagnostic.Message, temporaryRoot),
             };
 
             if (!string.IsNullOrEmpty(diagnostic.Path))
@@ -138,4 +144,22 @@ public static class ValidationSampleResultNormalizer
         TypeValidationDiagnosticSeverity.Info => "info",
         _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, "Unknown severity."),
     };
+
+    private static string RedactPath(string message, string? temporaryRoot)
+    {
+        if (string.IsNullOrEmpty(temporaryRoot) || string.IsNullOrEmpty(message))
+        {
+            return message;
+        }
+
+        // Replace both backslash and forward-slash variants of the temp root
+        var withForwardSlash = temporaryRoot.Replace('\\', '/');
+        var result = message
+            .Replace(temporaryRoot, "<sample-root>", StringComparison.Ordinal)
+            .Replace(withForwardSlash, "<sample-root>", StringComparison.Ordinal);
+
+        // Normalize any remaining backslash path separators that follow the placeholder
+        // so baselines are cross-platform stable.
+        return result.Replace("<sample-root>\\", "<sample-root>/", StringComparison.Ordinal);
+    }
 }

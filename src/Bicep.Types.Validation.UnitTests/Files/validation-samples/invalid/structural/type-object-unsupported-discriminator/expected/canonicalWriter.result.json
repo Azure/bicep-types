@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT009",
+      "severity": "error",
+      "message": "The \u0027$type\u0027 value \u0027NonExistentKind\u0027 at \u0027/0/$type\u0027 in \u0027types.json\u0027 is not a supported type kind.",
+      "path": "types.json",
+      "jsonPointer": "/0/$type",
+      "line": 1,
+      "column": 11
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

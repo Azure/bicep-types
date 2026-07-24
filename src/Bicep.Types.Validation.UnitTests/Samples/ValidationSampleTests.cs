@@ -53,7 +53,7 @@ public class ValidationSampleTests
             var validator = new TypePackageValidator();
             var result = validator.Validate(input, options);
 
-            var actual = ValidationSampleResultNormalizer.Normalize(result);
+            var actual = ValidationSampleResultNormalizer.Normalize(result, temporaryRoot);
             var expected = ValidationSampleResultNormalizer.Canonicalize(
                 ValidationSampleData.ReadResource(expectedResourceName));
 

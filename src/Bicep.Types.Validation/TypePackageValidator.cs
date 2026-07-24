@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using Azure.Bicep.Types.Validation.Diagnostics;
+using Azure.Bicep.Types.Validation.Graph;
 using Azure.Bicep.Types.Validation.Packaging;
+using Azure.Bicep.Types.Validation.Structural;
 
 namespace Azure.Bicep.Types.Validation
 {
@@ -12,10 +14,10 @@ namespace Azure.Bicep.Types.Validation
     /// Public entry point for validating a Bicep type package.
     /// </summary>
     /// <remarks>
-    /// Phase 1 is an input-only driver: directory and raw <c>index.json</c> inputs produce
-    /// an empty valid result, and archive inputs produce a deterministic not-implemented
-    /// diagnostic. Later phases insert structural, graph, and policy validators between input
-    /// resolution and result shaping without changing this call shape.
+    /// Phase 2 adds real package-file reading and structural validation for directory
+    /// and raw <c>index.json</c> inputs.  Archive inputs continue to return the phase-1
+    /// not-implemented diagnostic.  Later phases will add graph and policy validators
+    /// between structural validation and result shaping without changing this call shape.
     /// </remarks>
     public sealed class TypePackageValidator
     {
@@ -38,11 +40,38 @@ namespace Azure.Bicep.Types.Validation
             var resolution = PackageInputResolver.Resolve(input);
             diagnostics.AddRange(resolution.Diagnostics);
 
-            // Phase 1 intentionally performs no structural, graph, or policy validation.
-            // Directory and index inputs therefore produce an empty valid result, while
-            // archive inputs already carry the not-implemented diagnostic from resolution.
+            // Archive inputs carry the not-implemented diagnostic from resolution; return early.
+            if (resolution.Kind == PackageInputKind.ArchiveFile ||
+                resolution.Kind == PackageInputKind.ArchiveStream)
+            {
+                return TypePackageValidationResult.Create(effectiveOptions.Mode, diagnostics, effectiveOptions);
+            }
+
+            // Phase 2: read package files
+            var readResult = PackageReader.Read(resolution, effectiveOptions);
+            diagnostics.AddRange(readResult.Diagnostics);
+
+            if (readResult.HasFatalReadFailure)
+            {
+                return TypePackageValidationResult.Create(effectiveOptions.Mode, diagnostics, effectiveOptions);
+            }
+
+            // Phase 2: structural validation
+            var structuralDiagnostics = StructuralValidator.Validate(readResult.Documents, effectiveOptions);
+            diagnostics.AddRange(structuralDiagnostics);
+
+            // Phase 3: semantic graph validation. Requires the index document and a package
+            // file system; the graph layer loads and structurally validates type files on demand.
+            var indexDocument = readResult.Documents.IndexDocument;
+            if (indexDocument != null && readResult.FileSystem != null)
+            {
+                var provider = new PackageDocumentProvider(readResult.FileSystem, indexDocument, effectiveOptions);
+                var graphDiagnostics = SemanticGraphValidator.Validate(provider, indexDocument, effectiveOptions);
+                diagnostics.AddRange(graphDiagnostics);
+            }
 
             return TypePackageValidationResult.Create(effectiveOptions.Mode, diagnostics, effectiveOptions);
         }
     }
 }
+

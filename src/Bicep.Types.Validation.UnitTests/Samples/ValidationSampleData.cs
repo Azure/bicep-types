@@ -217,6 +217,10 @@ public static class ValidationSampleData
     /// </summary>
     public static string MaterializePackage(string resourcePrefix, string packageRoot)
     {
+        // Always create the package directory so scenarios with an intentionally empty
+        // package dir (e.g. missing-index-file) still receive an existing directory.
+        Directory.CreateDirectory(packageRoot);
+
         var packagePrefix = $"{resourcePrefix}/package/";
         foreach (var resourceName in EnumeratePackageResources(resourcePrefix))
         {
