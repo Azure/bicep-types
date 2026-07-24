@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "compatibleReader",
+  "diagnostics": [
+    {
+      "code": "BCPVT007",
+      "severity": "error",
+      "message": "Type object at \u0027/0\u0027 in \u0027types.json\u0027 is missing the required \u0027$type\u0027 discriminator field.",
+      "path": "types.json",
+      "jsonPointer": "/0",
+      "line": 1,
+      "column": 2
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

@@ -1,0 +1,1 @@
+{"name":"missing-index-file","description":"A package directory with no index.json file.","category":"structural","modes":["canonicalWriter","compatibleReader"]}

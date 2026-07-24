@@ -1,0 +1,20 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT004",
+      "severity": "error",
+      "message": "The root value of \u0027index.json\u0027 must be a JSON object.",
+      "path": "index.json",
+      "line": 1,
+      "column": 1
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

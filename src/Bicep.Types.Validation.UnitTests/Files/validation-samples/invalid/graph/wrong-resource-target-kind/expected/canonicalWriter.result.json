@@ -1,0 +1,30 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT020",
+      "severity": "error",
+      "message": "Resource entry \u0027My.Rp/things@2026-01-01\u0027 must reference a resource type (\u0027ResourceType\u0027), but the target is \u0027ObjectType\u0027.",
+      "path": "index.json",
+      "jsonPointer": "/resources/My.Rp~1things@2026-01-01/$ref",
+      "line": 4,
+      "column": 15,
+      "relatedLocations": [
+        {
+          "message": "Target type is declared here.",
+          "path": "types.json",
+          "jsonPointer": "/0",
+          "line": 2,
+          "column": 3
+        }
+      ]
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

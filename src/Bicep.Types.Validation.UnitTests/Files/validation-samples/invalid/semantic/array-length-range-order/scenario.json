@@ -1,0 +1,8 @@
+{
+  "name": "array-length-range-order",
+  "description": "An ArrayType has minLength greater than maxLength (BCPVT026); mode-independent.",
+  "category": "invalid.semantic",
+  "modes": [
+    "canonicalWriter"
+  ]
+}

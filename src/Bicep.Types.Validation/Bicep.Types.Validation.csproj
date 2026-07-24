@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Azure.Bicep.Types.Validation</AssemblyName>
+    <RootNamespace>Azure.Bicep.Types.Validation</RootNamespace>
+    <Description>Validation for Bicep types serialized packages</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" />
+    <ProjectReference Include="..\Bicep.Types\Bicep.Types.csproj" />
+  </ItemGroup>
+
+  <!-- Expose internals to the unit test project (strong-name only applied in CI builds). -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Bicep.Types.Validation.UnitTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <!-- Need to sign the assembly with a strong name in Official Build. -->
+  <Import Project="$(EnlistmentRoot)\StrongName.props" />
+
+</Project>

@@ -1,0 +1,39 @@
+{
+  "isValid": false,
+  "mode": "compatibleReader",
+  "diagnostics": [
+    {
+      "code": "BCPVT020",
+      "severity": "error",
+      "message": "Resource entry \u0027S/r@v1\u0027 must reference a resource type (\u0027ResourceType\u0027), but the target is \u0027StringLiteralType\u0027.",
+      "path": "index.json",
+      "jsonPointer": "/resources/S~1r@v1/$ref",
+      "line": 1,
+      "column": 32,
+      "relatedLocations": [
+        {
+          "message": "Target type is declared here.",
+          "path": "types.json",
+          "jsonPointer": "/0",
+          "line": 1,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "code": "BCPVT011",
+      "severity": "error",
+      "message": "Property \u0027value\u0027 at \u0027/0/value\u0027 in \u0027types.json\u0027 must be a string, but got number.",
+      "path": "types.json",
+      "jsonPointer": "/0/value",
+      "line": 1,
+      "column": 39
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 2,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

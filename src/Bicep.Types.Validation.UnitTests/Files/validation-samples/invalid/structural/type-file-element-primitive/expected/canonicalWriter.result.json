@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT006",
+      "severity": "error",
+      "message": "Element \u0027/0\u0027 in type file \u0027types.json\u0027 must be a JSON object.",
+      "path": "types.json",
+      "jsonPointer": "/0",
+      "line": 1,
+      "column": 2
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

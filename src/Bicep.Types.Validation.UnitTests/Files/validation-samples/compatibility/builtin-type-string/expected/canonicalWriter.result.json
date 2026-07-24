@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT022",
+      "severity": "error",
+      "message": "BuiltInType.kind at \u0027/2/kind\u0027 in \u0027types.json\u0027 uses legacy built-in kind 5 (\u0027String\u0027). CanonicalWriter packages must use \u0027StringType\u0027.",
+      "path": "types.json",
+      "jsonPointer": "/2/kind",
+      "line": 16,
+      "column": 5
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

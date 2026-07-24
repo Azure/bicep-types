@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT019",
+      "severity": "error",
+      "message": "Reference at \u0027/0/body/$ref\u0027 in \u0027types.json\u0027 targets index 99 in \u0027types.json\u0027, but the file contains 1 type objects.",
+      "path": "types.json",
+      "jsonPointer": "/0/body/$ref",
+      "line": 6,
+      "column": 15
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}
