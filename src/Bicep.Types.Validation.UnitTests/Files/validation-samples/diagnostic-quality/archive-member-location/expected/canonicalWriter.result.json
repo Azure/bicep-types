@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT026",
+      "severity": "error",
+      "message": "IntegerType at '/2' in 'types.json' has minValue 10 greater than maxValue 5.",
+      "path": "types.json",
+      "jsonPointer": "/2",
+      "line": 27,
+      "column": 5
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

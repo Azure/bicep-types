@@ -19,7 +19,18 @@ namespace Azure.Bicep.Types.Validation.Graph
         public static IReadOnlyList<TypeValidationDiagnostic> Validate(
             PackageDocumentProvider provider,
             PackageDocument indexDocument,
-            TypePackageValidationOptions options)
+            TypePackageValidationOptions options) =>
+            Validate(provider, indexDocument, options, out _);
+
+        /// <summary>
+        /// Validates the reference graph and also returns the set of node ids reached from
+        /// <c>index.json</c> roots, so strict package hygiene can avoid re-walking the root closure.
+        /// </summary>
+        public static IReadOnlyList<TypeValidationDiagnostic> Validate(
+            PackageDocumentProvider provider,
+            PackageDocument indexDocument,
+            TypePackageValidationOptions options,
+            out HashSet<TypeNodeId> visited)
         {
             if (provider == null) { throw new ArgumentNullException(nameof(provider)); }
             if (indexDocument == null) { throw new ArgumentNullException(nameof(indexDocument)); }
@@ -27,7 +38,7 @@ namespace Azure.Bicep.Types.Validation.Graph
 
             var diagnostics = new List<TypeValidationDiagnostic>();
             var resolver = new TypeReferenceResolver(provider);
-            var visited = new HashSet<TypeNodeId>();
+            visited = new HashSet<TypeNodeId>();
             var stack = new Stack<TypeGraphNode>();
 
             // Seed traversal from index.json roots.
@@ -41,8 +52,56 @@ namespace Azure.Bicep.Types.Validation.Graph
                 }
             }
 
-            // Depth-first traversal of the reachable closure. A node is enqueued once (visited
-            // set), but every edge that targets it still gets an independent kind check.
+            Traverse(resolver, stack, visited, diagnostics);
+
+            // Include structural/parse diagnostics accumulated while loading type files.
+            diagnostics.AddRange(provider.LoadDiagnostics);
+            return diagnostics;
+        }
+
+        /// <summary>
+        /// Validates reference edges reachable from a set of seed nodes that were not reached from
+        /// <c>index.json</c> roots (strict package hygiene).  The <paramref name="visited"/> set is
+        /// shared with the root traversal so nodes already validated are not re-checked, keeping
+        /// diagnostics duplicate-free.  Only edge-resolution diagnostics are returned; structural and
+        /// parse diagnostics for newly loaded files are surfaced by the caller via load-diagnostic
+        /// deltas.
+        /// </summary>
+        public static IReadOnlyList<TypeValidationDiagnostic> ValidateUnreachableSeeds(
+            PackageDocumentProvider provider,
+            IEnumerable<TypeGraphNode> seedNodes,
+            HashSet<TypeNodeId> visited)
+        {
+            if (provider == null) { throw new ArgumentNullException(nameof(provider)); }
+            if (seedNodes == null) { throw new ArgumentNullException(nameof(seedNodes)); }
+            if (visited == null) { throw new ArgumentNullException(nameof(visited)); }
+
+            var diagnostics = new List<TypeValidationDiagnostic>();
+            var resolver = new TypeReferenceResolver(provider);
+            var stack = new Stack<TypeGraphNode>();
+
+            foreach (var seed in seedNodes)
+            {
+                if (seed != null && visited.Add(seed.Id))
+                {
+                    stack.Push(seed);
+                }
+            }
+
+            Traverse(resolver, stack, visited, diagnostics);
+            return diagnostics;
+        }
+
+        /// <summary>
+        /// Depth-first traversal of the reachable closure. A node is enqueued once (visited set),
+        /// but every edge that targets it still gets an independent kind check.
+        /// </summary>
+        private static void Traverse(
+            TypeReferenceResolver resolver,
+            Stack<TypeGraphNode> stack,
+            HashSet<TypeNodeId> visited,
+            List<TypeValidationDiagnostic> diagnostics)
+        {
             while (stack.Count > 0)
             {
                 var node = stack.Pop();
@@ -56,10 +115,6 @@ namespace Azure.Bicep.Types.Validation.Graph
                     }
                 }
             }
-
-            // Include structural/parse diagnostics accumulated while loading type files.
-            diagnostics.AddRange(provider.LoadDiagnostics);
-            return diagnostics;
         }
 
         /// <summary>

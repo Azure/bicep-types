@@ -125,6 +125,6 @@ public class ValidationSampleDataTests
         var cases = ValidationSampleData.GetSampleCases().ToList();
 
         cases.Should().HaveCount(expectedCaseCount);
-        cases.Should().OnlyContain(c => c.Length == 5);
+        cases.Should().OnlyContain(c => c.Length == 6);
     }
 }

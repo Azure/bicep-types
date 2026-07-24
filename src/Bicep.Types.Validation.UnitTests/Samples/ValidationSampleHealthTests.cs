@@ -90,4 +90,48 @@ public class ValidationSampleHealthTests
 
         parse.Should().NotThrow(because);
     }
+
+    [TestMethod]
+    public void SampleData_discovers_archive_input_scenarios()
+    {
+        var scenarios = System.Linq.Enumerable.ToList(ValidationSampleData.EnumerateScenarios());
+
+        scenarios.Should().Contain(
+            s => System.Linq.Enumerable.Any(s.Inputs, i => i.Kind == ValidationSampleInputKind.ArchiveFile),
+            "phase-6 samples include at least one archiveFile input scenario.");
+    }
+
+    [TestMethod]
+    public void SampleData_materializes_archive_resources()
+    {
+        var scenario = System.Linq.Enumerable.First(
+            ValidationSampleData.EnumerateScenarios(),
+            s => System.Linq.Enumerable.Any(s.Inputs, i => i.Kind == ValidationSampleInputKind.ArchiveFile));
+
+        var temporaryRoot = System.IO.Path.Combine(
+            System.IO.Path.GetTempPath(), "bicep-types-validation-samples", Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            var packageRoot = ValidationSampleData.MaterializePackage(
+                scenario.ResourcePrefix, System.IO.Path.Combine(temporaryRoot, "package"));
+            var archivePath = System.IO.Path.Combine(temporaryRoot, "package.tgz");
+            ValidationSampleData.MaterializeArchive(packageRoot, archivePath);
+
+            System.IO.File.Exists(archivePath).Should().BeTrue();
+            new System.IO.FileInfo(archivePath).Length.Should().BeGreaterThan(0);
+
+            var result = new TypePackageValidator().Validate(
+                TypePackageValidationInput.ForArchiveFile(archivePath));
+            result.Diagnostics.Should().NotContain(
+                d => d.Code == Azure.Bicep.Types.Validation.Diagnostics.TypeValidationDiagnosticCodes.ArchivePackageInvalid);
+        }
+        finally
+        {
+            if (System.IO.Directory.Exists(temporaryRoot))
+            {
+                System.IO.Directory.Delete(temporaryRoot, recursive: true);
+            }
+        }
+    }
 }

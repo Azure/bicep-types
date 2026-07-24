@@ -23,31 +23,19 @@ namespace Azure.Bicep.Types.Validation.Packaging
             if (resolution == null) { throw new ArgumentNullException(nameof(resolution)); }
             if (options == null) { throw new ArgumentNullException(nameof(options)); }
 
-            // Archive inputs never reach here – they carry the BCPVT001 diagnostic from
-            // PackageInputResolver and TypePackageValidator returns before calling Read.
             var diagnostics = new List<TypeValidationDiagnostic>();
 
-            // Resolve the physical package root
-            string? packageRoot = resolution.PackageRootPath;
-            if (string.IsNullOrEmpty(packageRoot))
+            if (!TryOpenFileSystem(resolution, diagnostics, out IPackageFileSystem? fs))
             {
-                diagnostics.Add(TypeValidationDiagnosticBuilder.PackagePathInvalid(resolution.DisplayPath));
                 return Fatal(diagnostics);
             }
-
-            if (!Directory.Exists(packageRoot))
-            {
-                diagnostics.Add(TypeValidationDiagnosticBuilder.PackagePathInvalid(resolution.DisplayPath));
-                return Fatal(diagnostics);
-            }
-
-            var fs = new DirectoryPackageFileSystem(packageRoot!);
 
             // The index document is always at the package-relative path "index.json".
             // For directory inputs, the file must exist at packageRoot/index.json.
             // For indexFile inputs, the resolution already computed the root as the
             // containing directory, so the file is also at packageRoot/index.json.
-            if (!fs.FileExists(IndexFileName))
+            // For archive inputs, only the archive-root index.json is the package index.
+            if (!fs!.FileExists(IndexFileName))
             {
                 diagnostics.Add(TypeValidationDiagnosticBuilder.IndexFileMissing(resolution.DisplayPath));
                 return Fatal(diagnostics);
@@ -74,6 +62,78 @@ namespace Azure.Bicep.Types.Validation.Packaging
             // document is materialized here.
             var documents = new JsonDocumentSet(indexDoc, new PackageDocument[0]);
             return new PackageReadResult(documents, diagnostics, hasFatalReadFailure: false, fileSystem: fs);
+        }
+
+        /// <summary>
+        /// Opens the appropriate <see cref="IPackageFileSystem"/> for the resolved input kind, adding a
+        /// fatal diagnostic and returning <c>false</c> when the package container cannot be opened.
+        /// </summary>
+        private static bool TryOpenFileSystem(
+            PackageInputResolution resolution,
+            List<TypeValidationDiagnostic> diagnostics,
+            out IPackageFileSystem? fileSystem)
+        {
+            fileSystem = null;
+
+            if (resolution.Kind == PackageInputKind.ArchiveFile || resolution.Kind == PackageInputKind.ArchiveStream)
+            {
+                if (!TryGetArchiveBytes(resolution, diagnostics, out byte[]? archiveBytes))
+                {
+                    return false;
+                }
+
+                var archiveFs = ArchivePackageFileSystem.Create(archiveBytes!, resolution.DisplayPath);
+                if (archiveFs.HasFatalContainerFailure)
+                {
+                    diagnostics.AddRange(archiveFs.Diagnostics);
+                    return false;
+                }
+
+                fileSystem = archiveFs;
+                return true;
+            }
+
+            string? packageRoot = resolution.PackageRootPath;
+            if (string.IsNullOrEmpty(packageRoot) || !Directory.Exists(packageRoot))
+            {
+                diagnostics.Add(TypeValidationDiagnosticBuilder.PackagePathInvalid(resolution.DisplayPath));
+                return false;
+            }
+
+            fileSystem = new DirectoryPackageFileSystem(packageRoot!);
+            return true;
+        }
+
+        /// <summary>Resolves the raw archive bytes for an archive-file or archive-stream input.</summary>
+        private static bool TryGetArchiveBytes(
+            PackageInputResolution resolution,
+            List<TypeValidationDiagnostic> diagnostics,
+            out byte[]? archiveBytes)
+        {
+            if (resolution.Kind == PackageInputKind.ArchiveStream)
+            {
+                archiveBytes = resolution.ArchiveBytes ?? Array.Empty<byte>();
+                return true;
+            }
+
+            archiveBytes = null;
+            var path = resolution.ArchiveFilePath;
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            {
+                diagnostics.Add(TypeValidationDiagnosticBuilder.PackagePathInvalid(resolution.DisplayPath));
+                return false;
+            }
+
+            try
+            {
+                archiveBytes = File.ReadAllBytes(path!);
+                return true;
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                diagnostics.Add(TypeValidationDiagnosticBuilder.PackageFileReadFailed(resolution.DisplayPath, ex.Message));
+                return false;
+            }
         }
 
         private static PackageReadResult Fatal(List<TypeValidationDiagnostic> diagnostics)

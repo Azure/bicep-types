@@ -27,7 +27,7 @@ public class ValidationSampleTests
         DynamicDataSourceType.Method,
         DynamicDataDisplayName = nameof(ValidationSampleData.GetSampleCaseDisplayName),
         DynamicDataDisplayNameDeclaringType = typeof(ValidationSampleData))]
-    public void Sample_matches_expected_baseline(string resourcePrefix, string name, string inputKind, string inputPath, string mode)
+    public void Sample_matches_expected_baseline(string resourcePrefix, string name, string inputKind, string inputPath, string mode, bool validateUnreachableFiles)
     {
         var expectedResourceName = ValidationSampleData.GetExpectedResultResourceName(resourcePrefix, mode);
         ValidationSampleData.ResourceExists(expectedResourceName).Should().BeTrue(
@@ -40,15 +40,29 @@ public class ValidationSampleTests
 
         try
         {
-            ValidationSampleData.MaterializePackage(
+            var packageRoot = ValidationSampleData.MaterializePackage(
                 resourcePrefix,
                 Path.Combine(temporaryRoot, "package"));
 
+            var parsedKind = ParseInputKind(inputKind);
+            if (parsedKind == ValidationSampleInputKind.ArchiveFile)
+            {
+                var archivePath = Path.Combine(
+                    temporaryRoot,
+                    inputPath.Replace('/', Path.DirectorySeparatorChar));
+                Directory.CreateDirectory(Path.GetDirectoryName(archivePath)!);
+                ValidationSampleData.MaterializeArchive(packageRoot, archivePath);
+            }
+
             var input = ValidationSampleData.CreateValidationInput(
-                ParseInputKind(inputKind),
+                parsedKind,
                 inputPath,
                 temporaryRoot);
-            var options = new TypePackageValidationOptions { Mode = ParseMode(mode) };
+            var options = new TypePackageValidationOptions
+            {
+                Mode = ParseMode(mode),
+                ValidateUnreachableFiles = validateUnreachableFiles,
+            };
 
             var validator = new TypePackageValidator();
             var result = validator.Validate(input, options);

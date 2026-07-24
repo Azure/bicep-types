@@ -9,7 +9,11 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
     /// </summary>
     public static class TypeValidationDiagnosticCodes
     {
-        /// <summary>Reported when an archive input is supplied but archive extraction is not implemented.</summary>
+        /// <summary>
+        /// Legacy code from phase 1 when archive inputs returned a not-implemented diagnostic.  Archive
+        /// validation is now implemented (see <c>BCPVT030</c>–<c>BCPVT033</c>); this code is retained for
+        /// API stability but is no longer emitted.
+        /// </summary>
         public const string ArchiveValidationNotImplemented = "BCPVT001";
 
         /// <summary>The package root directory does not contain <c>index.json</c>.</summary>
@@ -101,5 +105,25 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
 
         /// <summary>A flags-valued field contains bits outside its known mask for this validator version.</summary>
         public const string FlagsValueInvalid = "BCPVT029";
+
+        // ── Phase 6: archive inputs and strict package hygiene ───────────────────
+
+        /// <summary>Archive bytes cannot be read as a valid gzip/tar package (fatal container failure).</summary>
+        public const string ArchivePackageInvalid = "BCPVT030";
+
+        /// <summary>An archive member has an invalid package-relative path or an unsupported entry type.</summary>
+        public const string ArchiveMemberPathInvalid = "BCPVT031";
+
+        /// <summary>The archive contains the same canonical package-relative file path more than once.</summary>
+        public const string ArchiveMemberDuplicate = "BCPVT032";
+
+        /// <summary>Two distinct archive member names collide after canonical path normalization.</summary>
+        public const string ArchiveMemberPathCollision = "BCPVT033";
+
+        /// <summary>A package file is not reachable from <c>index.json</c> roots under strict hygiene validation.</summary>
+        public const string UnreachablePackageFile = "BCPVT034";
+
+        /// <summary>A strict package scan found an unsupported package member, such as a non-JSON regular file.</summary>
+        public const string UnexpectedPackageFile = "BCPVT035";
     }
 }

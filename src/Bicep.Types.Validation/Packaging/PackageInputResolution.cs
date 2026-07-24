@@ -16,13 +16,17 @@ namespace Azure.Bicep.Types.Validation.Packaging
             string displayPath,
             string? packageRootPath,
             string? indexFilePath,
-            IReadOnlyList<TypeValidationDiagnostic> diagnostics)
+            IReadOnlyList<TypeValidationDiagnostic> diagnostics,
+            string? archiveFilePath = null,
+            byte[]? archiveBytes = null)
         {
             Kind = kind;
             DisplayPath = displayPath;
             PackageRootPath = packageRootPath;
             IndexFilePath = indexFilePath;
             Diagnostics = diagnostics;
+            ArchiveFilePath = archiveFilePath;
+            ArchiveBytes = archiveBytes;
         }
 
         public PackageInputKind Kind { get; }
@@ -37,5 +41,11 @@ namespace Azure.Bicep.Types.Validation.Packaging
 
         /// <summary>Diagnostics produced while resolving the input.</summary>
         public IReadOnlyList<TypeValidationDiagnostic> Diagnostics { get; }
+
+        /// <summary>Physical archive path, for archive-file inputs.</summary>
+        public string? ArchiveFilePath { get; }
+
+        /// <summary>Archive bytes read fully into memory, for archive-stream inputs.</summary>
+        public byte[]? ArchiveBytes { get; }
     }
 }

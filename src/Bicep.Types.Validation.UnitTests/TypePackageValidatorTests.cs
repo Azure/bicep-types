@@ -87,29 +87,29 @@ public class TypePackageValidatorTests
             .Which.Path.Should().Be("types.json");
     }
 
-    // ── Phase-1 behaviour preserved ──────────────────────────────────────────
+    // ── Phase-6 archive behaviour ────────────────────────────────────────────
 
     [TestMethod]
-    public void Archive_file_input_returns_not_implemented_error()
+    public void Archive_file_input_missing_file_returns_package_path_invalid()
     {
-        var result = Validator.Validate(TypePackageValidationInput.ForArchiveFile("some/types.tgz"));
+        var result = Validator.Validate(TypePackageValidationInput.ForArchiveFile("some/missing-types.tgz"));
 
         result.IsValid.Should().BeFalse();
         result.Diagnostics.Should().ContainSingle()
-            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.ArchiveValidationNotImplemented);
+            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.PackagePathInvalid);
         result.Summary.ErrorCount.Should().Be(1);
     }
 
     [TestMethod]
-    public void Archive_stream_input_returns_not_implemented_error()
+    public void Archive_stream_input_non_gzip_bytes_reports_archive_invalid()
     {
-        using var stream = new MemoryStream();
+        using var stream = new MemoryStream(new byte[] { 0x00, 0x01, 0x02, 0x03 });
 
         var result = Validator.Validate(TypePackageValidationInput.ForArchiveStream(stream, "types.tgz"));
 
         result.IsValid.Should().BeFalse();
         result.Diagnostics.Should().ContainSingle()
-            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.ArchiveValidationNotImplemented);
+            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.ArchivePackageInvalid);
     }
 
     [TestMethod]

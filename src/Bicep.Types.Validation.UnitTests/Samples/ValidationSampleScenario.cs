@@ -17,7 +17,8 @@ public sealed class ValidationSampleScenario
         string? description,
         string? category,
         IReadOnlyList<ValidationSampleInput> inputs,
-        IReadOnlyList<string> modes)
+        IReadOnlyList<string> modes,
+        bool validateUnreachableFiles = false)
     {
         ResourcePrefix = resourcePrefix;
         FolderName = folderName;
@@ -26,6 +27,7 @@ public sealed class ValidationSampleScenario
         Category = category;
         Inputs = inputs;
         Modes = modes;
+        ValidateUnreachableFiles = validateUnreachableFiles;
     }
 
     /// <summary>Embedded-resource prefix up to (but excluding) <c>/scenario.json</c>.</summary>
@@ -51,4 +53,10 @@ public sealed class ValidationSampleScenario
 
     /// <summary>Declared validation modes.</summary>
     public IReadOnlyList<string> Modes { get; }
+
+    /// <summary>
+    /// Whether the scenario opts into strict package hygiene validation via
+    /// <see cref="TypePackageValidationOptions.ValidateUnreachableFiles"/>.
+    /// </summary>
+    public bool ValidateUnreachableFiles { get; }
 }

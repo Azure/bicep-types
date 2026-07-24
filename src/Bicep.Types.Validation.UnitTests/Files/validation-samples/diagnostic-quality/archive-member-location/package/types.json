@@ -1,0 +1,29 @@
+[
+  {
+    "$type": "ObjectType",
+    "name": "widgetBody",
+    "properties": {
+      "size": {
+        "type": {
+          "$ref": "#/2"
+        },
+        "flags": 0,
+        "description": "The widget size."
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Sample.Provider/widgets@2026-01-01",
+    "body": {
+      "$ref": "#/0"
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  },
+  {
+    "$type": "IntegerType",
+    "minValue": 10,
+    "maxValue": 5
+  }
+]

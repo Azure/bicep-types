@@ -76,7 +76,17 @@ public static class ValidationSampleData
             }
         }
 
-        return new ValidationSampleScenario(resourcePrefix, folderName, name, description, category, inputs, modes);
+        return new ValidationSampleScenario(
+            resourcePrefix, folderName, name, description, category, inputs, modes,
+            ParseValidateUnreachableFiles(root));
+    }
+
+    private static bool ParseValidateUnreachableFiles(JsonElement root)
+    {
+        return root.TryGetProperty("options", out var optionsElement)
+            && optionsElement.ValueKind == JsonValueKind.Object
+            && optionsElement.TryGetProperty("validateUnreachableFiles", out var flagElement)
+            && flagElement.ValueKind == JsonValueKind.True;
     }
 
     private static IReadOnlyList<ValidationSampleInput> ParseInputs(string folderName, JsonElement root)
@@ -160,6 +170,7 @@ public static class ValidationSampleData
                         input.Kind.ToString(),
                         input.Path,
                         mode,
+                        scenario.ValidateUnreachableFiles,
                     };
                 }
             }
@@ -238,5 +249,25 @@ public static class ValidationSampleData
         }
 
         return packageRoot;
+    }
+
+    /// <summary>
+    /// Builds a gzip-compressed tar archive at <paramref name="archivePath"/> from every file
+    /// under <paramref name="packageRoot"/>. Member names are package-relative and use <c>/</c>
+    /// separators so archive inputs exercise the same package layout as directory inputs.
+    /// </summary>
+    public static void MaterializeArchive(string packageRoot, string archivePath)
+    {
+        var entries = new List<Packaging.TarGzTestEntry>();
+        foreach (var filePath in Directory.EnumerateFiles(packageRoot, "*", SearchOption.AllDirectories)
+            .OrderBy(p => p, StringComparer.Ordinal))
+        {
+            var relativePath = filePath.Substring(packageRoot.Length)
+                .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                .Replace(Path.DirectorySeparatorChar, '/');
+            entries.Add(Packaging.TarGzTestEntry.File(relativePath, File.ReadAllText(filePath)));
+        }
+
+        File.WriteAllBytes(archivePath, Packaging.TarGzTestArchive.Build(entries));
     }
 }

@@ -12,7 +12,7 @@ namespace Azure.Bicep.Types.Validation
     /// </summary>
     /// <remarks>
     /// The hierarchy is closed: instances are created through the static factory methods.
-    /// Archive inputs are part of the API in phase 1 but are not validated yet.
+    /// Directory, raw <c>index.json</c>, and gzip-compressed tar archive inputs are all validated.
     /// </remarks>
     public abstract class TypePackageValidationInput
     {

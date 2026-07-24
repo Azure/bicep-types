@@ -11,8 +11,9 @@ namespace Azure.Bicep.Types.Validation.Packaging
     /// Classifies a public validation input into its first normalized shape.
     /// </summary>
     /// <remarks>
-    /// Phase 1 does not read the file system. It records the shape that phase 2 will
-    /// extend, and produces the deterministic not-implemented diagnostic for archives.
+    /// The resolver records the input shape that <see cref="PackageReader"/> extends.  Directory and
+    /// index-file inputs carry a package root; archive inputs carry the archive path or the archive
+    /// bytes read fully from the caller's stream.  Archive validity is decided later by the reader.
     /// </remarks>
     internal static class PackageInputResolver
     {
@@ -40,10 +41,25 @@ namespace Azure.Bicep.Types.Validation.Packaging
                         diagnostics: NoDiagnostics);
 
                 case ArchiveFileValidationInput archiveFile:
-                    return ArchiveNotImplemented(PackageInputKind.ArchiveFile, archiveFile.DisplayPath);
+                    return new PackageInputResolution(
+                        PackageInputKind.ArchiveFile,
+                        archiveFile.DisplayPath,
+                        packageRootPath: null,
+                        indexFilePath: null,
+                        diagnostics: NoDiagnostics,
+                        archiveFilePath: archiveFile.Path);
 
                 case ArchiveStreamValidationInput archiveStream:
-                    return ArchiveNotImplemented(PackageInputKind.ArchiveStream, archiveStream.DisplayPath);
+                    // Read the caller-provided stream fully into memory without disposing it and
+                    // without requiring seekability.
+                    var bytes = ReadStreamFully(archiveStream.Content);
+                    return new PackageInputResolution(
+                        PackageInputKind.ArchiveStream,
+                        archiveStream.DisplayPath,
+                        packageRootPath: null,
+                        indexFilePath: null,
+                        diagnostics: NoDiagnostics,
+                        archiveBytes: bytes);
 
                 default:
                     throw new ArgumentOutOfRangeException(
@@ -53,15 +69,11 @@ namespace Azure.Bicep.Types.Validation.Packaging
             }
         }
 
-        private static PackageInputResolution ArchiveNotImplemented(PackageInputKind kind, string displayPath)
+        private static byte[] ReadStreamFully(Stream stream)
         {
-            var diagnostic = TypeValidationDiagnosticBuilder.ArchiveValidationNotImplemented(displayPath);
-            return new PackageInputResolution(
-                kind,
-                displayPath,
-                packageRootPath: null,
-                indexFilePath: null,
-                diagnostics: new[] { diagnostic });
+            using var buffer = new MemoryStream();
+            stream.CopyTo(buffer);
+            return buffer.ToArray();
         }
     }
 }

@@ -14,10 +14,11 @@ namespace Azure.Bicep.Types.Validation
     /// Public entry point for validating a Bicep type package.
     /// </summary>
     /// <remarks>
-    /// Phase 2 adds real package-file reading and structural validation for directory
-    /// and raw <c>index.json</c> inputs.  Archive inputs continue to return the phase-1
-    /// not-implemented diagnostic.  Later phases will add graph and policy validators
-    /// between structural validation and result shaping without changing this call shape.
+    /// The validator reads real package files and runs structural, semantic, graph, and package-hygiene
+    /// validation for directory, raw <c>index.json</c>, and gzip-compressed tar archive
+    /// (<c>types.tgz</c>) inputs.  Archive inputs are opened as an in-memory package file system so the
+    /// same validators run regardless of input form.  The legacy <c>BCPVT001</c> diagnostic is retained
+    /// for API stability but is no longer emitted.
     /// </remarks>
     public sealed class TypePackageValidator
     {
@@ -40,14 +41,9 @@ namespace Azure.Bicep.Types.Validation
             var resolution = PackageInputResolver.Resolve(input);
             diagnostics.AddRange(resolution.Diagnostics);
 
-            // Archive inputs carry the not-implemented diagnostic from resolution; return early.
-            if (resolution.Kind == PackageInputKind.ArchiveFile ||
-                resolution.Kind == PackageInputKind.ArchiveStream)
-            {
-                return TypePackageValidationResult.Create(effectiveOptions.Mode, diagnostics, effectiveOptions);
-            }
-
-            // Phase 2: read package files
+            // Read package files. Archive inputs are opened as an in-memory package file system;
+            // directory and index-file inputs are read from disk. Fatal container/read failures
+            // (including malformed archives and unsafe archive members) short-circuit here.
             var readResult = PackageReader.Read(resolution, effectiveOptions);
             diagnostics.AddRange(readResult.Diagnostics);
 
@@ -66,7 +62,8 @@ namespace Azure.Bicep.Types.Validation
             if (indexDocument != null && readResult.FileSystem != null)
             {
                 var provider = new PackageDocumentProvider(readResult.FileSystem, indexDocument, effectiveOptions);
-                var graphDiagnostics = SemanticGraphValidator.Validate(provider, indexDocument, effectiveOptions);
+                var graphDiagnostics = SemanticGraphValidator.Validate(
+                    provider, indexDocument, effectiveOptions, out var visited);
                 diagnostics.AddRange(graphDiagnostics);
 
                 // Phase 5: scalar-semantic validation (value-domain constraints) over the type
@@ -79,6 +76,15 @@ namespace Azure.Bicep.Types.Validation
                 var policyDiagnostics = Policy.PolicyValidator.Validate(
                     provider.GetReachedUsableTypeFiles(), effectiveOptions);
                 diagnostics.AddRange(policyDiagnostics);
+
+                // Phase 6: strict package hygiene. Opt-in; validates files unreachable from
+                // index.json roots and reports unreachable/unexpected package members.
+                if (effectiveOptions.ValidateUnreachableFiles)
+                {
+                    var hygieneDiagnostics = Hygiene.PackageHygieneValidator.Validate(
+                        readResult.FileSystem, provider, effectiveOptions, visited);
+                    diagnostics.AddRange(hygieneDiagnostics);
+                }
             }
 
             return TypePackageValidationResult.Create(effectiveOptions.Mode, diagnostics, effectiveOptions);

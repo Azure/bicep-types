@@ -58,6 +58,26 @@ namespace Azure.Bicep.Types.Validation.Graph
             }
         }
 
+        /// <summary>
+        /// Returns the package-relative paths reached by graph traversal: <c>index.json</c> plus every
+        /// type file that was loaded and exists on the package file system (whether or not it parsed
+        /// into a usable type-file array).  Strict package hygiene uses this to distinguish reachable
+        /// files from unreachable ones.  The comparer matches the provider cache so casing and leading
+        /// prefixes are treated consistently.
+        /// </summary>
+        public HashSet<string> GetReachedFilePaths()
+        {
+            var reached = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { indexPath };
+            foreach (var entry in cache)
+            {
+                if (entry.Value.Exists)
+                {
+                    reached.Add(entry.Key);
+                }
+            }
+            return reached;
+        }
+
         /// <summary>Loads (or returns the cached result for) a type file by package-relative path.</summary>
         public PackageDocumentProviderResult GetTypeFile(string packageRelativePath)
         {

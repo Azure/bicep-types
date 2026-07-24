@@ -13,7 +13,10 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
     {
         // ── Phase 1 ──────────────────────────────────────────────────────────────
 
-        /// <summary>Builds the deterministic diagnostic returned for archive inputs.</summary>
+        /// <summary>
+        /// Builds the legacy <c>BCPVT001</c> diagnostic.  Archive validation is now implemented, so this
+        /// builder is retained only for API stability and is no longer produced during validation.
+        /// </summary>
         public static TypeValidationDiagnostic ArchiveValidationNotImplemented(string displayPath)
         {
             if (displayPath is null) { throw new ArgumentNullException(nameof(displayPath)); }
@@ -21,7 +24,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
             return new TypeValidationDiagnostic(
                 code: TypeValidationDiagnosticCodes.ArchiveValidationNotImplemented,
                 severity: TypeValidationDiagnosticSeverity.Error,
-                message: $"Archive package validation is not implemented yet. Provide an extracted package directory or an 'index.json' file instead of archive input '{displayPath}'.");
+                message: $"'{displayPath}' produced the legacy BCPVT001 diagnostic, which is retained for compatibility and no longer emitted. Archive package validation is implemented; archive inputs are validated directly.");
         }
 
         // ── Phase 2: input/package-reading ───────────────────────────────────────
@@ -458,6 +461,77 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
                 jsonPointer: jsonPointer,
                 line: line,
                 column: column);
+        }
+
+        // ── Phase 6: archive inputs and strict package hygiene ───────────────────
+
+        /// <summary>Archive bytes cannot be read as a valid gzip/tar package (fatal container failure).</summary>
+        public static TypeValidationDiagnostic ArchivePackageInvalid(string displayPath, string readerMessage)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.ArchivePackageInvalid,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"Archive input '{displayPath}' could not be read as a gzip-compressed tar package: {readerMessage}.");
+        }
+
+        /// <summary>An archive member has an invalid package-relative path.</summary>
+        public static TypeValidationDiagnostic ArchiveMemberPathInvalid(string memberName)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.ArchiveMemberPathInvalid,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"Archive member '{memberName}' is not a valid package-relative file path.",
+                path: memberName);
+        }
+
+        /// <summary>An archive member uses an unsupported tar entry type such as a symlink or hardlink.</summary>
+        public static TypeValidationDiagnostic ArchiveMemberEntryTypeUnsupported(string memberName, string entryTypeName)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.ArchiveMemberPathInvalid,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"Archive member '{memberName}' has unsupported tar entry type '{entryTypeName}'. Only regular files and directories are supported.",
+                path: memberName);
+        }
+
+        /// <summary>The archive contains the same canonical package-relative file path more than once.</summary>
+        public static TypeValidationDiagnostic ArchiveMemberDuplicate(string displayPath, string memberName)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.ArchiveMemberDuplicate,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"Archive member '{memberName}' appears more than once in archive input '{displayPath}'.",
+                path: memberName);
+        }
+
+        /// <summary>Two distinct archive member names collide after canonical path normalization.</summary>
+        public static TypeValidationDiagnostic ArchiveMemberPathCollision(string firstMemberName, string secondMemberName)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.ArchiveMemberPathCollision,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"Archive members '{firstMemberName}' and '{secondMemberName}' collide after package path normalization.",
+                path: secondMemberName);
+        }
+
+        /// <summary>A package file is not reachable from <c>index.json</c> roots under strict hygiene validation.</summary>
+        public static TypeValidationDiagnostic UnreachablePackageFile(string packageRelativePath)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.UnreachablePackageFile,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"Package file '{packageRelativePath}' is not reachable from 'index.json' roots.",
+                path: packageRelativePath);
+        }
+
+        /// <summary>A strict package scan found an unsupported non-JSON package member.</summary>
+        public static TypeValidationDiagnostic UnexpectedPackageFile(string packageRelativePath)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.UnexpectedPackageFile,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"Package file '{packageRelativePath}' is not a supported Bicep Types package file.",
+                path: packageRelativePath);
         }
     }
 }
