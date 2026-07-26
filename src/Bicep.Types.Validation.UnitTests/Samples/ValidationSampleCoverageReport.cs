@@ -96,9 +96,6 @@ public static class ValidationSampleCoverageReport
                 Increment(inputKindCounts, input.Kind.ToString());
             }
 
-            var anyBaselineFound = false;
-            var anyModeHadError = false;
-
             foreach (var mode in scenario.Modes)
             {
                 Increment(modeCounts, mode);
@@ -109,26 +106,14 @@ public static class ValidationSampleCoverageReport
                     continue;
                 }
 
-                anyBaselineFound = true;
-                var (codes, errorCount) = ReadBaselineDiagnostics(expectedResource, scenario.Name, mode);
-                diagnosticRows.AddRange(codes);
-
-                if (errorCount > 0)
-                {
-                    anyModeHadError = true;
-                }
-            }
-
-            // Corpus gap: an invalid.* scenario that produces no error in ANY declared mode.
-            // Evaluating across all modes avoids flagging intentional compatibility cases that are
-            // an error in canonicalWriter but only a warning in compatibleReader.
-            if (category.StartsWith("invalid.", StringComparison.Ordinal) && anyBaselineFound && !anyModeHadError)
-            {
-                gaps.Add($"{scenario.Name}: category '{category}' but no declared mode produces an error diagnostic.");
+                diagnosticRows.AddRange(ReadBaselineDiagnostics(expectedResource, scenario.Name, mode));
             }
         }
 
-        // Corpus gap: a known category with no scenarios at all.
+        // Corpus gap: a known category with no scenarios at all. This is a coverage-presence check,
+        // not a validity assertion: it does not infer expected diagnostics from a scenario's
+        // category. Per-scenario validity is enforced by the baseline-internal invariants in the
+        // sample health tests, not here.
         foreach (var known in KnownCategories)
         {
             if (!categoriesSeen.Contains(known))
@@ -203,12 +188,11 @@ public static class ValidationSampleCoverageReport
         sb.AppendLine();
     }
 
-    private static (IReadOnlyList<DiagnosticCoverageRow> Codes, int ErrorCount) ReadBaselineDiagnostics(
+    private static IReadOnlyList<DiagnosticCoverageRow> ReadBaselineDiagnostics(
         string expectedResource, string scenarioName, string mode)
     {
         using var document = JsonDocument.Parse(ValidationSampleData.ReadResource(expectedResource));
         var rows = new List<DiagnosticCoverageRow>();
-        var errorCount = 0;
 
         if (document.RootElement.TryGetProperty("diagnostics", out var diagnostics)
             && diagnostics.ValueKind == JsonValueKind.Array)
@@ -223,14 +207,10 @@ public static class ValidationSampleCoverageReport
                     : "(none)";
 
                 rows.Add(new DiagnosticCoverageRow(code, scenarioName, mode, severity));
-                if (string.Equals(severity, "error", StringComparison.Ordinal))
-                {
-                    errorCount++;
-                }
             }
         }
 
-        return (rows, errorCount);
+        return rows;
     }
 
     private static int CompareDiagnosticRows(DiagnosticCoverageRow x, DiagnosticCoverageRow y)

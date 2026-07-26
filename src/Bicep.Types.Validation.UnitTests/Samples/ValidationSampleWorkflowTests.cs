@@ -290,12 +290,22 @@ public class ValidationSampleCoverageReportTests
     }
 
     [TestMethod]
-    public void Report_does_not_flag_intentional_compatibility_scenarios_as_gaps()
+    public void Report_does_not_apply_category_based_validity_gaps()
     {
         var model = ValidationSampleCoverageReport.Build();
 
-        // These invalid.* scenarios are an error in canonicalWriter but only a warning in
-        // compatibleReader. They must NOT be reported as corpus gaps.
+        // The report must not infer expected diagnostics from a scenario's category. Gaps are limited
+        // to coverage-presence checks (a known category with no scenarios); per-scenario validity is
+        // owned by the baseline-internal invariants in the health tests. For the current corpus every
+        // known category is present, so there are no gaps at all.
+        model.Gaps.Should().NotContain(g => g.Contains("error diagnostic"));
+        foreach (var gap in model.Gaps)
+        {
+            gap.Should().Contain("has no scenarios", "the only coverage gaps are missing-category presence checks");
+        }
+
+        // Intentional compatibility scenarios (error in canonicalWriter, warning in compatibleReader)
+        // must never be reported as gaps.
         foreach (var name in new[]
         {
             "object-property-flags-invalid",
@@ -303,9 +313,7 @@ public class ValidationSampleCoverageReportTests
             "visible-in-file-kind-invalid",
         })
         {
-            model.Gaps.Should().NotContain(
-                g => g.Contains(name),
-                $"'{name}' produces an error in canonicalWriter, so it is not a coverage gap.");
+            model.Gaps.Should().NotContain(g => g.Contains(name));
         }
     }
 }
