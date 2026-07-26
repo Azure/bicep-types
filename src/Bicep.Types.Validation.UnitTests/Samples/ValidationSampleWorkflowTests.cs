@@ -116,6 +116,104 @@ public class ValidationSampleBaselineUpdaterTests
     }
 
     [TestMethod]
+    public void UpdateGroup_writes_exactly_once_when_all_inputs_agree()
+    {
+        using var root = new TempDir();
+        var inputs = new List<ValidationSampleInput>
+        {
+            new(ValidationSampleInputKind.Directory, "package"),
+            new(ValidationSampleInputKind.ArchiveFile, "package.tgz"),
+        };
+        var writeCount = 0;
+
+        var outcome = ValidationSampleBaselineUpdater.UpdateGroup(
+            root.Path,
+            "Files/validation-samples/invalid/graph/x",
+            "x",
+            "canonicalWriter",
+            inputs,
+            _ => "IDENTICAL",
+            (_, _) => { writeCount++; return true; });
+
+        outcome.Kind.Should().Be(ValidationSampleBaselineUpdater.GroupUpdateKind.Written);
+        outcome.RelativeTarget.Should().Be("invalid/graph/x/expected/canonicalWriter.result.json");
+        writeCount.Should().Be(1, "an agreeing multi-input group must write exactly one baseline");
+    }
+
+    [TestMethod]
+    public void UpdateGroup_reports_unchanged_when_writer_reports_no_change()
+    {
+        using var root = new TempDir();
+        var inputs = new List<ValidationSampleInput> { new(ValidationSampleInputKind.Directory, "package") };
+
+        var outcome = ValidationSampleBaselineUpdater.UpdateGroup(
+            root.Path,
+            "Files/validation-samples/invalid/graph/x",
+            "x",
+            "canonicalWriter",
+            inputs,
+            _ => "IDENTICAL",
+            (_, _) => false);
+
+        outcome.Kind.Should().Be(ValidationSampleBaselineUpdater.GroupUpdateKind.Unchanged);
+        outcome.RelativeTarget.Should().Be("invalid/graph/x/expected/canonicalWriter.result.json");
+    }
+
+    [TestMethod]
+    public void UpdateGroup_does_not_write_and_reports_mismatch_when_inputs_differ()
+    {
+        using var root = new TempDir();
+        var inputs = new List<ValidationSampleInput>
+        {
+            new(ValidationSampleInputKind.Directory, "package"),
+            new(ValidationSampleInputKind.ArchiveFile, "package.tgz"),
+        };
+        var writeCount = 0;
+
+        var outcome = ValidationSampleBaselineUpdater.UpdateGroup(
+            root.Path,
+            "Files/validation-samples/invalid/graph/x",
+            "x",
+            "canonicalWriter",
+            inputs,
+            input => input.Path, // distinct content per input
+            (_, _) => { writeCount++; return true; });
+
+        outcome.Kind.Should().Be(ValidationSampleBaselineUpdater.GroupUpdateKind.Mismatch);
+        writeCount.Should().Be(0, "a divergent multi-input group must not write any baseline");
+        // The mismatch message must identify both the first and divergent input paths.
+        outcome.MismatchMessage.Should().Contain("package.tgz");
+        outcome.MismatchMessage.Should().Contain("first input 'Directory:package'");
+    }
+
+    [TestMethod]
+    public void UpdateGroup_writes_one_file_through_real_writer_and_is_idempotent()
+    {
+        using var root = new TempDir();
+        var inputs = new List<ValidationSampleInput>
+        {
+            new(ValidationSampleInputKind.Directory, "package"),
+            new(ValidationSampleInputKind.ArchiveFile, "package.tgz"),
+        };
+        var content = ValidationSampleResultNormalizer.Canonicalize("{\"isValid\":true}");
+
+        var first = ValidationSampleBaselineUpdater.UpdateGroup(
+            root.Path, "Files/validation-samples/invalid/graph/x", "x", "canonicalWriter",
+            inputs, _ => content, ValidationSampleBaselineUpdater.WriteBaselineIfChanged);
+
+        var writtenPath = Path.Combine(root.Path, "invalid", "graph", "x", "expected", "canonicalWriter.result.json");
+        first.Kind.Should().Be(ValidationSampleBaselineUpdater.GroupUpdateKind.Written);
+        File.Exists(writtenPath).Should().BeTrue();
+
+        // Second run with identical content must be a no-op.
+        var second = ValidationSampleBaselineUpdater.UpdateGroup(
+            root.Path, "Files/validation-samples/invalid/graph/x", "x", "canonicalWriter",
+            inputs, _ => content, ValidationSampleBaselineUpdater.WriteBaselineIfChanged);
+
+        second.Kind.Should().Be(ValidationSampleBaselineUpdater.GroupUpdateKind.Unchanged);
+    }
+
+    [TestMethod]
     public void ResolveSamplesRoot_prefers_explicit_existing_root()
     {
         using var root = new TempDir();
@@ -189,5 +287,25 @@ public class ValidationSampleCoverageReportTests
         model.DiagnosticRows.Should().NotBeEmpty();
         // Every known category should appear (no missing-category gap for the current corpus).
         model.Gaps.Should().NotContain(g => g.Contains("has no scenarios"));
+    }
+
+    [TestMethod]
+    public void Report_does_not_flag_intentional_compatibility_scenarios_as_gaps()
+    {
+        var model = ValidationSampleCoverageReport.Build();
+
+        // These invalid.* scenarios are an error in canonicalWriter but only a warning in
+        // compatibleReader. They must NOT be reported as corpus gaps.
+        foreach (var name in new[]
+        {
+            "object-property-flags-invalid",
+            "readable-scope-bits-invalid",
+            "visible-in-file-kind-invalid",
+        })
+        {
+            model.Gaps.Should().NotContain(
+                g => g.Contains(name),
+                $"'{name}' produces an error in canonicalWriter, so it is not a coverage gap.");
+        }
     }
 }

@@ -96,6 +96,9 @@ public static class ValidationSampleCoverageReport
                 Increment(inputKindCounts, input.Kind.ToString());
             }
 
+            var anyBaselineFound = false;
+            var anyModeHadError = false;
+
             foreach (var mode in scenario.Modes)
             {
                 Increment(modeCounts, mode);
@@ -106,14 +109,22 @@ public static class ValidationSampleCoverageReport
                     continue;
                 }
 
+                anyBaselineFound = true;
                 var (codes, errorCount) = ReadBaselineDiagnostics(expectedResource, scenario.Name, mode);
                 diagnosticRows.AddRange(codes);
 
-                // Corpus gap: an invalid.* scenario whose baseline produces no error in this mode.
-                if (category.StartsWith("invalid.", StringComparison.Ordinal) && errorCount == 0)
+                if (errorCount > 0)
                 {
-                    gaps.Add($"{scenario.Name} [{mode}]: category '{category}' but baseline has no error diagnostics.");
+                    anyModeHadError = true;
                 }
+            }
+
+            // Corpus gap: an invalid.* scenario that produces no error in ANY declared mode.
+            // Evaluating across all modes avoids flagging intentional compatibility cases that are
+            // an error in canonicalWriter but only a warning in compatibleReader.
+            if (category.StartsWith("invalid.", StringComparison.Ordinal) && anyBaselineFound && !anyModeHadError)
+            {
+                gaps.Add($"{scenario.Name}: category '{category}' but no declared mode produces an error diagnostic.");
             }
         }
 

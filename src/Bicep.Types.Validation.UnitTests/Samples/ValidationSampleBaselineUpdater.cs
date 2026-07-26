@@ -188,30 +188,27 @@ public static class ValidationSampleBaselineUpdater
             foreach (var mode in scenario.Modes)
             {
                 var parsedMode = ValidationSampleData.ParseMode(mode);
-                var results = scenario.Inputs
-                    .Select(input => ValidationSampleData.RunScenarioNormalized(
-                        scenario.ResourcePrefix, input.Kind, input.Path, parsedMode, scenario.ValidateUnreachableFiles))
-                    .ToList();
+                var outcome = UpdateGroup(
+                    samplesRoot,
+                    scenario.ResourcePrefix,
+                    scenario.Name,
+                    mode,
+                    scenario.Inputs,
+                    input => ValidationSampleData.RunScenarioNormalized(
+                        scenario.ResourcePrefix, input.Kind, input.Path, parsedMode, scenario.ValidateUnreachableFiles),
+                    WriteBaselineIfChanged);
 
-                if (!TryReconcileInputs(results, out var agreed, out var divergentIndex))
+                switch (outcome.Kind)
                 {
-                    var divergentInput = scenario.Inputs[divergentIndex];
-                    mismatches.Add(
-                        $"{scenario.Name} [{mode}]: input '{divergentInput.Kind}:{divergentInput.Path}' " +
-                        "produced a different normalized result than the first input; baseline not written.");
-                    continue;
-                }
-
-                var target = ComputeWriteTarget(samplesRoot, scenario.ResourcePrefix, mode);
-                var relativeTarget = $"{ToScenarioRelativePath(scenario.ResourcePrefix)}/expected/{mode}.result.json";
-
-                if (WriteBaselineIfChanged(target, agreed))
-                {
-                    written.Add(relativeTarget);
-                }
-                else
-                {
-                    unchanged.Add(relativeTarget);
+                    case GroupUpdateKind.Written:
+                        written.Add(outcome.RelativeTarget!);
+                        break;
+                    case GroupUpdateKind.Unchanged:
+                        unchanged.Add(outcome.RelativeTarget!);
+                        break;
+                    case GroupUpdateKind.Mismatch:
+                        mismatches.Add(outcome.MismatchMessage!);
+                        break;
                 }
             }
         }
@@ -221,6 +218,88 @@ public static class ValidationSampleBaselineUpdater
         mismatches.Sort(StringComparer.Ordinal);
 
         return new BaselineUpdateSummary(written, unchanged, mismatches);
+    }
+
+    /// <summary>
+    /// Updates a single <c>(scenario, mode)</c> group. Runs <paramref name="runInput"/> for every
+    /// input, requires all normalized results to be identical, and writes the baseline exactly once
+    /// through <paramref name="writeIfChanged"/>. Execution and writing are injected so the write-once,
+    /// no-write-on-mismatch, and mismatch-propagation guarantees can be tested without the real corpus.
+    /// </summary>
+    /// <param name="runInput">Produces the normalized result for one input.</param>
+    /// <param name="writeIfChanged">Persists <c>(fullPath, content)</c>; returns whether a write occurred.</param>
+    public static GroupUpdateResult UpdateGroup(
+        string samplesRoot,
+        string resourcePrefix,
+        string scenarioName,
+        string mode,
+        IReadOnlyList<ValidationSampleInput> inputs,
+        Func<ValidationSampleInput, string> runInput,
+        Func<string, string, bool> writeIfChanged)
+    {
+        if (inputs.Count == 0)
+        {
+            throw new ArgumentException("At least one input is required.", nameof(inputs));
+        }
+
+        var relativeTarget = $"{ToScenarioRelativePath(resourcePrefix)}/expected/{mode}.result.json";
+        var results = inputs.Select(runInput).ToList();
+
+        if (!TryReconcileInputs(results, out var agreed, out var divergentIndex))
+        {
+            var first = inputs[0];
+            var divergent = inputs[divergentIndex];
+            return GroupUpdateResult.Mismatch(
+                $"{scenarioName} [{mode}]: input '{divergent.Kind}:{divergent.Path}' produced a different " +
+                $"normalized result than first input '{first.Kind}:{first.Path}'; baseline not written.");
+        }
+
+        var target = ComputeWriteTarget(samplesRoot, resourcePrefix, mode);
+        return writeIfChanged(target, agreed)
+            ? GroupUpdateResult.Written(relativeTarget)
+            : GroupUpdateResult.Unchanged(relativeTarget);
+    }
+
+    /// <summary>Kind of outcome produced by <see cref="UpdateGroup"/>.</summary>
+    public enum GroupUpdateKind
+    {
+        /// <summary>The baseline content changed and was rewritten.</summary>
+        Written,
+
+        /// <summary>The baseline was already up to date.</summary>
+        Unchanged,
+
+        /// <summary>Inputs disagreed; nothing was written.</summary>
+        Mismatch,
+    }
+
+    /// <summary>Outcome of updating a single <c>(scenario, mode)</c> group.</summary>
+    public sealed class GroupUpdateResult
+    {
+        private GroupUpdateResult(GroupUpdateKind kind, string? relativeTarget, string? mismatchMessage)
+        {
+            Kind = kind;
+            RelativeTarget = relativeTarget;
+            MismatchMessage = mismatchMessage;
+        }
+
+        /// <summary>The outcome kind.</summary>
+        public GroupUpdateKind Kind { get; }
+
+        /// <summary>Package-relative baseline path, for <see cref="GroupUpdateKind.Written"/>/<see cref="GroupUpdateKind.Unchanged"/>.</summary>
+        public string? RelativeTarget { get; }
+
+        /// <summary>Mismatch description, for <see cref="GroupUpdateKind.Mismatch"/>.</summary>
+        public string? MismatchMessage { get; }
+
+        internal static GroupUpdateResult Written(string relativeTarget)
+            => new(GroupUpdateKind.Written, relativeTarget, null);
+
+        internal static GroupUpdateResult Unchanged(string relativeTarget)
+            => new(GroupUpdateKind.Unchanged, relativeTarget, null);
+
+        internal static GroupUpdateResult Mismatch(string message)
+            => new(GroupUpdateKind.Mismatch, null, message);
     }
 
     /// <summary>Deterministic outcome of a corpus baseline update.</summary>
