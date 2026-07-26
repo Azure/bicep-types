@@ -159,6 +159,101 @@ public class TypePackageValidatorTests
         result.DiagnosticsTruncated.Should().BeFalse();
     }
 
+    // ── Phase-7 format version awareness ─────────────────────────────────────
+
+    [TestMethod]
+    public void Unsupported_format_version_returns_single_unsupported_error()
+    {
+        using var pkg = CreateMinimalPackage();
+        var options = new TypePackageValidationOptions { FormatVersion = (TypePackageFormatVersion)999 };
+
+        var result = Validator.Validate(TypePackageValidationInput.ForDirectory(pkg.Path), options);
+
+        result.IsValid.Should().BeFalse();
+        result.Diagnostics.Should().ContainSingle()
+            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.UnsupportedFormatVersion);
+    }
+
+    [TestMethod]
+    public void Explicit_bicep_types_v1_validates_valid_package()
+    {
+        using var pkg = CreateMinimalPackage();
+        var options = new TypePackageValidationOptions { FormatVersion = TypePackageFormatVersion.BicepTypesV1 };
+
+        var result = Validator.Validate(TypePackageValidationInput.ForDirectory(pkg.Path), options);
+
+        result.IsValid.Should().BeTrue();
+        result.Diagnostics.Should().BeEmpty();
+    }
+
+    [TestMethod]
+    public void Explicit_bicep_types_v1_compatible_reader_accepts_legacy_form_with_warning()
+    {
+        // Explicit BicepTypesV1 + CompatibleReader + a legacy scope form: version plumbing must not
+        // alter existing compatible-reader policy (single BCPVT023 warning, still valid).
+        using var pkg = CreatePackageWithContent(
+            "{\"resources\":{\"My.Rp/x@2026-01-01\":{\"$ref\":\"types.json#/0\"}}," +
+            "\"resourceFunctions\":{},\"namespaceFunctions\":[]}",
+            "[{\"$type\":\"ResourceType\",\"name\":\"My.Rp/x@2026-01-01\"," +
+            "\"body\":{\"$ref\":\"#/1\"},\"scopeType\":0}," +
+            "{\"$type\":\"ObjectType\",\"name\":\"o\",\"properties\":{}}]");
+        var options = new TypePackageValidationOptions
+        {
+            FormatVersion = TypePackageFormatVersion.BicepTypesV1,
+            Mode = TypePackageValidationMode.CompatibleReader,
+        };
+
+        var result = Validator.Validate(TypePackageValidationInput.ForDirectory(pkg.Path), options);
+
+        result.IsValid.Should().BeTrue();
+        result.Diagnostics.Should().ContainSingle()
+            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.CompatibilityFormUsed);
+        result.Summary.WarningCount.Should().Be(1);
+        result.Summary.ErrorCount.Should().Be(0);
+    }
+
+    [TestMethod]
+    public void Unsupported_format_version_wins_over_invalid_input_path()
+    {
+        var options = new TypePackageValidationOptions { FormatVersion = (TypePackageFormatVersion)999 };
+
+        var result = Validator.Validate(
+            TypePackageValidationInput.ForDirectory("nonexistent-dir-that-does-not-exist"), options);
+
+        // The version gate runs before input resolution/reading, so the path error never appears.
+        result.Diagnostics.Should().ContainSingle()
+            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.UnsupportedFormatVersion);
+        result.Diagnostics.Should().NotContain(d => d.Code == TypeValidationDiagnosticCodes.PackagePathInvalid);
+    }
+
+    [TestMethod]
+    public void Unsupported_format_version_does_not_consume_archive_stream()
+    {
+        using var stream = new TrackingStream(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 });
+        var options = new TypePackageValidationOptions { FormatVersion = (TypePackageFormatVersion)999 };
+
+        var result = Validator.Validate(TypePackageValidationInput.ForArchiveStream(stream, "types.tgz"), options);
+
+        result.Diagnostics.Should().ContainSingle()
+            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.UnsupportedFormatVersion);
+        stream.ReadInvoked.Should().BeFalse("the version gate must run before the caller's stream is read");
+    }
+
+    [TestMethod]
+    public void Unsupported_format_version_is_invalid_and_counted_in_summary()
+    {
+        using var pkg = CreateMinimalPackage();
+        var options = new TypePackageValidationOptions { FormatVersion = (TypePackageFormatVersion)999 };
+
+        var result = Validator.Validate(TypePackageValidationInput.ForDirectory(pkg.Path), options);
+
+        result.IsValid.Should().BeFalse();
+        result.Summary.ErrorCount.Should().Be(1);
+        result.Summary.WarningCount.Should().Be(0);
+        result.Diagnostics.Should().ContainSingle();
+        result.DiagnosticsTruncated.Should().BeFalse();
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     /// <summary>
@@ -203,6 +298,46 @@ public class TypePackageValidatorTests
         public void Dispose()
         {
             try { Directory.Delete(Path, recursive: true); } catch { /* best-effort */ }
+        }
+    }
+
+    /// <summary>
+    /// Non-seekable read-only stream that records whether it was ever read, used to prove the
+    /// format-version gate returns before the caller's archive stream is consumed.
+    /// </summary>
+    private sealed class TrackingStream : Stream
+    {
+        private readonly MemoryStream inner;
+
+        public TrackingStream(byte[] content) => inner = new MemoryStream(content);
+
+        public bool ReadInvoked { get; private set; }
+
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            ReadInvoked = true;
+            return inner.Read(buffer, offset, count);
+        }
+
+        public override void Flush() { }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) { inner.Dispose(); }
+            base.Dispose(disposing);
         }
     }
 }

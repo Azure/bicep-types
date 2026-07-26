@@ -38,6 +38,15 @@ namespace Azure.Bicep.Types.Validation
 
             var diagnostics = new List<TypeValidationDiagnostic>();
 
+            // Phase 7: gate on the selected format version before touching any input. This must run
+            // before PackageInputResolver.Resolve because resolving an ArchiveStream input eagerly
+            // reads the caller's stream into memory; an unsupported version must not consume it.
+            if (!TypePackageFormatVersionFacts.IsSupported(effectiveOptions.FormatVersion))
+            {
+                diagnostics.Add(TypeValidationDiagnosticBuilder.UnsupportedFormatVersion(effectiveOptions.FormatVersion));
+                return TypePackageValidationResult.Create(effectiveOptions.Mode, diagnostics, effectiveOptions);
+            }
+
             var resolution = PackageInputResolver.Resolve(input);
             diagnostics.AddRange(resolution.Diagnostics);
 

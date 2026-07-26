@@ -125,5 +125,10 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
 
         /// <summary>A strict package scan found an unsupported package member, such as a non-JSON regular file.</summary>
         public const string UnexpectedPackageFile = "BCPVT035";
+
+        // ── Phase 7: format version awareness ────────────────────────────────────
+
+        /// <summary>The selected package format version is not supported by this validator.</summary>
+        public const string UnsupportedFormatVersion = "BCPVT036";
     }
 }

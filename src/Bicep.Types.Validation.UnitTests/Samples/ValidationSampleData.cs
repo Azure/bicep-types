@@ -21,6 +21,9 @@ public static class ValidationSampleData
     private const string ScenarioFileSuffix = "/scenario.json";
     private const string ExpectedResultSuffix = ".result.json";
 
+    /// <summary>Embedded-resource prefix (with trailing slash) under which all samples live.</summary>
+    public const string SampleRootResourcePrefix = SampleRoot;
+
     private static Assembly SampleAssembly => typeof(ValidationSampleData).Assembly;
 
     /// <summary>Enumerates every discovered scenario, ordered deterministically.</summary>
@@ -152,6 +155,63 @@ public static class ValidationSampleData
             ValidationSampleInputKind.ArchiveFile => TypePackageValidationInput.ForArchiveFile(resolvedPath),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unsupported sample input kind."),
         };
+    }
+
+    /// <summary>Parses a sample mode string into a <see cref="TypePackageValidationMode"/>.</summary>
+    public static TypePackageValidationMode ParseMode(string mode) => mode switch
+    {
+        "canonicalWriter" => TypePackageValidationMode.CanonicalWriter,
+        "compatibleReader" => TypePackageValidationMode.CompatibleReader,
+        _ => throw new InvalidOperationException($"Unknown sample mode '{mode}'."),
+    };
+
+    /// <summary>
+    /// Runs a single sample case through the full pipeline (materialize package, build the input,
+    /// validate, normalize) and returns the normalized baseline JSON. This is the shared path used
+    /// by both baseline comparison and baseline update so they can never diverge.
+    /// </summary>
+    public static string RunScenarioNormalized(
+        string resourcePrefix,
+        ValidationSampleInputKind inputKind,
+        string inputPath,
+        TypePackageValidationMode mode,
+        bool validateUnreachableFiles)
+    {
+        var temporaryRoot = Path.Combine(
+            Path.GetTempPath(),
+            "bicep-types-validation-samples",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            var packageRoot = MaterializePackage(
+                resourcePrefix, Path.Combine(temporaryRoot, "package"));
+
+            if (inputKind == ValidationSampleInputKind.ArchiveFile)
+            {
+                var archivePath = Path.Combine(
+                    temporaryRoot, inputPath.Replace('/', Path.DirectorySeparatorChar));
+                Directory.CreateDirectory(Path.GetDirectoryName(archivePath)!);
+                MaterializeArchive(packageRoot, archivePath);
+            }
+
+            var input = CreateValidationInput(inputKind, inputPath, temporaryRoot);
+            var options = new TypePackageValidationOptions
+            {
+                Mode = mode,
+                ValidateUnreachableFiles = validateUnreachableFiles,
+            };
+
+            var result = new TypePackageValidator().Validate(input, options);
+            return ValidationSampleResultNormalizer.Normalize(result, temporaryRoot);
+        }
+        finally
+        {
+            if (Directory.Exists(temporaryRoot))
+            {
+                Directory.Delete(temporaryRoot, recursive: true);
+            }
+        }
     }
 
     /// <summary>DynamicData source: one case per (scenario, input, mode).</summary>

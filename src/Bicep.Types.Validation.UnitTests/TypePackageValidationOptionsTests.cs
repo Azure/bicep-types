@@ -15,6 +15,14 @@ public class TypePackageValidationOptionsTests
         => new TypePackageValidationOptions().Mode.Should().Be(TypePackageValidationMode.CanonicalWriter);
 
     [TestMethod]
+    public void Default_options_use_bicep_types_v1_format_version()
+        => new TypePackageValidationOptions().FormatVersion.Should().Be(TypePackageFormatVersion.BicepTypesV1);
+
+    [TestMethod]
+    public void Bicep_types_v1_is_the_default_enum_value()
+        => default(TypePackageFormatVersion).Should().Be(TypePackageFormatVersion.BicepTypesV1);
+
+    [TestMethod]
     public void Default_options_include_warnings()
         => new TypePackageValidationOptions().IncludeWarnings.Should().BeTrue();
 

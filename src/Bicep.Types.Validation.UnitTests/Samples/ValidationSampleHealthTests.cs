@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -133,5 +135,133 @@ public class ValidationSampleHealthTests
                 System.IO.Directory.Delete(temporaryRoot, recursive: true);
             }
         }
+    }
+
+    // ── Phase-8 corpus health checks ─────────────────────────────────────────
+
+    private static readonly HashSet<string> KnownModes =
+        new(new[] { "canonicalWriter", "compatibleReader" }, StringComparer.Ordinal);
+
+    [TestMethod]
+    public void Every_scenario_has_non_empty_description_and_category()
+    {
+        foreach (var scenario in ValidationSampleData.EnumerateScenarios())
+        {
+            scenario.Description.Should().NotBeNullOrWhiteSpace(
+                $"scenario '{scenario.Name}' must have a non-empty description.");
+            scenario.Category.Should().NotBeNullOrWhiteSpace(
+                $"scenario '{scenario.Name}' must have a non-empty category.");
+        }
+    }
+
+    [TestMethod]
+    public void Every_scenario_category_is_known()
+    {
+        foreach (var scenario in ValidationSampleData.EnumerateScenarios())
+        {
+            ValidationSampleCoverageReport.KnownCategories.Should().Contain(
+                scenario.Category!,
+                $"scenario '{scenario.Name}' uses category '{scenario.Category}', which is not in the known set.");
+        }
+    }
+
+    [TestMethod]
+    public void Every_scenario_mode_is_known()
+    {
+        foreach (var scenario in ValidationSampleData.EnumerateScenarios())
+        {
+            foreach (var mode in scenario.Modes)
+            {
+                KnownModes.Should().Contain(
+                    mode,
+                    $"scenario '{scenario.Name}' declares unknown mode '{mode}'.");
+            }
+        }
+    }
+
+    [TestMethod]
+    public void Scenario_names_are_unique()
+    {
+        var duplicates = ValidationSampleData.EnumerateScenarios()
+            .GroupBy(s => s.Name, StringComparer.Ordinal)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        duplicates.Should().BeEmpty(
+            $"scenario names must be unique; duplicates: {string.Join(", ", duplicates)}.");
+    }
+
+    [TestMethod]
+    public void Every_baseline_declares_the_matching_mode()
+    {
+        foreach (var scenario in ValidationSampleData.EnumerateScenarios())
+        {
+            foreach (var mode in scenario.Modes)
+            {
+                var expected = ValidationSampleData.GetExpectedResultResourceName(scenario.ResourcePrefix, mode);
+                using var document = JsonDocument.Parse(ValidationSampleData.ReadResource(expected));
+
+                document.RootElement.TryGetProperty("mode", out var modeElement).Should().BeTrue(
+                    $"baseline '{expected}' must declare a 'mode' property.");
+                modeElement.GetString().Should().Be(
+                    mode,
+                    $"baseline '{expected}' must declare mode '{mode}' matching its file name.");
+            }
+        }
+    }
+
+    [TestMethod]
+    public void Every_baseline_satisfies_internal_invariants()
+    {
+        // These invariants assume default validation options (warnings included, no truncation),
+        // which every current scenario uses. If a future scenario opts into warning filtering or
+        // MaxDiagnostics, the summary would legitimately diverge from the returned diagnostics and
+        // this check would need to account for that.
+        foreach (var scenario in ValidationSampleData.EnumerateScenarios())
+        {
+            foreach (var mode in scenario.Modes)
+            {
+                var expected = ValidationSampleData.GetExpectedResultResourceName(scenario.ResourcePrefix, mode);
+                using var document = JsonDocument.Parse(ValidationSampleData.ReadResource(expected));
+                var root = document.RootElement;
+
+                AssertProperty(root, "isValid", JsonValueKind.True, JsonValueKind.False, expected);
+                AssertProperty(root, "mode", JsonValueKind.String, JsonValueKind.String, expected);
+                AssertProperty(root, "diagnostics", JsonValueKind.Array, JsonValueKind.Array, expected);
+                AssertProperty(root, "diagnosticsTruncated", JsonValueKind.True, JsonValueKind.False, expected);
+                AssertProperty(root, "summary", JsonValueKind.Object, JsonValueKind.Object, expected);
+
+                var summary = root.GetProperty("summary");
+                var errorCount = summary.GetProperty("errorCount").GetInt32();
+                var warningCount = summary.GetProperty("warningCount").GetInt32();
+                var infoCount = summary.GetProperty("infoCount").GetInt32();
+
+                var isValid = root.GetProperty("isValid").GetBoolean();
+                isValid.Should().Be(
+                    errorCount == 0,
+                    $"baseline '{expected}' must have isValid == (errorCount == 0).");
+
+                var severities = root.GetProperty("diagnostics").EnumerateArray()
+                    .Select(d => d.GetProperty("severity").GetString())
+                    .ToList();
+
+                severities.Count(s => s == "error").Should().Be(
+                    errorCount, $"baseline '{expected}' error count must match its diagnostics.");
+                severities.Count(s => s == "warning").Should().Be(
+                    warningCount, $"baseline '{expected}' warning count must match its diagnostics.");
+                severities.Count(s => s == "info").Should().Be(
+                    infoCount, $"baseline '{expected}' info count must match its diagnostics.");
+            }
+        }
+    }
+
+    private static void AssertProperty(
+        JsonElement root, string name, JsonValueKind allowed1, JsonValueKind allowed2, string resource)
+    {
+        root.TryGetProperty(name, out var element).Should().BeTrue(
+            $"baseline '{resource}' must declare a '{name}' property.");
+        (element.ValueKind == allowed1 || element.ValueKind == allowed2).Should().BeTrue(
+            $"baseline '{resource}' property '{name}' has unexpected JSON kind '{element.ValueKind}'.");
     }
 }

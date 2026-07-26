@@ -15,6 +15,14 @@ namespace Azure.Bicep.Types.Validation
         /// <summary>Validation mode. Defaults to <see cref="TypePackageValidationMode.CanonicalWriter"/>.</summary>
         public TypePackageValidationMode Mode { get; set; } = TypePackageValidationMode.CanonicalWriter;
 
+        /// <summary>
+        /// Serialized package format version to validate against. Defaults to
+        /// <see cref="TypePackageFormatVersion.BicepTypesV1"/>. Format version is independent of
+        /// <see cref="Mode"/>. Selecting a version the validator does not support produces a single
+        /// <c>BCPVT036</c> error before any package input is read.
+        /// </summary>
+        public TypePackageFormatVersion FormatVersion { get; set; } = TypePackageFormatVersion.BicepTypesV1;
+
         /// <summary>Whether warning diagnostics are returned. Defaults to <c>true</c>.</summary>
         public bool IncludeWarnings { get; set; } = true;
 

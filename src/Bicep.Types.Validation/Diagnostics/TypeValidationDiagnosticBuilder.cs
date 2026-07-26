@@ -533,5 +533,16 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
                 message: $"Package file '{packageRelativePath}' is not a supported Bicep Types package file.",
                 path: packageRelativePath);
         }
+
+        // ── Phase 7: format version awareness ────────────────────────────────────
+
+        /// <summary>The selected package format version is not supported by this validator.</summary>
+        public static TypeValidationDiagnostic UnsupportedFormatVersion(TypePackageFormatVersion version)
+        {
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.UnsupportedFormatVersion,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"Unsupported Bicep Types package format version '{version}'. This validator supports '{TypePackageFormatVersion.BicepTypesV1}'.");
+        }
     }
 }
