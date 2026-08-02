@@ -1,0 +1,8 @@
+{
+  "name": "integer-range-order",
+  "description": "An IntegerType has minValue greater than maxValue (BCPVT026); mode-independent.",
+  "category": "invalid.semantic",
+  "modes": [
+    "canonicalWriter"
+  ]
+}

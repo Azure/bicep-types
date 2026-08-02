@@ -1,0 +1,13 @@
+{
+  "resources": {},
+  "resourceFunctions": {
+    "My.Rp/things": {
+      "2026-01-01": [
+        {
+          "$ref": "types.json#/0"
+        }
+      ]
+    }
+  },
+  "namespaceFunctions": []
+}

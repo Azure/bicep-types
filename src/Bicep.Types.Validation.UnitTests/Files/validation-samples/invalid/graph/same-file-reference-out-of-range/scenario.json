@@ -1,0 +1,8 @@
+{
+  "name": "same-file-reference-out-of-range",
+  "description": "A same-file reference names a type-object index that is out of range.",
+  "category": "invalid.graph",
+  "modes": [
+    "canonicalWriter"
+  ]
+}
