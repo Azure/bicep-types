@@ -36,9 +36,17 @@ public class DirectoryPackageFileSystemTests
     public void Absolute_package_relative_path_FileExists_returns_false()
     {
         using var dir = new TempDir();
+
+        if (Path.DirectorySeparatorChar != '\\')
+        {
+            var misleadingWindowsPath = Path.Combine(dir.Path, "C:", "Windows", "System32");
+            Directory.CreateDirectory(misleadingWindowsPath);
+            File.WriteAllText(Path.Combine(misleadingWindowsPath, "cmd.exe"), string.Empty);
+        }
+
         var fs = new DirectoryPackageFileSystem(dir.Path);
 
-        // platform-absolute paths are rejected before touching the file system
+        // Package paths are portable, so both Unix and Windows absolute forms are always rejected.
         fs.FileExists("/etc/passwd").Should().BeFalse();
         fs.FileExists("C:\\Windows\\System32\\cmd.exe").Should().BeFalse();
     }
@@ -69,6 +77,26 @@ public class DirectoryPackageFileSystemTests
         var fs = new DirectoryPackageFileSystem(dir.Path);
         var ok = fs.TryReadAllBytes("../../secret.txt", out _, out _);
         ok.Should().BeFalse();
+    }
+
+    [TestMethod]
+    public void Case_variant_sibling_does_not_pass_root_containment_on_case_sensitive_file_systems()
+    {
+        if (Path.DirectorySeparatorChar == '\\')
+        {
+            return;
+        }
+
+        using var parent = new TempDir();
+        var root = Path.Combine(parent.Path, "package");
+        var sibling = Path.Combine(parent.Path, "PACKAGE");
+        Directory.CreateDirectory(root);
+        Directory.CreateDirectory(sibling);
+        File.WriteAllText(Path.Combine(sibling, "secret.txt"), string.Empty);
+
+        var fs = new DirectoryPackageFileSystem(root);
+
+        fs.FileExists("../PACKAGE/secret.txt").Should().BeFalse();
     }
 
     // ── Separator normalization ─────────────────────────────────────────────

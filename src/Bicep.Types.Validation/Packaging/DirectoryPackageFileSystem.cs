@@ -15,6 +15,9 @@ namespace Azure.Bicep.Types.Validation.Packaging
     /// </summary>
     internal sealed class DirectoryPackageFileSystem : IPackageFileSystem
     {
+        private static readonly StringComparison PhysicalPathComparison =
+            Path.DirectorySeparatorChar == '\\' ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
         private readonly string physicalRoot;
 
         public DirectoryPackageFileSystem(string physicalRoot)
@@ -86,8 +89,10 @@ namespace Azure.Bicep.Types.Validation.Packaging
                 return false;
             }
 
+            packageRelativePath = NormalizeSeparators(packageRelativePath);
+
             // Reject absolute paths
-            if (Path.IsPathRooted(packageRelativePath))
+            if (IsPackagePathRooted(packageRelativePath))
             {
                 physical = null;
                 return false;
@@ -109,9 +114,9 @@ namespace Azure.Bicep.Types.Validation.Packaging
             // separator removed so a directory root supplied with a trailing slash (e.g.
             // "C:\\pkg\\") still matches its own children (e.g. "C:\\pkg\\index.json").
             string rootFull = NormalizeRoot(physicalRoot);
-            if (!combined.StartsWith(rootFull + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) &&
-                !combined.StartsWith(rootFull + Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(combined, rootFull, StringComparison.OrdinalIgnoreCase))
+            if (!combined.StartsWith(rootFull + Path.DirectorySeparatorChar, PhysicalPathComparison) &&
+                !combined.StartsWith(rootFull + Path.AltDirectorySeparatorChar, PhysicalPathComparison) &&
+                !string.Equals(combined, rootFull, PhysicalPathComparison))
             {
                 physical = null;
                 return false;
@@ -128,8 +133,15 @@ namespace Azure.Bicep.Types.Validation.Packaging
         private static string NormalizeRoot(string root) =>
             Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
+        private static bool IsPackagePathRooted(string path) =>
+            Path.IsPathRooted(path) ||
+            (path.Length >= 2 && path[1] == ':' && IsAsciiLetter(path[0]));
+
+        private static bool IsAsciiLetter(char value) =>
+            (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z');
+
         /// <summary>Normalizes a package-relative path to use forward slashes.</summary>
         public static string NormalizeSeparators(string path) =>
-            path.Replace(Path.DirectorySeparatorChar, '/').Replace(Path.AltDirectorySeparatorChar, '/');
+            path.Replace('\\', '/');
     }
 }
