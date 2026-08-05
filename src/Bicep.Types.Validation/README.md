@@ -10,7 +10,7 @@ The validator accepts:
 
 ## Usage
 
-Reference the `Azure.Bicep.Types.Validation` package, create an input, and pass it to `TypePackageValidator`:
+Reference the `Azure.Bicep.Types.Validation` package, create an input, and pass it to an `ITypePackageValidator`:
 
 ```csharp
 using Azure.Bicep.Types.Validation;
@@ -22,7 +22,8 @@ var options = new TypePackageValidationOptions
     ValidateUnreachableFiles = true,
 };
 
-var result = new TypePackageValidator().Validate(input, options);
+ITypePackageValidator validator = new TypePackageValidator();
+var result = validator.Validate(input, options);
 
 foreach (var diagnostic in result.Diagnostics)
 {
@@ -36,6 +37,8 @@ if (!result.IsValid)
     Environment.ExitCode = 1;
 }
 ```
+
+Applications can register `TypePackageValidator` as the implementation of `ITypePackageValidator` for dependency injection. Callers that do not use dependency injection can continue to instantiate `TypePackageValidator` directly.
 
 Choose the input factory that matches the package source:
 

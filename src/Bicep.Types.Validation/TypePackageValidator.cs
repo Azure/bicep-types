@@ -19,7 +19,7 @@ namespace Azure.Bicep.Types.Validation
     /// (<c>types.tgz</c>) inputs.  Archive inputs are opened as an in-memory package file system so the
     /// same validators run regardless of input form.
     /// </remarks>
-    public sealed class TypePackageValidator
+    public sealed class TypePackageValidator : ITypePackageValidator
     {
         /// <summary>Validates the package described by <paramref name="input"/> using default options.</summary>
         public TypePackageValidationResult Validate(TypePackageValidationInput input) =>
