@@ -5,7 +5,10 @@ using System;
 using System.Collections.Generic;
 using Azure.Bicep.Types.Validation.Diagnostics;
 using Azure.Bicep.Types.Validation.Graph;
+using Azure.Bicep.Types.Validation.Hygiene;
 using Azure.Bicep.Types.Validation.Packaging;
+using Azure.Bicep.Types.Validation.Policy;
+using Azure.Bicep.Types.Validation.Semantic;
 using Azure.Bicep.Types.Validation.Structural;
 
 namespace Azure.Bicep.Types.Validation
@@ -76,12 +79,12 @@ namespace Azure.Bicep.Types.Validation
 
                 // Scalar-semantic validation (value-domain constraints) over the type
                 // files graph traversal reached, before mode policy.
-                var scalarDiagnostics = Semantic.ScalarSemanticValidator.Validate(
+                var scalarDiagnostics = ScalarSemanticValidator.Validate(
                     provider.GetReachedUsableTypeFiles(), effectiveOptions);
                 diagnostics.AddRange(scalarDiagnostics);
 
                 // Mode-policy validation over the type files graph traversal reached.
-                var policyDiagnostics = Policy.PolicyValidator.Validate(
+                var policyDiagnostics = PolicyValidator.Validate(
                     provider.GetReachedUsableTypeFiles(), effectiveOptions);
                 diagnostics.AddRange(policyDiagnostics);
 
@@ -89,7 +92,7 @@ namespace Azure.Bicep.Types.Validation
                 // index.json roots and reports unreachable/unexpected package members.
                 if (effectiveOptions.ValidateUnreachableFiles)
                 {
-                    var hygieneDiagnostics = Hygiene.PackageHygieneValidator.Validate(
+                    var hygieneDiagnostics = PackageHygieneValidator.Validate(
                         readResult.FileSystem, provider, effectiveOptions, visited);
                     diagnostics.AddRange(hygieneDiagnostics);
                 }
