@@ -1,0 +1,19 @@
+{
+  "resources": {
+    "Sample.Provider/configuredWidgets@2026-01-01": {
+      "$ref": "types.json#/3"
+    }
+  },
+  "resourceFunctions": {},
+  "namespaceFunctions": [],
+  "settings": {
+    "name": "SampleConfiguredWidgets",
+    "isSingleton": true,
+    "isPreview": false,
+    "isDeprecated": false,
+    "version": "1.0.0",
+    "configurationType": {
+      "$ref": "types.json#/1"
+    }
+  }
+}

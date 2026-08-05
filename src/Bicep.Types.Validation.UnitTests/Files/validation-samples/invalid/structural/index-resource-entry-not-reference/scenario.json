@@ -1,0 +1,1 @@
+{"name":"index-resource-entry-not-reference","description":"A resources entry value is not a reference object.","category":"structural","modes":["canonicalWriter","compatibleReader"]}
