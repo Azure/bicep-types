@@ -8,11 +8,10 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
 {
     /// <summary>
     /// Factory for validation diagnostics with stable codes and messages.
+    /// Every new diagnostic code should be added in the sequential order.
     /// </summary>
     public static class TypeValidationDiagnosticBuilder
     {
-        // ── Phase 1 ──────────────────────────────────────────────────────────────
-
         /// <summary>
         /// Builds the legacy <c>BCPVT001</c> diagnostic.  Archive validation is now implemented, so this
         /// builder is retained only for API stability and is no longer produced during validation.
@@ -27,7 +26,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
                 message: $"'{displayPath}' produced the legacy BCPVT001 diagnostic, which is retained for compatibility and no longer emitted. Archive package validation is implemented; archive inputs are validated directly.");
         }
 
-        // ── Phase 2: input/package-reading ───────────────────────────────────────
+        // ── Input/package-reading ───────────────────────────────────────
 
         /// <summary>The supplied package path does not point to a valid directory.</summary>
         public static TypeValidationDiagnostic PackagePathInvalid(string displayPath)
@@ -69,7 +68,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
                 column: column);
         }
 
-        // ── Phase 2: structural ───────────────────────────────────────────────────
+        // ── Structural ───────────────────────────────────────────────────
 
         /// <summary>The root value of <c>index.json</c> is not a JSON object.</summary>
         public static TypeValidationDiagnostic IndexRootMustBeObject(string packageRelativePath, int line, int column)
@@ -214,7 +213,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
                 column: column);
         }
 
-        // ── Phase 3: semantic graph ───────────────────────────────────────────────
+        // ── Semantic graph ───────────────────────────────────────────────
 
         /// <summary>A reference targets a type file that does not exist in the package.</summary>
         public static TypeValidationDiagnostic ReferencedTypeFileMissing(
@@ -310,7 +309,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
                 relatedLocations: relatedLocations);
         }
 
-        // ── Phase 4: mode policy ───────────────────────────────────────────────────
+        // ── Mode policy ───────────────────────────────────────────────────
 
         /// <summary>A legacy <c>ResourceType</c> scope field is present in a <c>CanonicalWriter</c> package.</summary>
         public static TypeValidationDiagnostic CanonicalScopeFieldViolation(
@@ -402,7 +401,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
                 column: column);
         }
 
-        // ── Phase 5: semantic constraints ────────────────────────────────────────
+        // ── Semantic constraints ────────────────────────────────────────
 
         /// <summary>A numeric range constraint has its minimum greater than its maximum.</summary>
         public static TypeValidationDiagnostic NumericRangeInvalid(
@@ -463,7 +462,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
                 column: column);
         }
 
-        // ── Phase 6: archive inputs and strict package hygiene ───────────────────
+        // ── Archive inputs and strict package hygiene ───────────────────
 
         /// <summary>Archive bytes cannot be read as a valid gzip/tar package (fatal container failure).</summary>
         public static TypeValidationDiagnostic ArchivePackageInvalid(string displayPath, string readerMessage)
@@ -534,7 +533,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
                 path: packageRelativePath);
         }
 
-        // ── Phase 7: format version awareness ────────────────────────────────────
+        // ── Format version awareness ────────────────────────────────────
 
         /// <summary>The selected package format version is not supported by this validator.</summary>
         public static TypeValidationDiagnostic UnsupportedFormatVersion(TypePackageFormatVersion version)

@@ -10,7 +10,7 @@ namespace Azure.Bicep.Types.Validation.Packaging
 {
     /// <summary>
     /// Reads a package's <c>index.json</c> into a <see cref="PackageReadResult"/> by resolving the
-    /// package root and parsing the index document.  Type files are not loaded here; they are
+    /// package root and parsing the index document. Type files are not loaded here; they are
     /// loaded on demand by the graph layer's package document provider, which owns transitive
     /// closure and per-file structural validation.
     /// </summary>
@@ -32,8 +32,7 @@ namespace Azure.Bicep.Types.Validation.Packaging
 
             // The index document is always at the package-relative path "index.json".
             // For directory inputs, the file must exist at packageRoot/index.json.
-            // For indexFile inputs, the resolution already computed the root as the
-            // containing directory, so the file is also at packageRoot/index.json.
+            // For indexFile inputs, the resolution already computed the root as the containing directory, so the file is also at packageRoot/index.json.
             // For archive inputs, only the archive-root index.json is the package index.
             if (!fs!.FileExists(IndexFileName))
             {

@@ -17,8 +17,7 @@ namespace Azure.Bicep.Types.Validation
     /// The validator reads real package files and runs structural, semantic, graph, and package-hygiene
     /// validation for directory, raw <c>index.json</c>, and gzip-compressed tar archive
     /// (<c>types.tgz</c>) inputs.  Archive inputs are opened as an in-memory package file system so the
-    /// same validators run regardless of input form.  The legacy <c>BCPVT001</c> diagnostic is retained
-    /// for API stability but is no longer emitted.
+    /// same validators run regardless of input form.
     /// </remarks>
     public sealed class TypePackageValidator
     {
@@ -38,7 +37,7 @@ namespace Azure.Bicep.Types.Validation
 
             var diagnostics = new List<TypeValidationDiagnostic>();
 
-            // Phase 7: gate on the selected format version before touching any input. This must run
+            // Gate on the selected format version before touching any input. This must run
             // before PackageInputResolver.Resolve because resolving an ArchiveStream input eagerly
             // reads the caller's stream into memory; an unsupported version must not consume it.
             if (!TypePackageFormatVersionFacts.IsSupported(effectiveOptions.FormatVersion))
@@ -61,11 +60,11 @@ namespace Azure.Bicep.Types.Validation
                 return TypePackageValidationResult.Create(effectiveOptions.Mode, diagnostics, effectiveOptions);
             }
 
-            // Phase 2: structural validation
+            // Structural validation
             var structuralDiagnostics = StructuralValidator.Validate(readResult.Documents, effectiveOptions);
             diagnostics.AddRange(structuralDiagnostics);
 
-            // Phase 3: semantic graph validation. Requires the index document and a package
+            // Semantic graph validation. Requires the index document and a package
             // file system; the graph layer loads and structurally validates type files on demand.
             var indexDocument = readResult.Documents.IndexDocument;
             if (indexDocument != null && readResult.FileSystem != null)
@@ -75,13 +74,13 @@ namespace Azure.Bicep.Types.Validation
                     provider, indexDocument, effectiveOptions, out var visited);
                 diagnostics.AddRange(graphDiagnostics);
 
-                // Phase 5: scalar-semantic validation (value-domain constraints) over the type
+                // Scalar-semantic validation (value-domain constraints) over the type
                 // files graph traversal reached, before mode policy.
                 var scalarDiagnostics = Semantic.ScalarSemanticValidator.Validate(
                     provider.GetReachedUsableTypeFiles(), effectiveOptions);
                 diagnostics.AddRange(scalarDiagnostics);
 
-                // Phase 4: mode-policy validation over the type files graph traversal reached.
+                // Mode-policy validation over the type files graph traversal reached.
                 var policyDiagnostics = Policy.PolicyValidator.Validate(
                     provider.GetReachedUsableTypeFiles(), effectiveOptions);
                 diagnostics.AddRange(policyDiagnostics);

@@ -52,7 +52,7 @@ namespace Azure.Bicep.Types.Validation.Structural
 
         /// <summary>
         /// Structurally validates a single type-file document in isolation and returns its
-        /// diagnostics.  Used by the graph layer, which loads type files on demand and needs
+        /// diagnostics. Used by the graph layer, which loads type files on demand and needs
         /// each file validated exactly once as it is discovered.
         /// </summary>
         public static IReadOnlyList<TypeValidationDiagnostic> ValidateTypeFileDocument(

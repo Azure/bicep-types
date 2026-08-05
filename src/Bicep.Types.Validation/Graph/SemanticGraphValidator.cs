@@ -11,7 +11,7 @@ namespace Azure.Bicep.Types.Validation.Graph
     /// <summary>
     /// Validates the package's semantic reference graph: resolves every reachable reference,
     /// reports unresolvable or mis-targeted references, and traverses the reachable closure of
-    /// type objects exactly once.  Traversal is iterative (explicit stack) so deeply nested or
+    /// type objects exactly once. Traversal is iterative (explicit stack) so deeply nested or
     /// cyclic graphs cannot overflow the call stack.
     /// </summary>
     internal static class SemanticGraphValidator

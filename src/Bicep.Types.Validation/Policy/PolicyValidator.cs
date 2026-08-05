@@ -10,9 +10,9 @@ using Azure.Bicep.Types.Validation.Packaging;
 namespace Azure.Bicep.Types.Validation.Policy
 {
     /// <summary>
-    /// Mode-policy layer.  Runs after structural and semantic-graph validation and classifies
+    /// Mode-policy layer. Runs after structural and semantic-graph validation and classifies
     /// documented legacy serialized forms: it rejects them in <c>CanonicalWriter</c> and accepts
-    /// them with warnings in <c>CompatibleReader</c>.  Policy reads the raw JSON node model
+    /// them with warnings in <c>CompatibleReader</c>. Policy reads the raw JSON node model
     /// (never the deserialized type model) so the original source forms remain visible.
     /// </summary>
     internal static class PolicyValidator

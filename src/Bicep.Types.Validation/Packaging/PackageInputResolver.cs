@@ -13,7 +13,7 @@ namespace Azure.Bicep.Types.Validation.Packaging
     /// <remarks>
     /// The resolver records the input shape that <see cref="PackageReader"/> extends.  Directory and
     /// index-file inputs carry a package root; archive inputs carry the archive path or the archive
-    /// bytes read fully from the caller's stream.  Archive validity is decided later by the reader.
+    /// bytes read fully from the caller's stream.
     /// </remarks>
     internal static class PackageInputResolver
     {

@@ -10,7 +10,7 @@ namespace Azure.Bicep.Types.Validation.Structural
 {
     /// <summary>
     /// Validates the local shape of the <c>index.json</c> document.
-    /// Does not resolve or follow type-file references (that belongs to graph validation).
+    /// Does not resolve or follow type-file references which belongs to graph validation.
     /// </summary>
     internal static class IndexDocumentValidator
     {

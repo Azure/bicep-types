@@ -10,7 +10,7 @@ namespace Azure.Bicep.Types.Validation.Structural
 {
     /// <summary>
     /// Mutable context object threaded through all structural validators during a single
-    /// validation run.  Accumulates diagnostics and provides read access to the current
+    /// validation run. Accumulates diagnostics and provides read access to the current
     /// document and validation options.
     /// </summary>
     internal sealed class StructuralValidationContext

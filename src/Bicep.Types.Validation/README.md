@@ -1,6 +1,6 @@
 # Azure.Bicep.Types.Validation
 
-`Azure.Bicep.Types.Validation` validates serialized Bicep type packages before they are published or consumed. It checks package layout, JSON structure, cross-file references, value constraints, format policy, and optional package hygiene. Diagnostics are returned as structured data with stable codes, severity, package-relative paths, JSON pointers, source locations, and related locations where available.
+`Azure.Bicep.Types.Validation` validates serialized Bicep type packages before they are published or consumed. It checks package layout, JSON structure, cross-file references, etc. Diagnostics are returned as structured data with stable codes, severity, message and source locations.
 
 The validator accepts:
 
@@ -46,6 +46,8 @@ TypePackageValidationInput.ForArchiveFile("path/to/types.tgz");
 TypePackageValidationInput.ForArchiveStream(stream, "types.tgz");
 ```
 
+Directory and archive inputs must contain an `index.json` at the package root; otherwise validation reports `BCPVT002`. In both input forms, type files that are not reachable from `index.json` are ignored by default; set `ValidateUnreachableFiles` to report and validate them.
+
 ### Validation modes
 
 - `CanonicalWriter` enforces the serialized form that package producers should emit. This is the default and the recommended mode for publishing workflows.
@@ -84,4 +86,4 @@ Public input, option, mode, version, result, and summary types live at the proje
 
 Validation collects diagnostics across independent stages when the package can be read safely. Fatal input or archive errors stop later stages because no usable package model is available. Archive member paths are checked before extraction, and archive validation uses the same structural and semantic pipeline as directory validation.
 
-Diagnostic codes are the stable integration surface for automation. Messages and source locations provide review context; consumers should use the code and severity when implementing policy or reporting logic.
+Diagnostic codes are the stable integration surface for automation. Messages and source locations provide review context.

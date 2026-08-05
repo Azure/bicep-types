@@ -11,7 +11,7 @@ namespace Azure.Bicep.Types.Validation
     /// Discriminated public input model describing where a type package is located.
     /// </summary>
     /// <remarks>
-    /// The hierarchy is closed: instances are created through the static factory methods.
+    /// Instances are created through the static factory methods.
     /// Directory, raw <c>index.json</c>, and gzip-compressed tar archive inputs are all validated.
     /// </remarks>
     public abstract class TypePackageValidationInput

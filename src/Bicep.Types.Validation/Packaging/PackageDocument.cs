@@ -6,7 +6,7 @@ using System;
 namespace Azure.Bicep.Types.Validation.Packaging
 {
     /// <summary>
-    /// One parsed package JSON document.  Carries the package-relative path, kind,
+    /// One parsed package JSON document. Carries the package-relative path, kind,
     /// source-mapped value tree, and optionally the physical path for debug use.
     /// </summary>
     internal sealed class PackageDocument

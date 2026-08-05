@@ -12,19 +12,19 @@ using Azure.Bicep.Types.Validation.Policy;
 namespace Azure.Bicep.Types.Validation.Semantic
 {
     /// <summary>
-    /// Scalar-semantic layer.  Runs after semantic-graph validation and before mode policy, over
-    /// the type files graph traversal reached.  It validates value-domain constraints that the
+    /// Scalar-semantic layer. Runs after semantic-graph validation and before mode policy, over
+    /// the type files graph traversal reached. It validates value-domain constraints that the
     /// structural layer intentionally does not check: numeric range ordering, non-negative length
-    /// bounds, and enum/flags value domains.  Like the policy layer it reads the raw JSON node
+    /// bounds, and enum/flags value domains. Like the policy layer it reads the raw JSON node
     /// model (never the deserialized type model) so it can report precise source locations.
     /// </summary>
     /// <remarks>
-    /// Range and length rules (BCPVT026/BCPVT027) are unconditional errors.  Enum and flags domain
+    /// Range and length rules (BCPVT026/BCPVT027) are unconditional errors. Enum and flags domain
     /// rules (BCPVT028/BCPVT029) are mode-aware: an <c>Error</c> in <c>CanonicalWriter</c> and a
     /// <c>Warning</c> in <c>CompatibleReader</c>, because new enum values and flag bits are
-    /// backward-compatible model evolution that a compatible reader must tolerate.  Direct-root
+    /// backward-compatible model evolution that a compatible reader must tolerate. Direct-root
     /// legacy <c>ResourceType</c> scope fields (<c>scopeType</c>/<c>readOnlyScopes</c>/<c>flags</c>)
-    /// are owned by the mode-policy layer and are never read here.  Wrong-shape (non-integer)
+    /// are owned by the mode-policy layer and are never read here. Wrong-shape (non-integer)
     /// fields are owned by the structural layer and are skipped.
     /// </remarks>
     internal static class ScalarSemanticValidator

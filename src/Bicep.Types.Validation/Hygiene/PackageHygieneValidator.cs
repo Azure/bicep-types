@@ -14,10 +14,10 @@ namespace Azure.Bicep.Types.Validation.Hygiene
 {
     /// <summary>
     /// Strict package-hygiene validation, enabled only when
-    /// <see cref="TypePackageValidationOptions.ValidateUnreachableFiles"/> is set.  Every package file
+    /// <see cref="TypePackageValidationOptions.ValidateUnreachableFiles"/> is set. Every package file
     /// that is not reachable from <c>index.json</c> roots is reported, and unreachable JSON type files
     /// are additionally validated for structural, graph, scalar, and policy defects so latent invalid
-    /// content is caught.  The root-reachable closure is never re-validated, keeping diagnostics
+    /// content is caught. The root-reachable closure is never re-validated, keeping diagnostics
     /// duplicate-free.
     /// </summary>
     internal static class PackageHygieneValidator
