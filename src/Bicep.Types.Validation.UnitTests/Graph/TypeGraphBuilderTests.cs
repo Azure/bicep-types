@@ -259,7 +259,7 @@ public class TypeGraphBuilderTests
     [TestMethod]
     public void ExtractRoots_skips_reference_object_with_extra_property()
     {
-        // The structural layer reports the extra property (BCPVT014); the graph layer must not
+        // The structural layer reports the extra property (BCPVT013); the graph layer must not
         // follow such a non-canonical reference (avoids a follow-on graph diagnostic).
         const string indexJson = @"{
   ""resources"": { ""a"": { ""$ref"": ""types.json#/0"", ""extra"": true } },

@@ -3,7 +3,7 @@
   "mode": "canonicalWriter",
   "diagnostics": [
     {
-      "code": "BCPVT035",
+      "code": "BCPVT034",
       "severity": "error",
       "message": "Package file 'README.md' is not a supported Bicep Types package file.",
       "path": "README.md"

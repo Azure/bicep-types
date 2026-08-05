@@ -3,7 +3,7 @@
   "mode": "canonicalWriter",
   "diagnostics": [
     {
-      "code": "BCPVT009",
+      "code": "BCPVT008",
       "severity": "error",
       "message": "The \u0027$type\u0027 value \u0027NonExistentKind\u0027 at \u0027/0/$type\u0027 in \u0027types.json\u0027 is not a supported type kind.",
       "path": "types.json",

@@ -3,7 +3,7 @@
   "mode": "canonicalWriter",
   "diagnostics": [
     {
-      "code": "BCPVT022",
+      "code": "BCPVT021",
       "severity": "error",
       "message": "Property \u0027flags\u0027 at \u0027/0/flags\u0027 in \u0027types.json\u0027 is a legacy ResourceType scope field. CanonicalWriter packages must use \u0027readableScopes\u0027 and \u0027writableScopes\u0027.",
       "path": "types.json",

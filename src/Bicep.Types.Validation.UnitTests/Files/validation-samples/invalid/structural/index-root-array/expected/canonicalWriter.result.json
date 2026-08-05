@@ -3,7 +3,7 @@
   "mode": "canonicalWriter",
   "diagnostics": [
     {
-      "code": "BCPVT004",
+      "code": "BCPVT003",
       "severity": "error",
       "message": "The root value of \u0027index.json\u0027 must be a JSON object.",
       "path": "index.json",

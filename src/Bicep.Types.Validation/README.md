@@ -49,7 +49,7 @@ TypePackageValidationInput.ForArchiveFile("path/to/types.tgz");
 TypePackageValidationInput.ForArchiveStream(stream, "types.tgz");
 ```
 
-Directory and archive inputs must contain an `index.json` at the package root; otherwise validation reports `BCPVT002`. In both input forms, type files that are not reachable from `index.json` are ignored by default; set `ValidateUnreachableFiles` to report and validate them.
+Directory and archive inputs must contain an `index.json` at the package root; otherwise validation reports `BCPVT001`. In both input forms, type files that are not reachable from `index.json` are ignored by default; set `ValidateUnreachableFiles` to report and validate them.
 
 ### Validation modes
 

@@ -44,10 +44,10 @@ public class ScalarSemanticValidatorTests
         "{\"resources\":{\"My.Rp/x@2026-01-01\":{\"$ref\":\"" + refValue + "\"}}," +
         "\"resourceFunctions\":{},\"namespaceFunctions\":[]}";
 
-    // ── BCPVT026: numeric range ordering ─────────────────────────────────────
+    // ── BCPVT025: numeric range ordering ─────────────────────────────────────
 
     [TestMethod]
-    public void Integer_min_greater_than_max_reports_bcpvt026()
+    public void Integer_min_greater_than_max_reports_bcpvt025()
     {
         var types = TypesWithTail("{\"$type\":\"IntegerType\",\"minValue\":10,\"maxValue\":5}");
 
@@ -60,7 +60,7 @@ public class ScalarSemanticValidatorTests
     }
 
     [TestMethod]
-    public void String_min_length_greater_than_max_length_reports_bcpvt026()
+    public void String_min_length_greater_than_max_length_reports_bcpvt025()
     {
         var types = TypesWithTail("{\"$type\":\"StringType\",\"minLength\":10,\"maxLength\":5}");
 
@@ -70,7 +70,7 @@ public class ScalarSemanticValidatorTests
     }
 
     [TestMethod]
-    public void Array_min_length_greater_than_max_length_reports_bcpvt026()
+    public void Array_min_length_greater_than_max_length_reports_bcpvt025()
     {
         var types = TypesWithTail(
             "{\"$type\":\"ArrayType\",\"itemType\":{\"$ref\":\"#/1\"},\"minLength\":10,\"maxLength\":5}");
@@ -80,10 +80,10 @@ public class ScalarSemanticValidatorTests
             .Which.JsonPointer.Should().Be("/2");
     }
 
-    // ── BCPVT027: non-negative length ────────────────────────────────────────
+    // ── BCPVT026: non-negative length ────────────────────────────────────────
 
     [TestMethod]
-    public void Negative_string_length_reports_bcpvt027()
+    public void Negative_string_length_reports_bcpvt026()
     {
         var types = TypesWithTail("{\"$type\":\"StringType\",\"minLength\":-1}");
 
@@ -96,7 +96,7 @@ public class ScalarSemanticValidatorTests
     }
 
     [TestMethod]
-    public void Negative_array_length_reports_bcpvt027()
+    public void Negative_array_length_reports_bcpvt026()
     {
         var types = TypesWithTail(
             "{\"$type\":\"ArrayType\",\"itemType\":{\"$ref\":\"#/1\"},\"maxLength\":-1}");
@@ -106,10 +106,10 @@ public class ScalarSemanticValidatorTests
             .Which.JsonPointer.Should().Be("/2/maxLength");
     }
 
-    // ── BCPVT029: scope flag domains ─────────────────────────────────────────
+    // ── BCPVT028: scope flag domains ─────────────────────────────────────────
 
     [TestMethod]
-    public void Readable_scope_with_unknown_bits_reports_bcpvt029_error_in_canonical_and_warning_in_compatible()
+    public void Readable_scope_with_unknown_bits_reports_bcpvt028_error_in_canonical_and_warning_in_compatible()
     {
         const string types =
             "[{\"$type\":\"ResourceType\",\"name\":\"My.Rp/x@2026-01-01\"," +
@@ -128,7 +128,7 @@ public class ScalarSemanticValidatorTests
     }
 
     [TestMethod]
-    public void Writable_scope_with_unknown_bits_reports_bcpvt029_error_in_canonical_and_warning_in_compatible()
+    public void Writable_scope_with_unknown_bits_reports_bcpvt028_error_in_canonical_and_warning_in_compatible()
     {
         const string types =
             "[{\"$type\":\"ResourceType\",\"name\":\"My.Rp/x@2026-01-01\"," +
@@ -146,7 +146,7 @@ public class ScalarSemanticValidatorTests
     public void Legacy_resource_scope_fields_are_skipped_by_scalar_domain_validation()
     {
         // scopeType is a legacy direct-root field owned by phase-4 policy; scalar domain
-        // validation must never read it, so no BCPVT029 is produced even for out-of-mask bits.
+        // validation must never read it, so no BCPVT028 is produced even for out-of-mask bits.
         const string types =
             "[{\"$type\":\"ResourceType\",\"name\":\"My.Rp/x@2026-01-01\"," +
             "\"body\":{\"$ref\":\"#/1\"},\"scopeType\":64}," +
@@ -156,10 +156,10 @@ public class ScalarSemanticValidatorTests
         Run(types, TypePackageValidationMode.CompatibleReader).Should().BeEmpty();
     }
 
-    // ── BCPVT029: object/parameter flag domains ──────────────────────────────
+    // ── BCPVT028: object/parameter flag domains ──────────────────────────────
 
     [TestMethod]
-    public void Object_property_flags_with_unknown_bits_reports_bcpvt029_error_in_canonical_and_warning_in_compatible()
+    public void Object_property_flags_with_unknown_bits_reports_bcpvt028_error_in_canonical_and_warning_in_compatible()
     {
         const string types =
             "[{\"$type\":\"ResourceType\",\"name\":\"My.Rp/x@2026-01-01\"," +
@@ -177,7 +177,7 @@ public class ScalarSemanticValidatorTests
     }
 
     [TestMethod]
-    public void Namespace_function_parameter_flags_with_unknown_bits_reports_bcpvt029_error_in_canonical_and_warning_in_compatible()
+    public void Namespace_function_parameter_flags_with_unknown_bits_reports_bcpvt028_error_in_canonical_and_warning_in_compatible()
     {
         var types = TypesWithTail(
             "{\"$type\":\"NamespaceFunctionType\",\"name\":\"f\"," +
@@ -192,10 +192,10 @@ public class ScalarSemanticValidatorTests
             .Which.Severity.Should().Be(TypeValidationDiagnosticSeverity.Warning);
     }
 
-    // ── BCPVT028: enum membership ────────────────────────────────────────────
+    // ── BCPVT027: enum membership ────────────────────────────────────────────
 
     [TestMethod]
-    public void Visible_in_file_kind_unknown_value_reports_bcpvt028_error_in_canonical_and_warning_in_compatible()
+    public void Visible_in_file_kind_unknown_value_reports_bcpvt027_error_in_canonical_and_warning_in_compatible()
     {
         var types = TypesWithTail(
             "{\"$type\":\"NamespaceFunctionType\",\"name\":\"f\",\"parameters\":[]," +

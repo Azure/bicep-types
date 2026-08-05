@@ -3,7 +3,7 @@
   "mode": "canonicalWriter",
   "diagnostics": [
     {
-      "code": "BCPVT034",
+      "code": "BCPVT033",
       "severity": "error",
       "message": "Package file 'orphan.json' is not reachable from 'index.json' roots.",
       "path": "orphan.json"

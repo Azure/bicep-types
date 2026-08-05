@@ -3,7 +3,7 @@
   "mode": "compatibleReader",
   "diagnostics": [
     {
-      "code": "BCPVT023",
+      "code": "BCPVT022",
       "severity": "warning",
       "message": "BuiltInType.kind at \u0027/2/kind\u0027 in \u0027types.json\u0027 uses legacy built-in kind 5 (\u0027String\u0027) accepted only for CompatibleReader mode. Prefer \u0027StringType\u0027.",
       "path": "types.json",

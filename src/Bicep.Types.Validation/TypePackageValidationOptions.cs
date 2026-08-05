@@ -19,7 +19,7 @@ namespace Azure.Bicep.Types.Validation
         /// Serialized package format version to validate against. Defaults to
         /// <see cref="TypePackageFormatVersion.BicepTypesV1"/>. Format version is independent of
         /// <see cref="Mode"/>. Selecting a version the validator does not support produces a single
-        /// <c>BCPVT036</c> error before any package input is read.
+        /// <c>BCPVT035</c> error before any package input is read.
         /// </summary>
         public TypePackageFormatVersion FormatVersion { get; set; } = TypePackageFormatVersion.BicepTypesV1;
 

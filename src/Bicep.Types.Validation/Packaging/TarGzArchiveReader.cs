@@ -70,7 +70,7 @@ namespace Azure.Bicep.Types.Validation.Packaging
     /// and GNU long-name entries (emitted by .NET's <c>TarWriter</c> in PAX format, which Bicep's own
     /// tgz writer uses) are consumed as metadata rather than treated as members, applying their
     /// <c>path</c> and <c>size</c> overrides to the following file entry.  Structural failures are
-    /// reported as a single fatal message rather than thrown, so callers can surface a <c>BCPVT030</c>
+    /// reported as a single fatal message rather than thrown, so callers can surface a <c>BCPVT029</c>
     /// diagnostic.  It does not depend on <c>System.Formats.Tar</c>, which is not available on
     /// <c>netstandard2.0</c>.
     /// </remarks>

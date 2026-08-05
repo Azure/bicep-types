@@ -10,9 +10,9 @@ namespace Azure.Bicep.Types.Validation.Policy
 {
     /// <summary>
     /// Policy for <c>ResourceType</c> scope fields.  The legacy scope fields <c>scopeType</c>,
-    /// <c>readOnlyScopes</c> and <c>flags</c> are rejected in <c>CanonicalWriter</c> (BCPVT022)
-    /// and accepted with a warning in <c>CompatibleReader</c> (BCPVT023).  When a package mixes
-    /// the modern scope pair with an <em>effective</em> legacy scope field, a single BCPVT024 is
+    /// <c>readOnlyScopes</c> and <c>flags</c> are rejected in <c>CanonicalWriter</c> (BCPVT021)
+    /// and accepted with a warning in <c>CompatibleReader</c> (BCPVT022).  When a package mixes
+    /// the modern scope pair with an <em>effective</em> legacy scope field, a single BCPVT023 is
     /// emitted for the object and the per-field classification is suppressed.
     /// </summary>
     /// <remarks>

@@ -86,7 +86,7 @@ public class PackageReaderTests
     {
         // index.json references types.json but that file doesn't exist. The reader only
         // parses index.json, so it reports no read failure; the missing file is reported
-        // later by graph validation (BCPVT017).
+        // later by graph validation (BCPVT016).
         const string indexJson = @"{
   ""resources"": { ""S/r@2026-01-01"": { ""$ref"": ""types.json#/0"" } },
   ""resourceFunctions"": {},

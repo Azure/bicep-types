@@ -27,7 +27,7 @@ public class BuiltInTypePolicyValidatorTests
     }
 
     [TestMethod]
-    public void Documented_builtin_kind_reports_bcpvt022_in_canonical()
+    public void Documented_builtin_kind_reports_bcpvt021_in_canonical()
     {
         Run("\"kind\":5", TypePackageValidationMode.CanonicalWriter)
             .Should().ContainSingle(d => d.Code == TypeValidationDiagnosticCodes.CanonicalFormViolation)
@@ -35,7 +35,7 @@ public class BuiltInTypePolicyValidatorTests
     }
 
     [TestMethod]
-    public void Documented_builtin_kind_reports_bcpvt023_in_compatible()
+    public void Documented_builtin_kind_reports_bcpvt022_in_compatible()
     {
         var diagnostics = Run("\"kind\":5", TypePackageValidationMode.CompatibleReader);
 
@@ -44,7 +44,7 @@ public class BuiltInTypePolicyValidatorTests
     }
 
     [TestMethod]
-    public void Reserved_builtin_kind_8_reports_bcpvt022_in_canonical()
+    public void Reserved_builtin_kind_8_reports_bcpvt021_in_canonical()
     {
         // Kind 8 (ResourceRef) has no canonical replacement but is still rejected in canonical.
         Run("\"kind\":8", TypePackageValidationMode.CanonicalWriter)
@@ -56,7 +56,7 @@ public class BuiltInTypePolicyValidatorTests
     [DataRow(0)]
     [DataRow(9)]
     [DataRow(-1)]
-    public void Out_of_range_builtin_kind_reports_bcpvt025_in_canonical(int kind)
+    public void Out_of_range_builtin_kind_reports_bcpvt024_in_canonical(int kind)
     {
         Run("\"kind\":" + kind, TypePackageValidationMode.CanonicalWriter)
             .Should().ContainSingle()
@@ -64,7 +64,7 @@ public class BuiltInTypePolicyValidatorTests
     }
 
     [TestMethod]
-    public void Out_of_range_builtin_kind_reports_bcpvt025_in_compatible()
+    public void Out_of_range_builtin_kind_reports_bcpvt024_in_compatible()
     {
         Run("\"kind\":42", TypePackageValidationMode.CompatibleReader)
             .Should().ContainSingle()

@@ -19,8 +19,8 @@ namespace Azure.Bicep.Types.Validation.Semantic
     /// model (never the deserialized type model) so it can report precise source locations.
     /// </summary>
     /// <remarks>
-    /// Range and length rules (BCPVT026/BCPVT027) are unconditional errors. Enum and flags domain
-    /// rules (BCPVT028/BCPVT029) are mode-aware: an <c>Error</c> in <c>CanonicalWriter</c> and a
+    /// Range and length rules (BCPVT025/BCPVT026) are unconditional errors. Enum and flags domain
+    /// rules (BCPVT027/BCPVT028) are mode-aware: an <c>Error</c> in <c>CanonicalWriter</c> and a
     /// <c>Warning</c> in <c>CompatibleReader</c>, because new enum values and flag bits are
     /// backward-compatible model evolution that a compatible reader must tolerate. Direct-root
     /// legacy <c>ResourceType</c> scope fields (<c>scopeType</c>/<c>readOnlyScopes</c>/<c>flags</c>)
@@ -104,7 +104,7 @@ namespace Azure.Bicep.Types.Validation.Semantic
         }
 
         /// <summary>
-        /// Reports BCPVT026 when both range bounds are present, shape-valid integers, and the
+        /// Reports BCPVT025 when both range bounds are present, shape-valid integers, and the
         /// minimum exceeds the maximum.  The diagnostic points at the maximum field so baselines
         /// do not depend on source property order.
         /// </summary>
@@ -123,7 +123,7 @@ namespace Azure.Bicep.Types.Validation.Semantic
                 minFieldName, min, maxFieldName, max, location.Line, location.Column));
         }
 
-        /// <summary>Reports BCPVT027 when a present, shape-valid length field is negative.</summary>
+        /// <summary>Reports BCPVT026 when a present, shape-valid length field is negative.</summary>
         private static void ValidateNonNegativeLength(
             TypeGraphNode node, string typeName, string fieldName, List<TypeValidationDiagnostic> diagnostics)
         {
@@ -137,7 +137,7 @@ namespace Azure.Bicep.Types.Validation.Semantic
                 node.Document.PackageRelativePath, pointer, typeName, fieldName, value, location.Line, location.Column));
         }
 
-        /// <summary>Reports BCPVT029 when a present, shape-valid direct-root flags field carries bits outside <paramref name="mask"/>.</summary>
+        /// <summary>Reports BCPVT028 when a present, shape-valid direct-root flags field carries bits outside <paramref name="mask"/>.</summary>
         private static void ValidateFlagsField(
             TypeGraphNode node, string fieldName, long mask, string description,
             TypeValidationDiagnosticSeverity severity, List<TypeValidationDiagnostic> diagnostics)
@@ -153,7 +153,7 @@ namespace Azure.Bicep.Types.Validation.Semantic
                 node.Document.PackageRelativePath, pointer, description, unknownBits, mask, severity, location.Line, location.Column));
         }
 
-        /// <summary>Reports BCPVT029 for each object-map member whose nested <c>flags</c> field carries bits outside <paramref name="mask"/>.</summary>
+        /// <summary>Reports BCPVT028 for each object-map member whose nested <c>flags</c> field carries bits outside <paramref name="mask"/>.</summary>
         private static void ValidatePropertyMapFlags(
             TypeGraphNode node, string mapFieldName, long mask, string description,
             TypeValidationDiagnosticSeverity severity, List<TypeValidationDiagnostic> diagnostics)
@@ -179,7 +179,7 @@ namespace Azure.Bicep.Types.Validation.Semantic
             }
         }
 
-        /// <summary>Reports BCPVT029 for each parameter element whose <c>flags</c> field carries bits outside <paramref name="mask"/>.</summary>
+        /// <summary>Reports BCPVT028 for each parameter element whose <c>flags</c> field carries bits outside <paramref name="mask"/>.</summary>
         private static void ValidateParameterArrayFlags(
             TypeGraphNode node, string arrayFieldName, long mask, string description,
             TypeValidationDiagnosticSeverity severity, List<TypeValidationDiagnostic> diagnostics)
@@ -206,7 +206,7 @@ namespace Azure.Bicep.Types.Validation.Semantic
             }
         }
 
-        /// <summary>Reports BCPVT028 when a present, shape-valid enum field is outside its documented value set.</summary>
+        /// <summary>Reports BCPVT027 when a present, shape-valid enum field is outside its documented value set.</summary>
         private static void ValidateEnumField(
             TypeGraphNode node, string fieldName, long[] allowedValues, string qualifiedFieldName,
             TypeValidationDiagnosticSeverity severity, List<TypeValidationDiagnostic> diagnostics)

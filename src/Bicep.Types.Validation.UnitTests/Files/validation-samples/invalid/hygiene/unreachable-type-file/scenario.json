@@ -1,6 +1,6 @@
 {
   "name": "unreachable-type-file",
-  "description": "With strict hygiene enabled, a JSON type file that is not reachable from index.json roots reports BCPVT034.",
+  "description": "With strict hygiene enabled, a JSON type file that is not reachable from index.json roots reports BCPVT033.",
   "category": "invalid.hygiene",
   "options": {
     "validateUnreachableFiles": true

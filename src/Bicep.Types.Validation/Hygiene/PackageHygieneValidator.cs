@@ -80,8 +80,8 @@ namespace Azure.Bicep.Types.Validation.Hygiene
 
             // Validate reference edges from unreachable type objects. Sharing the root-closure
             // visited set prevents re-checking already-validated nodes. Edges from unreachable files
-            // resolve through the same graph rules as reachable edges, so this may add BCPVT017,
-            // BCPVT018, BCPVT019, or target-kind diagnostics for latent invalid references.
+            // resolve through the same graph rules as reachable edges, so this may add BCPVT016,
+            // BCPVT017, BCPVT018, or target-kind diagnostics for latent invalid references.
             diagnostics.AddRange(SemanticGraphValidator.ValidateUnreachableSeeds(provider, seeds, visited));
 
             // Scalar and policy validation over only the newly loaded unreachable files.

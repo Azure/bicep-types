@@ -3,7 +3,7 @@
   "mode": "compatibleReader",
   "diagnostics": [
     {
-      "code": "BCPVT023",
+      "code": "BCPVT022",
       "severity": "warning",
       "message": "Property \u0027scopeType\u0027 at \u0027/0/scopeType\u0027 in \u0027types.json\u0027 is accepted only for CompatibleReader mode. Prefer canonical fields \u0027readableScopes\u0027 and \u0027writableScopes\u0027.",
       "path": "types.json",
@@ -12,7 +12,7 @@
       "column": 5
     },
     {
-      "code": "BCPVT023",
+      "code": "BCPVT022",
       "severity": "warning",
       "message": "Property \u0027readOnlyScopes\u0027 at \u0027/0/readOnlyScopes\u0027 in \u0027types.json\u0027 is accepted only for CompatibleReader mode. Prefer canonical fields \u0027readableScopes\u0027 and \u0027writableScopes\u0027.",
       "path": "types.json",

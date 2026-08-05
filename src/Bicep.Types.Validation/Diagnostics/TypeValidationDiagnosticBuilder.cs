@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 
 namespace Azure.Bicep.Types.Validation.Diagnostics
@@ -12,20 +11,6 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
     /// </summary>
     public static class TypeValidationDiagnosticBuilder
     {
-        /// <summary>
-        /// Builds the legacy <c>BCPVT001</c> diagnostic.  Archive validation is now implemented, so this
-        /// builder is retained only for API stability and is no longer produced during validation.
-        /// </summary>
-        public static TypeValidationDiagnostic ArchiveValidationNotImplemented(string displayPath)
-        {
-            if (displayPath is null) { throw new ArgumentNullException(nameof(displayPath)); }
-
-            return new TypeValidationDiagnostic(
-                code: TypeValidationDiagnosticCodes.ArchiveValidationNotImplemented,
-                severity: TypeValidationDiagnosticSeverity.Error,
-                message: $"'{displayPath}' produced the legacy BCPVT001 diagnostic, which is retained for compatibility and no longer emitted. Archive package validation is implemented; archive inputs are validated directly.");
-        }
-
         // ── Input/package-reading ───────────────────────────────────────
 
         /// <summary>The supplied package path does not point to a valid directory.</summary>

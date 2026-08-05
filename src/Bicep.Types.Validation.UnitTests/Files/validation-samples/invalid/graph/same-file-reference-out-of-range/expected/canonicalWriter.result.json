@@ -3,7 +3,7 @@
   "mode": "canonicalWriter",
   "diagnostics": [
     {
-      "code": "BCPVT019",
+      "code": "BCPVT018",
       "severity": "error",
       "message": "Reference at \u0027/0/body/$ref\u0027 in \u0027types.json\u0027 targets index 99 in \u0027types.json\u0027, but the file contains 1 type objects.",
       "path": "types.json",

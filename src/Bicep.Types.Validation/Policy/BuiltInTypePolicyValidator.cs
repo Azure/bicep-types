@@ -35,7 +35,7 @@ namespace Azure.Bicep.Types.Validation.Policy
             TypePackageValidationOptions options,
             List<TypeValidationDiagnostic> diagnostics)
         {
-            // A missing or non-integer 'kind' is owned by the structural layer (BCPVT010/BCPVT011).
+            // A missing or non-integer 'kind' is owned by the structural layer (BCPVT009/BCPVT010).
             if (!PolicyNodeReader.TryGetIntegerProperty(node.ObjectNode, "kind", out var kindProperty, out long kind))
             {
                 return;

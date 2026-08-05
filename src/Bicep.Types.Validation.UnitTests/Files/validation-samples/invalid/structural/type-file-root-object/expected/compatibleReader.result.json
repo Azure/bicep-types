@@ -3,7 +3,7 @@
   "mode": "compatibleReader",
   "diagnostics": [
     {
-      "code": "BCPVT018",
+      "code": "BCPVT017",
       "severity": "error",
       "message": "Reference at \u0027/resources/S~1r@v1/$ref\u0027 in \u0027index.json\u0027 targets type file \u0027types.json\u0027, which is not a usable type-file array.",
       "path": "index.json",
@@ -12,7 +12,7 @@
       "column": 32
     },
     {
-      "code": "BCPVT005",
+      "code": "BCPVT004",
       "severity": "error",
       "message": "The root value of type file \u0027types.json\u0027 must be a JSON array.",
       "path": "types.json",

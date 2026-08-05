@@ -69,7 +69,7 @@ public class ArchiveInputTests
     }
 
     [TestMethod]
-    public void Archive_input_missing_index_json_reports_bcpvt002()
+    public void Archive_input_missing_index_json_reports_bcpvt001()
     {
         var archive = TarGzTestArchive.FromTextFiles(("types.json", "[]"));
         using var stream = new MemoryStream(archive);
@@ -81,7 +81,7 @@ public class ArchiveInputTests
     }
 
     [TestMethod]
-    public void Archive_input_malformed_gzip_reports_bcpvt030()
+    public void Archive_input_malformed_gzip_reports_bcpvt029()
     {
         using var stream = new MemoryStream(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 });
 
@@ -92,7 +92,7 @@ public class ArchiveInputTests
     }
 
     [TestMethod]
-    public void Archive_input_malformed_tar_reports_bcpvt030()
+    public void Archive_input_malformed_tar_reports_bcpvt029()
     {
         // Valid gzip container wrapping a header block with a corrupted ustar magic marker.
         var tar = TarGzTestArchive.BuildTar(new[] { TarGzTestEntry.File("index.json", MinimalIndexJson) });
@@ -107,7 +107,7 @@ public class ArchiveInputTests
     }
 
     [TestMethod]
-    public void Archive_input_duplicate_member_reports_bcpvt032()
+    public void Archive_input_duplicate_member_reports_bcpvt031()
     {
         var archive = TarGzTestArchive.Build(new[]
         {
@@ -124,7 +124,7 @@ public class ArchiveInputTests
     }
 
     [TestMethod]
-    public void Archive_input_normalized_path_collision_reports_bcpvt033()
+    public void Archive_input_normalized_path_collision_reports_bcpvt032()
     {
         var archive = TarGzTestArchive.Build(new[]
         {
@@ -141,7 +141,7 @@ public class ArchiveInputTests
     }
 
     [TestMethod]
-    public void Archive_input_case_only_path_collision_reports_bcpvt033()
+    public void Archive_input_case_only_path_collision_reports_bcpvt032()
     {
         var archive = TarGzTestArchive.Build(new[]
         {
@@ -158,7 +158,7 @@ public class ArchiveInputTests
     }
 
     [TestMethod]
-    public void Archive_input_absolute_member_path_reports_bcpvt031()
+    public void Archive_input_absolute_member_path_reports_bcpvt030()
     {
         var archive = TarGzTestArchive.Build(new[]
         {
@@ -174,7 +174,7 @@ public class ArchiveInputTests
     }
 
     [TestMethod]
-    public void Archive_input_dotdot_member_path_reports_bcpvt031()
+    public void Archive_input_dotdot_member_path_reports_bcpvt030()
     {
         var archive = TarGzTestArchive.Build(new[]
         {
@@ -190,7 +190,7 @@ public class ArchiveInputTests
     }
 
     [TestMethod]
-    public void Archive_input_backslash_member_path_reports_bcpvt031()
+    public void Archive_input_backslash_member_path_reports_bcpvt030()
     {
         var archive = TarGzTestArchive.Build(new[]
         {
@@ -206,7 +206,7 @@ public class ArchiveInputTests
     }
 
     [TestMethod]
-    public void Archive_input_symlink_member_reports_bcpvt031()
+    public void Archive_input_symlink_member_reports_bcpvt030()
     {
         var archive = TarGzTestArchive.Build(new[]
         {
@@ -251,7 +251,7 @@ public class ArchiveInputTests
     }
 
     [TestMethod]
-    public void Archive_input_missing_resource_function_only_type_file_reports_bcpvt017()
+    public void Archive_input_missing_resource_function_only_type_file_reports_bcpvt016()
     {
         const string indexJson = @"{
   ""resources"": { ""Sample.Provider/widgets@2026-01-01"": { ""$ref"": ""types.json#/1"" } },

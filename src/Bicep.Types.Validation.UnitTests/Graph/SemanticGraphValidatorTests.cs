@@ -41,7 +41,7 @@ public class SemanticGraphValidatorTests
     }
 
     [TestMethod]
-    public void Missing_referenced_file_reports_bcpvt017()
+    public void Missing_referenced_file_reports_bcpvt016()
     {
         var fs = new InMemoryPackageFileSystem().AddText("types.json",
             "[{\"$type\":\"ResourceType\",\"name\":\"My.Rp/x@2026-01-01\"," +
@@ -54,7 +54,7 @@ public class SemanticGraphValidatorTests
     }
 
     [TestMethod]
-    public void Out_of_range_reference_reports_bcpvt019()
+    public void Out_of_range_reference_reports_bcpvt018()
     {
         var fs = new InMemoryPackageFileSystem().AddText("types.json",
             "[{\"$type\":\"ResourceType\",\"name\":\"My.Rp/x@2026-01-01\"," +
@@ -65,7 +65,7 @@ public class SemanticGraphValidatorTests
     }
 
     [TestMethod]
-    public void Wrong_top_level_target_kind_reports_bcpvt020_with_related_location()
+    public void Wrong_top_level_target_kind_reports_bcpvt019_with_related_location()
     {
         var fs = new InMemoryPackageFileSystem().AddText("types.json",
             "[{\"$type\":\"ObjectType\",\"name\":\"notAResource\",\"properties\":{}}]");
@@ -78,7 +78,7 @@ public class SemanticGraphValidatorTests
     }
 
     [TestMethod]
-    public void Nested_wrong_target_kind_reports_bcpvt021()
+    public void Nested_wrong_target_kind_reports_bcpvt020()
     {
         const string types = @"[
   { ""$type"": ""ObjectType"", ""name"": ""o"",
@@ -134,7 +134,7 @@ public class SemanticGraphValidatorTests
     {
         // The resource root points at an ObjectType (wrong kind) whose property targets a
         // ResourceType. Recovery must stop at the top-level mismatch and NOT descend into the
-        // ObjectType, so only the single BCPVT020 is reported.
+        // ObjectType, so only the single BCPVT019 is reported.
         const string types = @"[
   { ""$type"": ""ObjectType"", ""name"": ""wrongRoot"",
     ""properties"": { ""p"": { ""type"": { ""$ref"": ""#/1"" }, ""flags"": 0 } } },
@@ -150,7 +150,7 @@ public class SemanticGraphValidatorTests
     // ── Wrong-kind roots per root type ───────────────────────────────────────
 
     [TestMethod]
-    public void Wrong_resource_function_root_kind_reports_bcpvt020()
+    public void Wrong_resource_function_root_kind_reports_bcpvt019()
     {
         const string index =
             "{\"resources\":{},\"resourceFunctions\":{\"My.Rp/x\":{\"2026-01-01\":[{\"$ref\":\"types.json#/0\"}]}}," +
@@ -163,7 +163,7 @@ public class SemanticGraphValidatorTests
     }
 
     [TestMethod]
-    public void Wrong_namespace_function_root_kind_reports_bcpvt020()
+    public void Wrong_namespace_function_root_kind_reports_bcpvt019()
     {
         const string index =
             "{\"resources\":{},\"resourceFunctions\":{},\"namespaceFunctions\":[{\"$ref\":\"types.json#/0\"}]}";
@@ -175,7 +175,7 @@ public class SemanticGraphValidatorTests
     }
 
     [TestMethod]
-    public void Wrong_configuration_type_kind_reports_bcpvt020()
+    public void Wrong_configuration_type_kind_reports_bcpvt019()
     {
         const string index =
             "{\"resources\":{},\"resourceFunctions\":{},\"namespaceFunctions\":[]," +
@@ -187,7 +187,7 @@ public class SemanticGraphValidatorTests
     }
 
     [TestMethod]
-    public void Wrong_fallback_resource_type_kind_reports_bcpvt020()
+    public void Wrong_fallback_resource_type_kind_reports_bcpvt019()
     {
         const string index =
             "{\"resources\":{},\"resourceFunctions\":{},\"namespaceFunctions\":[]," +
@@ -202,7 +202,7 @@ public class SemanticGraphValidatorTests
     // ── Nested wrong-kind targets per role ───────────────────────────────────
 
     [TestMethod]
-    public void Resource_type_function_wrong_target_kind_reports_bcpvt021()
+    public void Resource_type_function_wrong_target_kind_reports_bcpvt020()
     {
         const string types = @"[
   { ""$type"": ""ObjectType"", ""name"": ""notAFunction"", ""properties"": {} },
@@ -217,7 +217,7 @@ public class SemanticGraphValidatorTests
     }
 
     [TestMethod]
-    public void Discriminated_object_base_property_wrong_target_kind_reports_bcpvt021()
+    public void Discriminated_object_base_property_wrong_target_kind_reports_bcpvt020()
     {
         const string types = @"[
   { ""$type"": ""DiscriminatedObjectType"", ""name"": ""d"", ""discriminator"": ""kind"",

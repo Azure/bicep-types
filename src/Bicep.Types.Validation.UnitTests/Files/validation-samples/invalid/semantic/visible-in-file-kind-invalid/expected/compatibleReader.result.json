@@ -3,7 +3,7 @@
   "mode": "compatibleReader",
   "diagnostics": [
     {
-      "code": "BCPVT028",
+      "code": "BCPVT027",
       "severity": "warning",
       "message": "NamespaceFunctionType.visibleInFileKind at \u0027/1/visibleInFileKind\u0027 in \u0027types.json\u0027 must be one of 1 or 2 for this validator version, but got 99.",
       "path": "types.json",

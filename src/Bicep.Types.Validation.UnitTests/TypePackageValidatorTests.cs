@@ -190,7 +190,7 @@ public class TypePackageValidatorTests
     public void Explicit_bicep_types_v1_compatible_reader_accepts_legacy_form_with_warning()
     {
         // Explicit BicepTypesV1 + CompatibleReader + a legacy scope form: version plumbing must not
-        // alter existing compatible-reader policy (single BCPVT023 warning, still valid).
+        // alter existing compatible-reader policy (single BCPVT022 warning, still valid).
         using var pkg = CreatePackageWithContent(
             "{\"resources\":{\"My.Rp/x@2026-01-01\":{\"$ref\":\"types.json#/0\"}}," +
             "\"resourceFunctions\":{},\"namespaceFunctions\":[]}",

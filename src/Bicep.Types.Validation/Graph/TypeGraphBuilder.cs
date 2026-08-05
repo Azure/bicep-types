@@ -336,7 +336,7 @@ namespace Azure.Bicep.Types.Validation.Graph
             if (!node.TryGetProperty("$ref", out var refNode) || refNode.Kind != JsonValueKind.String) { return false; }
 
             // A reference object must be canonical: exactly the '$ref' property and nothing
-            // else. Extra properties are already reported by the structural layer (BCPVT014);
+            // else. Extra properties are already reported by the structural layer (BCPVT013);
             // skipping such references here honors the recovery rule that malformed references
             // do not produce follow-on graph diagnostics.
             foreach (var property in node.Properties)

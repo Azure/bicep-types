@@ -3,7 +3,7 @@
   "mode": "canonicalWriter",
   "diagnostics": [
     {
-      "code": "BCPVT026",
+      "code": "BCPVT025",
       "severity": "error",
       "message": "IntegerType at \u0027/2\u0027 in \u0027types.json\u0027 has minValue 10 greater than maxValue 5.",
       "path": "types.json",

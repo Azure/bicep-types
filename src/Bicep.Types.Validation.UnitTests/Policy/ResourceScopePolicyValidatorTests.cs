@@ -27,7 +27,7 @@ public class ResourceScopePolicyValidatorTests
     }
 
     [TestMethod]
-    public void Legacy_scope_type_reports_bcpvt022_in_canonical()
+    public void Legacy_scope_type_reports_bcpvt021_in_canonical()
     {
         Run("\"scopeType\":0", TypePackageValidationMode.CanonicalWriter)
             .Should().ContainSingle(d => d.Code == TypeValidationDiagnosticCodes.CanonicalFormViolation)
@@ -35,7 +35,7 @@ public class ResourceScopePolicyValidatorTests
     }
 
     [TestMethod]
-    public void Legacy_scope_type_reports_bcpvt023_in_compatible()
+    public void Legacy_scope_type_reports_bcpvt022_in_compatible()
     {
         Run("\"scopeType\":0", TypePackageValidationMode.CompatibleReader)
             .Should().ContainSingle(d => d.Code == TypeValidationDiagnosticCodes.CompatibilityFormUsed)
@@ -43,7 +43,7 @@ public class ResourceScopePolicyValidatorTests
     }
 
     [TestMethod]
-    public void Legacy_read_only_scopes_reports_bcpvt022_in_canonical()
+    public void Legacy_read_only_scopes_reports_bcpvt021_in_canonical()
     {
         Run("\"readOnlyScopes\":4", TypePackageValidationMode.CanonicalWriter)
             .Should().ContainSingle(d => d.Code == TypeValidationDiagnosticCodes.CanonicalFormViolation)
@@ -51,7 +51,7 @@ public class ResourceScopePolicyValidatorTests
     }
 
     [TestMethod]
-    public void Legacy_nonzero_flags_reports_bcpvt023_in_compatible()
+    public void Legacy_nonzero_flags_reports_bcpvt022_in_compatible()
     {
         Run("\"flags\":1", TypePackageValidationMode.CompatibleReader)
             .Should().ContainSingle(d => d.Code == TypeValidationDiagnosticCodes.CompatibilityFormUsed)
@@ -62,14 +62,14 @@ public class ResourceScopePolicyValidatorTests
     public void Flags_zero_with_modern_pair_reports_per_field_policy_not_mixing()
     {
         // flags:0 is not an effective legacy value, so pairing it with the modern scopes is not a
-        // mix: the field is still classified per-field (BCPVT022), not BCPVT024.
+        // mix: the field is still classified per-field (BCPVT021), not BCPVT023.
         Run("\"readableScopes\":8,\"writableScopes\":8,\"flags\":0", TypePackageValidationMode.CanonicalWriter)
             .Should().ContainSingle(d => d.Code == TypeValidationDiagnosticCodes.CanonicalFormViolation)
             .Which.JsonPointer.Should().Be("/0/flags");
     }
 
     [TestMethod]
-    public void Mixed_modern_and_legacy_scope_type_reports_single_bcpvt024_in_canonical()
+    public void Mixed_modern_and_legacy_scope_type_reports_single_bcpvt023_in_canonical()
     {
         Run("\"readableScopes\":8,\"writableScopes\":8,\"scopeType\":0", TypePackageValidationMode.CanonicalWriter)
             .Should().ContainSingle()
@@ -77,16 +77,16 @@ public class ResourceScopePolicyValidatorTests
     }
 
     [TestMethod]
-    public void Mixed_modern_and_nonzero_flags_reports_single_bcpvt024_in_compatible()
+    public void Mixed_modern_and_nonzero_flags_reports_single_bcpvt023_in_compatible()
     {
-        // BCPVT024 is emitted in both modes; mixing is never merely a compatibility warning.
+        // BCPVT023 is emitted in both modes; mixing is never merely a compatibility warning.
         Run("\"readableScopes\":8,\"writableScopes\":8,\"flags\":2", TypePackageValidationMode.CompatibleReader)
             .Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.ResourceScopeFormMixed);
     }
 
     [TestMethod]
-    public void Mixed_scope_form_reports_single_bcpvt024_and_suppresses_per_field_policy_diagnostics()
+    public void Mixed_scope_form_reports_single_bcpvt023_and_suppresses_per_field_policy_diagnostics()
     {
         var diagnostics = Run(
             "\"readableScopes\":8,\"writableScopes\":8,\"scopeType\":0,\"readOnlyScopes\":4",

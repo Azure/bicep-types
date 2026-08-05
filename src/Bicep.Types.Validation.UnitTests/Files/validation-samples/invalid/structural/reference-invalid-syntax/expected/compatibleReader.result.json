@@ -3,7 +3,7 @@
   "mode": "compatibleReader",
   "diagnostics": [
     {
-      "code": "BCPVT013",
+      "code": "BCPVT012",
       "severity": "error",
       "message": "Reference \u0027notavalidref\u0027 at \u0027/resources/S~1r@v1/$ref\u0027 in \u0027index.json\u0027 has invalid syntax: the reference string must contain a \u0027#/\u0027 fragment separator.",
       "path": "index.json",
