@@ -9,7 +9,7 @@ namespace Azure.Bicep.Types.Validation.Structural
     /// <summary>
     /// Validates the local shape of one type file (an array of type objects).
     /// </summary>
-    internal static class TypeFileValidator
+    internal static class TypeDocumentValidator
     {
         public static void Validate(JsonShapeReader reader, StructuralValidationContext context)
         {

@@ -44,7 +44,7 @@ namespace Azure.Bicep.Types.Validation.Structural
             foreach (var typeFile in documents.TypeFiles)
             {
                 context.SetCurrentDocument(typeFile);
-                TypeFileValidator.Validate(reader, context);
+                TypeDocumentValidator.Validate(reader, context);
             }
 
             return context.GetDiagnostics();
@@ -66,7 +66,7 @@ namespace Azure.Bicep.Types.Validation.Structural
             var reader = new JsonShapeReader(context);
 
             context.SetCurrentDocument(typeFile);
-            TypeFileValidator.Validate(reader, context);
+            TypeDocumentValidator.Validate(reader, context);
 
             return context.GetDiagnostics();
         }

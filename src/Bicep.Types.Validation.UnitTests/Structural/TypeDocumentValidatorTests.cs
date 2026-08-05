@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Azure.Bicep.Types.Validation.UnitTests.Structural;
 
 [TestClass]
-public class TypeFileValidatorTests
+public class TypeDocumentValidatorTests
 {
     private static (StructuralValidationContext ctx, JsonShapeReader reader) CreateContext(
         string typeFileJson,
@@ -31,7 +31,7 @@ public class TypeFileValidatorTests
     public void Non_array_root_reports_type_file_root_must_be_array()
     {
         var (ctx, reader) = CreateContext("{\"bad\":1}");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.TypeFileRootMustBeArray);
     }
@@ -42,7 +42,7 @@ public class TypeFileValidatorTests
     public void Primitive_array_element_reports_type_file_element_must_be_object()
     {
         var (ctx, reader) = CreateContext("[42]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.TypeFileElementMustBeObject);
     }
@@ -51,7 +51,7 @@ public class TypeFileValidatorTests
     public void Null_array_element_reports_type_file_element_must_be_object()
     {
         var (ctx, reader) = CreateContext("[null]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.TypeFileElementMustBeObject);
     }
@@ -62,7 +62,7 @@ public class TypeFileValidatorTests
     public void Type_object_without_dollar_type_reports_discriminator_missing()
     {
         var (ctx, reader) = CreateContext("[{\"name\":\"x\"}]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.TypeObjectDiscriminatorMissing);
     }
@@ -71,7 +71,7 @@ public class TypeFileValidatorTests
     public void Non_string_dollar_type_reports_discriminator_must_be_string()
     {
         var (ctx, reader) = CreateContext("[{\"$type\":42}]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.TypeObjectDiscriminatorMustBeString);
     }
@@ -80,7 +80,7 @@ public class TypeFileValidatorTests
     public void Unknown_dollar_type_reports_discriminator_unsupported()
     {
         var (ctx, reader) = CreateContext("[{\"$type\":\"NonExistentKind\"}]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.TypeObjectDiscriminatorUnsupported);
     }
@@ -92,7 +92,7 @@ public class TypeFileValidatorTests
     {
         // StringLiteralType requires "value" field
         var (ctx, reader) = CreateContext("[{\"$type\":\"StringLiteralType\"}]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle(d =>
             d.Code == TypeValidationDiagnosticCodes.RequiredPropertyMissing && d.Message.Contains("value"));
     }
@@ -102,7 +102,7 @@ public class TypeFileValidatorTests
     {
         // StringLiteralType.value must be a string
         var (ctx, reader) = CreateContext("[{\"$type\":\"StringLiteralType\",\"value\":42}]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.PropertyTypeMismatch);
     }
@@ -111,7 +111,7 @@ public class TypeFileValidatorTests
     public void Unknown_type_object_field_reports_unknown_property_in_canonical_mode()
     {
         var (ctx, reader) = CreateContext("[{\"$type\":\"AnyType\",\"unknownField\":1}]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.UnknownProperty);
     }
@@ -124,7 +124,7 @@ public class TypeFileValidatorTests
         var json = "[{\"$type\":\"ResourceType\",\"name\":\"X\",\"body\":{\"$ref\":\"#/0\"}," +
                    "\"readableScopes\":8,\"writableScopes\":8,\"scopeType\":0}]";
         var (ctx, reader) = CreateContext(json, TypePackageValidationMode.CanonicalWriter);
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().BeEmpty();
     }
 
@@ -135,7 +135,7 @@ public class TypeFileValidatorTests
         var json = "[{\"$type\":\"ResourceType\",\"name\":\"X\",\"body\":{\"$ref\":\"#/0\"}," +
                    "\"readableScopes\":8,\"writableScopes\":8,\"scopeType\":0}]";
         var (ctx, reader) = CreateContext(json, TypePackageValidationMode.CompatibleReader);
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().BeEmpty();
     }
 
@@ -145,7 +145,7 @@ public class TypeFileValidatorTests
         // CompatibleReader accepts only documented legacy fields, not arbitrary unknowns.
         var (ctx, reader) = CreateContext(
             "[{\"$type\":\"AnyType\",\"unknownField\":1}]", TypePackageValidationMode.CompatibleReader);
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.UnknownProperty);
     }
@@ -155,7 +155,7 @@ public class TypeFileValidatorTests
     {
         // IntegerType.minValue is an integer field; a fractional number must be rejected.
         var (ctx, reader) = CreateContext("[{\"$type\":\"IntegerType\",\"minValue\":1.5}]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.PropertyTypeMismatch);
     }
@@ -165,7 +165,7 @@ public class TypeFileValidatorTests
     {
         // ArrayType.itemType must be a ref, but we're giving a string
         var (ctx, reader) = CreateContext("[{\"$type\":\"ArrayType\",\"itemType\":\"not-a-ref\"}]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.ReferenceObjectInvalid);
     }
@@ -176,7 +176,7 @@ public class TypeFileValidatorTests
     public void Any_type_object_with_no_extra_fields_is_valid()
     {
         var (ctx, reader) = CreateContext("[{\"$type\":\"AnyType\"}]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().BeEmpty();
     }
 
@@ -184,7 +184,7 @@ public class TypeFileValidatorTests
     public void String_literal_type_with_value_is_valid()
     {
         var (ctx, reader) = CreateContext("[{\"$type\":\"StringLiteralType\",\"value\":\"hello\"}]");
-        TypeFileValidator.Validate(reader, ctx);
+        TypeDocumentValidator.Validate(reader, ctx);
         ctx.GetDiagnostics().Should().BeEmpty();
     }
 }
