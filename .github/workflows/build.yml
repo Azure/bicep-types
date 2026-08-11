@@ -100,14 +100,14 @@ jobs:
       - name: Package
         run: |
           npm run package
-          mv bicep-types-*.tgz bicep-types.tgz
+          mv azure-bicep-types-*.tgz azure-bicep-types.tgz
         working-directory: ./src/bicep-types
 
       - name: Upload NPM package
         uses: actions/upload-artifact@v7
         with:
-          name: bicep-types.tgz
-          path: ./src/bicep-types/bicep-types.tgz
+          name: azure-bicep-types.tgz
+          path: ./src/bicep-types/azure-bicep-types.tgz
           if-no-files-found: error
 
       - name: Perform CodeQL Analysis

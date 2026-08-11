@@ -1,5 +1,5 @@
 {
-  "name": "bicep-types",
+  "name": "@azure/bicep-types",
   "version": "0.0.0-placeholder",
   "description": "Utility library to simplify reading & writing types in a format that Bicep understands.",
   "scripts": {
