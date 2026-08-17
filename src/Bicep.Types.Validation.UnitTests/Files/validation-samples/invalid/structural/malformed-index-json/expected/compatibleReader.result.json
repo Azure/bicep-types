@@ -1,0 +1,20 @@
+{
+  "isValid": false,
+  "mode": "compatibleReader",
+  "diagnostics": [
+    {
+      "code": "BCPVT003",
+      "severity": "error",
+      "message": "JSON syntax error in \u0027index.json\u0027: \u0027t\u0027 is an invalid start of a property name. Expected a \u0027\u0022\u0027. LineNumber: 0 | BytePositionInLine: 2.",
+      "path": "index.json",
+      "line": 1,
+      "column": 3
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

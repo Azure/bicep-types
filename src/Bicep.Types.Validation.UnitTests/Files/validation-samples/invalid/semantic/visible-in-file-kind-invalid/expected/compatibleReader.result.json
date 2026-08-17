@@ -1,0 +1,21 @@
+{
+  "isValid": true,
+  "mode": "compatibleReader",
+  "diagnostics": [
+    {
+      "code": "BCPVT028",
+      "severity": "warning",
+      "message": "NamespaceFunctionType.visibleInFileKind at \u0027/1/visibleInFileKind\u0027 in \u0027types.json\u0027 must be one of 1 or 2 for this validator version, but got 99.",
+      "path": "types.json",
+      "jsonPointer": "/1/visibleInFileKind",
+      "line": 12,
+      "column": 5
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0
+  }
+}
