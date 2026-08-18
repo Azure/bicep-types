@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using Azure.Bicep.Types.Validation.Diagnostics;
 
 namespace Azure.Bicep.Types.Validation.Packaging
 {
@@ -17,8 +16,6 @@ namespace Azure.Bicep.Types.Validation.Packaging
     /// </remarks>
     internal static class PackageInputResolver
     {
-        private static readonly TypeValidationDiagnostic[] NoDiagnostics = new TypeValidationDiagnostic[0];
-
         public static PackageInputResolution Resolve(TypePackageValidationInput input)
         {
             switch (input)
@@ -28,8 +25,7 @@ namespace Azure.Bicep.Types.Validation.Packaging
                         PackageInputKind.Directory,
                         directory.DisplayPath,
                         packageRootPath: directory.Path,
-                        indexFilePath: null,
-                        diagnostics: NoDiagnostics);
+                        indexFilePath: null);
 
                 case IndexFileValidationInput index:
                     var root = Path.GetDirectoryName(index.Path);
@@ -37,8 +33,7 @@ namespace Azure.Bicep.Types.Validation.Packaging
                         PackageInputKind.IndexFile,
                         index.DisplayPath,
                         packageRootPath: string.IsNullOrEmpty(root) ? "." : root,
-                        indexFilePath: index.Path,
-                        diagnostics: NoDiagnostics);
+                        indexFilePath: index.Path);
 
                 case ArchiveFileValidationInput archiveFile:
                     return new PackageInputResolution(
@@ -46,7 +41,6 @@ namespace Azure.Bicep.Types.Validation.Packaging
                         archiveFile.DisplayPath,
                         packageRootPath: null,
                         indexFilePath: null,
-                        diagnostics: NoDiagnostics,
                         archiveFilePath: archiveFile.Path);
 
                 case ArchiveStreamValidationInput archiveStream:
@@ -58,7 +52,6 @@ namespace Azure.Bicep.Types.Validation.Packaging
                         archiveStream.DisplayPath,
                         packageRootPath: null,
                         indexFilePath: null,
-                        diagnostics: NoDiagnostics,
                         archiveBytes: bytes);
 
                 default:

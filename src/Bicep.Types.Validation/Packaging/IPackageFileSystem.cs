@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Azure.Bicep.Types.Validation.Packaging
 {
     /// <summary>
-    /// Internal abstraction over package file access.  Implementations must normalize
+    /// Internal abstraction over package file access. Implementations must normalize
     /// path separators to <c>/</c> and reject paths that escape the package root.
     /// </summary>
     internal interface IPackageFileSystem

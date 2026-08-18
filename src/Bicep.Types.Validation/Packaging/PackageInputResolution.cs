@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections.Generic;
-using Azure.Bicep.Types.Validation.Diagnostics;
-
 namespace Azure.Bicep.Types.Validation.Packaging
 {
     /// <summary>
@@ -16,7 +13,6 @@ namespace Azure.Bicep.Types.Validation.Packaging
             string displayPath,
             string? packageRootPath,
             string? indexFilePath,
-            IReadOnlyList<TypeValidationDiagnostic> diagnostics,
             string? archiveFilePath = null,
             byte[]? archiveBytes = null)
         {
@@ -24,7 +20,6 @@ namespace Azure.Bicep.Types.Validation.Packaging
             DisplayPath = displayPath;
             PackageRootPath = packageRootPath;
             IndexFilePath = indexFilePath;
-            Diagnostics = diagnostics;
             ArchiveFilePath = archiveFilePath;
             ArchiveBytes = archiveBytes;
         }
@@ -38,9 +33,6 @@ namespace Azure.Bicep.Types.Validation.Packaging
 
         /// <summary>Index file path, for raw index inputs.</summary>
         public string? IndexFilePath { get; }
-
-        /// <summary>Diagnostics produced while resolving the input.</summary>
-        public IReadOnlyList<TypeValidationDiagnostic> Diagnostics { get; }
 
         /// <summary>Physical archive path, for archive-file inputs.</summary>
         public string? ArchiveFilePath { get; }

@@ -50,7 +50,6 @@ namespace Azure.Bicep.Types.Validation
             }
 
             var resolution = PackageInputResolver.Resolve(input);
-            diagnostics.AddRange(resolution.Diagnostics);
 
             // Read package files. Archive inputs are opened as an in-memory package file system;
             // directory and index-file inputs are read from disk. Fatal container/read failures

@@ -111,8 +111,7 @@ public class PackageReaderTests
         // A resolution with null PackageRootPath shouldn't crash the reader
         var resolution = new PackageInputResolution(
             PackageInputKind.Directory, "display",
-            packageRootPath: null, indexFilePath: null,
-            diagnostics: new TypeValidationDiagnostic[0]);
+            packageRootPath: null, indexFilePath: null);
 
         var result = PackageReader.Read(resolution, DefaultOptions);
 
