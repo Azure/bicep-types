@@ -1,0 +1,8 @@
+{
+  "name": "discriminated-object-element-target-kind",
+  "description": "A DiscriminatedObjectType element references a non-ObjectType.",
+  "category": "invalid.graph",
+  "modes": [
+    "canonicalWriter"
+  ]
+}

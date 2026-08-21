@@ -1,0 +1,1 @@
+{"name":"type-object-missing-required-field","description":"A type object (StringLiteralType) is missing its required value field.","category":"structural","modes":["canonicalWriter","compatibleReader"]}

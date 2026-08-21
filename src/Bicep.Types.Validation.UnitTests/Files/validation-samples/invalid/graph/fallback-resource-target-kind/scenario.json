@@ -1,0 +1,8 @@
+{
+  "name": "fallback-resource-target-kind",
+  "description": "The fallbackResourceType index entry references a non-ResourceType object.",
+  "category": "invalid.graph",
+  "modes": [
+    "canonicalWriter"
+  ]
+}

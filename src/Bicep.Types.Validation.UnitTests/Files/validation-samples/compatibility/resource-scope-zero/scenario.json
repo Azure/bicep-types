@@ -1,0 +1,1 @@
+{"name":"resource-scope-zero","description":"A ResourceType uses only the legacy scopeType field set to 0: still classified (rejected in CanonicalWriter, warned in CompatibleReader), confirming scopeType:0 is effective-legacy unlike flags:0.","category":"compatibility","modes":["canonicalWriter","compatibleReader"]}

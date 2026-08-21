@@ -1,0 +1,9 @@
+{
+  "name": "recursive-object",
+  "description": "A valid cycle is accepted when all references resolve and target-role rules are satisfied.",
+  "category": "valid.canonical",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}
