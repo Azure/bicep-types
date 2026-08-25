@@ -1,0 +1,9 @@
+{
+  "name": "object-property-flags-invalid",
+  "description": "An ObjectType property has flags with bits outside the known mask (BCPVT029): error in canonicalWriter, warning in compatibleReader.",
+  "category": "invalid.semantic",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

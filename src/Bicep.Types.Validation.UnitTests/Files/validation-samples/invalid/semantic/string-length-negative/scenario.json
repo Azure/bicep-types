@@ -1,0 +1,8 @@
+{
+  "name": "string-length-negative",
+  "description": "A StringType has a negative minLength (BCPVT027); mode-independent.",
+  "category": "invalid.semantic",
+  "modes": [
+    "canonicalWriter"
+  ]
+}

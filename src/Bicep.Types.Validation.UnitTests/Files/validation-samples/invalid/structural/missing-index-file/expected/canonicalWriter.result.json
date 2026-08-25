@@ -1,0 +1,17 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT002",
+      "severity": "error",
+      "message": "The package at \u0027\u003Csample-root\u003E/package\u0027 does not contain an \u0027index.json\u0027 file at the package root."
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

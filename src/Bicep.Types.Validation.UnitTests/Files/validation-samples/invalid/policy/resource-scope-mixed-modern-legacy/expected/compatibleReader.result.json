@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "compatibleReader",
+  "diagnostics": [
+    {
+      "code": "BCPVT024",
+      "severity": "error",
+      "message": "ResourceType at \u0027/0\u0027 in \u0027types.json\u0027 mixes modern scope fields with legacy scope field \u0027scopeType\u0027. Use either the canonical modern pair or a documented legacy form, not both.",
+      "path": "types.json",
+      "jsonPointer": "/0",
+      "line": 2,
+      "column": 3
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}
