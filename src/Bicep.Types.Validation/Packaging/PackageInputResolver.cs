@@ -11,8 +11,8 @@ namespace Azure.Bicep.Types.Validation.Packaging
     /// </summary>
     /// <remarks>
     /// The resolver records the input shape that <see cref="PackageReader"/> extends.  Directory and
-    /// index-file inputs carry a package root; archive inputs carry the archive path or the archive
-    /// bytes read fully from the caller's stream.
+    /// index-file inputs carry a package root; archive inputs carry the archive path or the caller's
+    /// archive stream without eagerly buffering its content.
     /// </remarks>
     internal static class PackageInputResolver
     {
@@ -44,15 +44,12 @@ namespace Azure.Bicep.Types.Validation.Packaging
                         archiveFilePath: archiveFile.Path);
 
                 case ArchiveStreamValidationInput archiveStream:
-                    // Read the caller-provided stream fully into memory without disposing it and
-                    // without requiring seekability.
-                    var bytes = ReadStreamFully(archiveStream.Content);
                     return new PackageInputResolution(
                         PackageInputKind.ArchiveStream,
                         archiveStream.DisplayPath,
                         packageRootPath: null,
                         indexFilePath: null,
-                        archiveBytes: bytes);
+                        archiveStream: archiveStream.Content);
 
                 default:
                     throw new ArgumentOutOfRangeException(
@@ -62,11 +59,5 @@ namespace Azure.Bicep.Types.Validation.Packaging
             }
         }
 
-        private static byte[] ReadStreamFully(Stream stream)
-        {
-            using var buffer = new MemoryStream();
-            stream.CopyTo(buffer);
-            return buffer.ToArray();
-        }
     }
 }

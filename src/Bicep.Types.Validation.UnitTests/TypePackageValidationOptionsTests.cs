@@ -35,6 +35,61 @@ public class TypePackageValidationOptionsTests
         => new TypePackageValidationOptions().ValidateUnreachableFiles.Should().BeFalse();
 
     [TestMethod]
+    public void Default_options_use_default_archive_limits()
+    {
+        var limits = new TypePackageValidationOptions().ArchiveLimits;
+
+        limits.MaxCompressedArchiveBytes.Should().Be(64L * 1024L * 1024L);
+        limits.MaxExpandedArchiveBytes.Should().Be(256L * 1024L * 1024L);
+        limits.MaxPackageFileBytes.Should().Be(32L * 1024L * 1024L);
+        limits.MaxPackageFileCount.Should().Be(4096);
+    }
+
+    [TestMethod]
+    public void Archive_limits_can_be_overridden()
+    {
+        var limits = new TypePackageArchiveLimits(
+            maxCompressedArchiveBytes: 1,
+            maxExpandedArchiveBytes: 2,
+            maxPackageFileBytes: 3,
+            maxPackageFileCount: 4);
+
+        limits.MaxCompressedArchiveBytes.Should().Be(1);
+        limits.MaxExpandedArchiveBytes.Should().Be(2);
+        limits.MaxPackageFileBytes.Should().Be(3);
+        limits.MaxPackageFileCount.Should().Be(4);
+    }
+
+    [TestMethod]
+    [DataRow(0L, 1L, 1L, 1)]
+    [DataRow(1L, 0L, 1L, 1)]
+    [DataRow(1L, 1L, 0L, 1)]
+    [DataRow(1L, 1L, 1L, 0)]
+    [DataRow(-1L, 1L, 1L, 1)]
+    public void Archive_limits_reject_non_positive_values(
+        long maxCompressedArchiveBytes,
+        long maxExpandedArchiveBytes,
+        long maxPackageFileBytes,
+        int maxPackageFileCount)
+    {
+        Action act = () => new TypePackageArchiveLimits(
+            maxCompressedArchiveBytes,
+            maxExpandedArchiveBytes,
+            maxPackageFileBytes,
+            maxPackageFileCount);
+
+        act.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    [TestMethod]
+    public void Archive_limits_cannot_be_null()
+    {
+        Action act = () => new TypePackageValidationOptions { ArchiveLimits = null! };
+
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [TestMethod]
     public void Default_options_have_no_diagnostic_cap()
         => new TypePackageValidationOptions().MaxDiagnostics.Should().BeNull();
 

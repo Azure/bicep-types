@@ -3,16 +3,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Azure.Bicep.Types.Validation.Diagnostics;
 
 namespace Azure.Bicep.Types.Validation.Packaging
 {
     /// <summary>
-    /// Archive-backed implementation of <see cref="IPackageFileSystem"/>.  Regular-file entries from a
+    /// Archive-backed implementation of <see cref="IPackageFileSystem"/>. Regular-file entries from a
     /// gzip-compressed tar (<c>types.tgz</c>) are read into memory and keyed by their canonical
     /// package-relative path so downstream validators cannot tell whether files came from a directory
-    /// or an archive.  Container defects surface as diagnostics rather than exceptions.
+    /// or an archive. Container defects surface as diagnostics rather than exceptions.
     /// </summary>
     internal sealed class ArchivePackageFileSystem : IPackageFileSystem
     {
@@ -40,13 +41,17 @@ namespace Azure.Bicep.Types.Validation.Packaging
         /// </summary>
         public bool HasFatalContainerFailure => Diagnostics.Count > 0;
 
-        /// <summary>Reads an archive from its raw bytes, classifying entries and validating member paths.</summary>
-        public static ArchivePackageFileSystem Create(byte[] archiveBytes, string displayPath)
+        /// <summary>Reads an archive stream, classifying entries and validating member paths.</summary>
+        public static ArchivePackageFileSystem Create(
+            Stream archiveStream,
+            string displayPath,
+            TypePackageArchiveLimits limits)
         {
-            if (archiveBytes == null) { throw new ArgumentNullException(nameof(archiveBytes)); }
+            if (archiveStream == null) { throw new ArgumentNullException(nameof(archiveStream)); }
             if (displayPath == null) { throw new ArgumentNullException(nameof(displayPath)); }
+            if (limits == null) { throw new ArgumentNullException(nameof(limits)); }
 
-            var readResult = TarGzArchiveReader.Read(archiveBytes);
+            var readResult = TarGzArchiveReader.Read(archiveStream, limits);
             if (!readResult.Success)
             {
                 // A gzip/tar structural failure is a single fatal diagnostic with no member-level detail.

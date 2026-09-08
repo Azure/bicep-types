@@ -27,7 +27,7 @@ public class PackageArchiveReaderTests
         resolution.Kind.Should().Be(PackageInputKind.ArchiveFile);
         resolution.ArchiveFilePath.Should().Be("some/dir/types.tgz");
         resolution.DisplayPath.Should().Contain("types.tgz");
-        resolution.ArchiveBytes.Should().BeNull();
+        resolution.ArchiveStream.Should().BeNull();
     }
 
     [TestMethod]
@@ -41,8 +41,8 @@ public class PackageArchiveReaderTests
 
         resolution.Kind.Should().Be(PackageInputKind.ArchiveStream);
         resolution.DisplayPath.Should().Be("types.tgz");
-        resolution.ArchiveBytes.Should().Equal(payload);
-        // The caller's stream is read fully but not disposed.
+        resolution.ArchiveStream.Should().BeSameAs(stream);
+        stream.Position.Should().Be(0);
         stream.CanRead.Should().BeTrue();
     }
 

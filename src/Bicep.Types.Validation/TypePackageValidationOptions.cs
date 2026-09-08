@@ -11,6 +11,7 @@ namespace Azure.Bicep.Types.Validation
     public sealed class TypePackageValidationOptions
     {
         private int? maxDiagnostics;
+        private TypePackageArchiveLimits archiveLimits = TypePackageArchiveLimits.Default;
 
         /// <summary>Validation mode. Defaults to <see cref="TypePackageValidationMode.CanonicalWriter"/>.</summary>
         public TypePackageValidationMode Mode { get; set; } = TypePackageValidationMode.CanonicalWriter;
@@ -31,6 +32,15 @@ namespace Azure.Bicep.Types.Validation
 
         /// <summary>Whether files unreachable from graph roots are validated. Defaults to <c>false</c>.</summary>
         public bool ValidateUnreachableFiles { get; set; }
+
+        /// <summary>
+        /// Resource limits applied to archive inputs. Defaults to <see cref="TypePackageArchiveLimits.Default"/>.
+        /// </summary>
+        public TypePackageArchiveLimits ArchiveLimits
+        {
+            get => archiveLimits;
+            set => archiveLimits = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         /// <summary>
         /// Optional cap on the number of returned diagnostics. <c>null</c> means no cap.

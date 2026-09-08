@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.IO;
+
 namespace Azure.Bicep.Types.Validation.Packaging
 {
     /// <summary>
@@ -14,14 +16,14 @@ namespace Azure.Bicep.Types.Validation.Packaging
             string? packageRootPath,
             string? indexFilePath,
             string? archiveFilePath = null,
-            byte[]? archiveBytes = null)
+            Stream? archiveStream = null)
         {
             Kind = kind;
             DisplayPath = displayPath;
             PackageRootPath = packageRootPath;
             IndexFilePath = indexFilePath;
             ArchiveFilePath = archiveFilePath;
-            ArchiveBytes = archiveBytes;
+            ArchiveStream = archiveStream;
         }
 
         public PackageInputKind Kind { get; }
@@ -37,7 +39,7 @@ namespace Azure.Bicep.Types.Validation.Packaging
         /// <summary>Physical archive path, for archive-file inputs.</summary>
         public string? ArchiveFilePath { get; }
 
-        /// <summary>Archive bytes read fully into memory, for archive-stream inputs.</summary>
-        public byte[]? ArchiveBytes { get; }
+        /// <summary>Caller-owned content stream, for archive-stream inputs.</summary>
+        public Stream? ArchiveStream { get; }
     }
 }

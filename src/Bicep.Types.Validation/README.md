@@ -62,6 +62,25 @@ Mode and format version are independent. `BicepTypesV1` is the current supported
 
 `TypePackageValidationOptions` also controls warning and informational diagnostic inclusion, validation of unreachable package files, and the maximum number of returned diagnostics. Package hygiene is opt-in through `ValidateUnreachableFiles` because it examines files outside the graph reachable from `index.json`.
 
+Archive inputs are read incrementally and use resource limits to prevent compressed or expanded
+content from consuming unbounded memory. The defaults are 64 MiB of compressed input, 256 MiB of
+expanded tar content, 32 MiB per package file, and 4096 package files. Callers that intentionally
+validate larger packages can provide custom limits:
+
+```csharp
+var options = new TypePackageValidationOptions
+{
+    ArchiveLimits = new TypePackageArchiveLimits(
+        maxCompressedArchiveBytes: 128L * 1024L * 1024L,
+        maxExpandedArchiveBytes: 512L * 1024L * 1024L,
+        maxPackageFileBytes: 64L * 1024L * 1024L,
+        maxPackageFileCount: 8192),
+};
+```
+
+These limits apply only to `types.tgz` file and stream inputs. Exceeding any archive limit produces
+the fatal archive diagnostic `BCPVT029` and stops validation before package JSON is processed.
+
 `TypePackageValidationResult` provides:
 
 - `IsValid`, based on every detected error before filtering or truncation.

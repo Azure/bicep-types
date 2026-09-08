@@ -25,7 +25,7 @@ namespace Azure.Bicep.Types.Validation.Packaging
 
             var diagnostics = new List<TypeValidationDiagnostic>();
 
-            if (!TryOpenFileSystem(resolution, diagnostics, out IPackageFileSystem? fs))
+            if (!TryOpenFileSystem(resolution, options, diagnostics, out IPackageFileSystem? fs))
             {
                 return Fatal(diagnostics);
             }
@@ -69,6 +69,7 @@ namespace Azure.Bicep.Types.Validation.Packaging
         /// </summary>
         private static bool TryOpenFileSystem(
             PackageInputResolution resolution,
+            TypePackageValidationOptions options,
             List<TypeValidationDiagnostic> diagnostics,
             out IPackageFileSystem? fileSystem)
         {
@@ -76,20 +77,7 @@ namespace Azure.Bicep.Types.Validation.Packaging
 
             if (resolution.Kind == PackageInputKind.ArchiveFile || resolution.Kind == PackageInputKind.ArchiveStream)
             {
-                if (!TryGetArchiveBytes(resolution, diagnostics, out byte[]? archiveBytes))
-                {
-                    return false;
-                }
-
-                var archiveFs = ArchivePackageFileSystem.Create(archiveBytes!, resolution.DisplayPath);
-                if (archiveFs.HasFatalContainerFailure)
-                {
-                    diagnostics.AddRange(archiveFs.Diagnostics);
-                    return false;
-                }
-
-                fileSystem = archiveFs;
-                return true;
+                return TryOpenArchiveFileSystem(resolution, options.ArchiveLimits, diagnostics, out fileSystem);
             }
 
             string? packageRoot = resolution.PackageRootPath;
@@ -103,19 +91,32 @@ namespace Azure.Bicep.Types.Validation.Packaging
             return true;
         }
 
-        /// <summary>Resolves the raw archive bytes for an archive-file or archive-stream input.</summary>
-        private static bool TryGetArchiveBytes(
+        private static bool TryOpenArchiveFileSystem(
             PackageInputResolution resolution,
+            TypePackageArchiveLimits limits,
             List<TypeValidationDiagnostic> diagnostics,
-            out byte[]? archiveBytes)
+            out IPackageFileSystem? fileSystem)
         {
+            fileSystem = null;
+
             if (resolution.Kind == PackageInputKind.ArchiveStream)
             {
-                archiveBytes = resolution.ArchiveBytes ?? Array.Empty<byte>();
-                return true;
+                if (resolution.ArchiveStream == null)
+                {
+                    diagnostics.Add(TypeValidationDiagnosticBuilder.ArchivePackageInvalid(
+                        resolution.DisplayPath,
+                        "the archive stream is unavailable"));
+                    return false;
+                }
+
+                return TryCreateArchiveFileSystem(
+                    resolution.ArchiveStream,
+                    resolution.DisplayPath,
+                    limits,
+                    diagnostics,
+                    out fileSystem);
             }
 
-            archiveBytes = null;
             var path = resolution.ArchiveFilePath;
             if (string.IsNullOrEmpty(path) || !File.Exists(path))
             {
@@ -125,14 +126,47 @@ namespace Azure.Bicep.Types.Validation.Packaging
 
             try
             {
-                archiveBytes = File.ReadAllBytes(path!);
-                return true;
+                var fileInfo = new FileInfo(path!);
+                if (fileInfo.Length > limits.MaxCompressedArchiveBytes)
+                {
+                    diagnostics.Add(TypeValidationDiagnosticBuilder.ArchivePackageInvalid(
+                        resolution.DisplayPath,
+                        $"the compressed archive exceeds the configured limit of {limits.MaxCompressedArchiveBytes} bytes"));
+                    return false;
+                }
+
+                using var archiveStream = File.OpenRead(path!);
+                return TryCreateArchiveFileSystem(
+                    archiveStream,
+                    resolution.DisplayPath,
+                    limits,
+                    diagnostics,
+                    out fileSystem);
             }
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
             {
                 diagnostics.Add(TypeValidationDiagnosticBuilder.PackageFileReadFailed(resolution.DisplayPath, ex.Message));
                 return false;
             }
+        }
+
+        private static bool TryCreateArchiveFileSystem(
+            Stream archiveStream,
+            string displayPath,
+            TypePackageArchiveLimits limits,
+            List<TypeValidationDiagnostic> diagnostics,
+            out IPackageFileSystem? fileSystem)
+        {
+            var archiveFileSystem = ArchivePackageFileSystem.Create(archiveStream, displayPath, limits);
+            if (archiveFileSystem.HasFatalContainerFailure)
+            {
+                diagnostics.AddRange(archiveFileSystem.Diagnostics);
+                fileSystem = null;
+                return false;
+            }
+
+            fileSystem = archiveFileSystem;
+            return true;
         }
 
         private static PackageReadResult Fatal(List<TypeValidationDiagnostic> diagnostics)
