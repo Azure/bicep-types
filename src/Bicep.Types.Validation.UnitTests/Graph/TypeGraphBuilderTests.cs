@@ -49,6 +49,23 @@ public class TypeGraphBuilderTests
     }
 
     [TestMethod]
+    public void ExtractRoots_canonicalizes_target_path_and_preserves_raw_reference()
+    {
+        const string indexJson = @"{
+  ""resources"": { ""My.Rp/things@2026-01-01"": { ""$ref"": ""./common//types.json#/0"" } },
+  ""resourceFunctions"": {},
+  ""namespaceFunctions"": []
+}";
+        var index = GraphTestHelpers.Document("index.json", indexJson);
+
+        var reference = TypeGraphBuilder.ExtractRoots(index).Should().ContainSingle().Subject.Reference;
+
+        reference.RawText.Should().Be("./common//types.json#/0");
+        reference.PackageRelativePath.Should().Be("common/types.json");
+        reference.EffectiveTargetPath.Should().Be("common/types.json");
+    }
+
+    [TestMethod]
     public void ExtractRoots_skips_malformed_reference_objects()
     {
         const string indexJson = @"{

@@ -37,6 +37,35 @@ public class TypeReferenceResolverTests
     }
 
     [TestMethod]
+    public void Provider_uses_one_cached_identity_for_path_aliases()
+    {
+        var fs = new InMemoryPackageFileSystem().AddText("common/types.json", "[{\"$type\":\"StringType\"}]");
+        var index = GraphTestHelpers.Document("index.json", IndexJson);
+        var provider = new PackageDocumentProvider(fs, index, new TypePackageValidationOptions());
+
+        var canonical = provider.GetTypeFile("common/types.json");
+        var dotAlias = provider.GetTypeFile("./common/./types.json");
+        var separatorAlias = provider.GetTypeFile(@"common\\types.json");
+
+        dotAlias.Should().BeSameAs(canonical);
+        separatorAlias.Should().BeSameAs(canonical);
+        canonical.Document!.PackageRelativePath.Should().Be("common/types.json");
+        provider.GetReachedFilePaths().Should().BeEquivalentTo("index.json", "common/types.json");
+    }
+
+    [TestMethod]
+    public void Provider_rejects_invalid_internal_path()
+    {
+        var fs = new InMemoryPackageFileSystem();
+        var index = GraphTestHelpers.Document("index.json", IndexJson);
+        var provider = new PackageDocumentProvider(fs, index, new TypePackageValidationOptions());
+
+        System.Action act = () => provider.GetTypeFile("../types.json");
+
+        act.Should().Throw<System.ArgumentException>();
+    }
+
+    [TestMethod]
     public void Resolve_returns_resolved_for_same_file_reference()
     {
         var fs = new InMemoryPackageFileSystem()

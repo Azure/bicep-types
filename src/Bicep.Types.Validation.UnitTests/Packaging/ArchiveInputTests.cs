@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using Azure.Bicep.Types.Validation.Diagnostics;
+using Azure.Bicep.Types.Validation.Packaging;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -54,6 +55,26 @@ public class ArchiveInputTests
         var result = Validator.Validate(TypePackageValidationInput.ForArchiveStream(stream, "types.tgz"));
 
         result.IsValid.Should().BeTrue();
+    }
+
+    [TestMethod]
+    [DataRow("./common/types.json")]
+    [DataRow("common/./types.json")]
+    [DataRow("common////types.json")]
+    [DataRow(@"common\types.json")]
+    public void Archive_lookup_accepts_safe_reference_path_aliases(string packageRelativePath)
+    {
+        var archive = TarGzTestArchive.FromTextFiles(("common/types.json", "[]"));
+        using var stream = new MemoryStream(archive);
+        var fileSystem = ArchivePackageFileSystem.Create(
+            stream,
+            "types.tgz",
+            TypePackageArchiveLimits.Default);
+
+        fileSystem.HasFatalContainerFailure.Should().BeFalse();
+        fileSystem.FileExists(packageRelativePath).Should().BeTrue();
+        fileSystem.TryReadAllBytes(packageRelativePath, out byte[] bytes, out _).Should().BeTrue();
+        bytes.Should().Equal(System.Text.Encoding.UTF8.GetBytes("[]"));
     }
 
     [TestMethod]
@@ -180,6 +201,25 @@ public class ArchiveInputTests
         {
             TarGzTestEntry.File("index.json", MinimalIndexJson),
             TarGzTestEntry.File("../types.json", "[]"),
+        });
+        using var stream = new MemoryStream(archive);
+
+        var result = Validator.Validate(TypePackageValidationInput.ForArchiveStream(stream, "types.tgz"));
+
+        result.Diagnostics.Should().ContainSingle()
+            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.ArchiveMemberPathInvalid);
+    }
+
+    [TestMethod]
+    [DataRow("a/./types.json")]
+    [DataRow("a//types.json")]
+    [DataRow("a/types.json/")]
+    public void Archive_input_noncanonical_member_path_remains_invalid(string memberPath)
+    {
+        var archive = TarGzTestArchive.Build(new[]
+        {
+            TarGzTestEntry.File("index.json", MinimalIndexJson),
+            TarGzTestEntry.File(memberPath, "[]"),
         });
         using var stream = new MemoryStream(archive);
 

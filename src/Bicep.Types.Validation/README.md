@@ -51,6 +51,13 @@ TypePackageValidationInput.ForArchiveStream(stream, "types.tgz");
 
 Directory and archive inputs must contain an `index.json` at the package root; otherwise validation reports `BCPVT001`. In both input forms, type files that are not reachable from `index.json` are ignored by default; set `ValidateUnreachableFiles` to report and validate them.
 
+Package-relative reference paths use one OS-independent identity. Safe aliases are canonicalized by
+converting `\` to `/`, removing exact `.` segments, and collapsing repeated internal separators. For
+example, `./common//types.json` becomes `common/types.json`. Rooted paths, drive-qualified paths,
+exact `..` segments, empty file paths, and trailing separators are rejected. Path case is preserved,
+while package identity retains its existing case-insensitive comparison. Raw archive member names
+remain stricter: noncanonical member names are rejected so normalization cannot hide collisions.
+
 ### Validation modes
 
 - `CanonicalWriter` enforces the serialized form that package producers should emit. This is the default and the recommended mode for publishing workflows.

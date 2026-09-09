@@ -10,9 +10,9 @@ using Azure.Bicep.Types.Validation.Structural;
 namespace Azure.Bicep.Types.Validation.Graph
 {
     /// <summary>
-    /// Loads type files on demand for graph traversal.  Each file is read, parsed, structurally
+    /// Loads type files on demand for graph traversal. Each file is read, parsed, structurally
     /// validated, and turned into graph nodes exactly once; subsequent lookups are served from a
-    /// cache.  All diagnostics produced during loading are accumulated in <see cref="LoadDiagnostics"/>.
+    /// cache. All diagnostics produced during loading are accumulated in <see cref="LoadDiagnostics"/>.
     /// </summary>
     internal sealed class PackageDocumentProvider
     {
@@ -32,7 +32,7 @@ namespace Azure.Bicep.Types.Validation.Graph
             this.fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             this.indexDocument = indexDocument ?? throw new ArgumentNullException(nameof(indexDocument));
             this.options = options ?? throw new ArgumentNullException(nameof(options));
-            this.indexPath = DirectoryPackageFileSystem.NormalizeSeparators(indexDocument.PackageRelativePath);
+            this.indexPath = CanonicalizeFilePath(indexDocument.PackageRelativePath, nameof(indexDocument));
         }
 
         /// <summary>All diagnostics accumulated across loaded type files.</summary>
@@ -40,9 +40,9 @@ namespace Azure.Bicep.Types.Validation.Graph
 
         /// <summary>
         /// Returns the type files that graph traversal loaded and that parsed into a usable
-        /// type-file array.  Policy validation inspects every structurally usable element of
+        /// type-file array. Policy validation inspects every structurally usable element of
         /// these reached files (including elements at unreferenced indices), which is why this
-        /// exposes the whole reached file rather than only graph-visited nodes.  The index
+        /// exposes the whole reached file rather than only graph-visited nodes. The index
         /// document (served for same-file references) is excluded because its root is an object.
         /// </summary>
         public IEnumerable<PackageDocumentProviderResult> GetReachedUsableTypeFiles()
@@ -61,8 +61,8 @@ namespace Azure.Bicep.Types.Validation.Graph
         /// <summary>
         /// Returns the package-relative paths reached by graph traversal: <c>index.json</c> plus every
         /// type file that was loaded and exists on the package file system (whether or not it parsed
-        /// into a usable type-file array).  Strict package hygiene uses this to distinguish reachable
-        /// files from unreachable ones.  The comparer matches the provider cache so casing and leading
+        /// into a usable type-file array). Strict package hygiene uses this to distinguish reachable
+        /// files from unreachable ones. The comparer matches the provider cache so casing and leading
         /// prefixes are treated consistently.
         /// </summary>
         public HashSet<string> GetReachedFilePaths()
@@ -83,7 +83,7 @@ namespace Azure.Bicep.Types.Validation.Graph
         {
             if (packageRelativePath == null) { throw new ArgumentNullException(nameof(packageRelativePath)); }
 
-            string key = DirectoryPackageFileSystem.NormalizeSeparators(packageRelativePath);
+            string key = CanonicalizeFilePath(packageRelativePath, nameof(packageRelativePath));
             if (cache.TryGetValue(key, out var cached))
             {
                 return cached;
@@ -134,6 +134,19 @@ namespace Azure.Bicep.Types.Validation.Graph
             bool usable = nodes != null; // usable iff root is a type-file array
 
             return PackageDocumentProviderResult.Loaded(document, usable, nodes, structuralDiagnostics);
+        }
+
+        /// <summary>Returns a canonical provider identity or rejects an invalid internal path.</summary>
+        private static string CanonicalizeFilePath(string path, string parameterName)
+        {
+            if (!PackageRelativePath.TryCanonicalizeFile(path, out string canonicalPath, out var error))
+            {
+                throw new ArgumentException(
+                    $"The package-relative path is invalid ({error}).",
+                    parameterName);
+            }
+
+            return canonicalPath;
         }
     }
 }

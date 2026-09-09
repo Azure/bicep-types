@@ -2,9 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Azure.Bicep.Types.Validation.Diagnostics;
+using Azure.Bicep.Types.Validation.Graph;
+using Azure.Bicep.Types.Validation.Hygiene;
+using Azure.Bicep.Types.Validation.Packaging;
+using Azure.Bicep.Types.Validation.UnitTests.Graph;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -142,6 +148,29 @@ public class PackageHygieneTests
         result.Diagnostics.Should().Contain(d => d.Code == TypeValidationDiagnosticCodes.UnreachablePackageFile);
     }
 
+    [TestMethod]
+    [DataRow("C:orphan.json")]
+    [DataRow(@"dir\orphan.json")]
+    public void Invalid_enumerated_package_path_is_reported_as_unexpected_without_throwing(
+        string enumeratedPath)
+    {
+        var fileSystem = new RawPathPackageFileSystem(enumeratedPath, "[]");
+        var options = new TypePackageValidationOptions { ValidateUnreachableFiles = true };
+        var index = GraphTestHelpers.Document("index.json", MinimalIndexJson);
+        var provider = new PackageDocumentProvider(fileSystem, index, options);
+        IReadOnlyList<TypeValidationDiagnostic>? diagnostics = null;
+
+        Action act = () => diagnostics = PackageHygieneValidator.Validate(
+            fileSystem,
+            provider,
+            options,
+            new HashSet<TypeNodeId>());
+
+        act.Should().NotThrow();
+        diagnostics.Should().ContainSingle()
+            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.UnexpectedPackageFile);
+    }
+
     private static TypePackageValidationResult Validate(TempDir dir, bool validateUnreachable)
     {
         var options = new TypePackageValidationOptions { ValidateUnreachableFiles = validateUnreachable };
@@ -161,6 +190,40 @@ public class PackageHygieneTests
         public void Dispose()
         {
             try { Directory.Delete(Path, recursive: true); } catch { /* best-effort */ }
+        }
+    }
+
+    private sealed class RawPathPackageFileSystem : IPackageFileSystem
+    {
+        private readonly string path;
+        private readonly byte[] content;
+
+        public RawPathPackageFileSystem(string path, string content)
+        {
+            this.path = path;
+            this.content = Encoding.UTF8.GetBytes(content);
+        }
+
+        public bool FileExists(string packageRelativePath) =>
+            string.Equals(packageRelativePath, path, StringComparison.Ordinal);
+
+        public bool TryReadAllBytes(string packageRelativePath, out byte[] bytes, out string error)
+        {
+            if (FileExists(packageRelativePath))
+            {
+                bytes = content;
+                error = string.Empty;
+                return true;
+            }
+
+            bytes = Array.Empty<byte>();
+            error = "File not found.";
+            return false;
+        }
+
+        public IEnumerable<string> EnumerateFiles()
+        {
+            yield return path;
         }
     }
 }

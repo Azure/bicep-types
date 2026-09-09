@@ -76,14 +76,15 @@ namespace Azure.Bicep.Types.Validation.Structural
                 return ReferenceSyntaxResult.Invalid;
             }
 
-            // Reject package paths that are not safe relative paths: rooted paths
-            // ("/tmp/...", "C:/...") or paths containing ".." traversal (via '/' or '\').
-            if (IsUnsafePackagePath(packagePath))
+            if (!PackageRelativePath.TryCanonicalizeReferenceTarget(
+                packagePath,
+                out string canonicalPackagePath,
+                out var pathError))
             {
                 var loc = sm.GetLocation(refNode.ByteOffset);
                 context.Add(TypeValidationDiagnosticBuilder.ReferenceSyntaxInvalid(
                     path, jsonPointer + "/$ref", refValue,
-                    "the package path must be a relative path without '..' segments",
+                    DescribePackagePathError(pathError),
                     loc.Line, loc.Column));
                 return ReferenceSyntaxResult.Invalid;
             }
@@ -100,33 +101,25 @@ namespace Azure.Bicep.Types.Validation.Structural
                 }
             }
 
-            return ReferenceSyntaxResult.Valid(packagePath, index);
+            return ReferenceSyntaxResult.Valid(canonicalPackagePath, index);
         }
 
-        private static bool IsUnsafePackagePath(string packagePath)
+        /// <summary>Returns the source-facing reason for a package path failure.</summary>
+        private static string DescribePackagePathError(PackageRelativePathError error)
         {
-            if (string.IsNullOrEmpty(packagePath)) { return false; }
-
-            // Normalize Windows separators so both '/' and '\' traversal are checked.
-            string normalized = packagePath.Replace('\\', '/');
-
-            // Reject rooted paths: a leading '/' (POSIX / UNC) or a drive-qualified
-            // path such as "C:/temp/...".
-            if (normalized.StartsWith("/", StringComparison.Ordinal))
+            switch (error)
             {
-                return true;
+                case PackageRelativePathError.Empty:
+                    return "the package path must identify a file";
+                case PackageRelativePathError.Rooted:
+                case PackageRelativePathError.DriveQualified:
+                case PackageRelativePathError.ParentTraversal:
+                    return "the package path must be a relative path without '..' segments";
+                case PackageRelativePathError.TrailingSeparator:
+                    return "the package path must identify a file and must not end with a separator";
+                default:
+                    return "the package path is invalid";
             }
-            if (normalized.Length >= 2 && normalized[1] == ':')
-            {
-                return true;
-            }
-
-            // Reject any ".." traversal segment.
-            foreach (string segment in normalized.Split('/'))
-            {
-                if (segment == "..") { return true; }
-            }
-            return false;
         }
 
         private static string DescribeKind(JsonValueKind kind) => JsonValueKindText.Describe(kind);

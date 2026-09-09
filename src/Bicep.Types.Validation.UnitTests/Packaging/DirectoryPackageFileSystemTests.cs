@@ -115,6 +115,49 @@ public class DirectoryPackageFileSystemTests
         fs.FileExists(@"sub\types.json").Should().BeTrue();
     }
 
+    [TestMethod]
+    [DataRow("./sub/types.json")]
+    [DataRow("sub/./types.json")]
+    [DataRow("sub////types.json")]
+    [DataRow(@"sub\types.json")]
+    public void Safe_path_aliases_resolve_to_the_same_file(string packageRelativePath)
+    {
+        using var dir = new TempDir();
+        Directory.CreateDirectory(Path.Combine(dir.Path, "sub"));
+        File.WriteAllText(Path.Combine(dir.Path, "sub", "types.json"), "[]");
+        var fs = new DirectoryPackageFileSystem(dir.Path);
+
+        fs.FileExists(packageRelativePath).Should().BeTrue();
+        fs.TryReadAllBytes(packageRelativePath, out byte[] bytes, out _).Should().BeTrue();
+        bytes.Should().Equal(System.Text.Encoding.UTF8.GetBytes("[]"));
+    }
+
+    [TestMethod]
+    [DataRow("sub/../types.json")]
+    [DataRow("types.json/")]
+    [DataRow("C:types.json")]
+    public void Noncanonical_unsafe_or_non_file_paths_are_rejected(string packageRelativePath)
+    {
+        using var dir = new TempDir();
+        File.WriteAllText(Path.Combine(dir.Path, "types.json"), "[]");
+        var fs = new DirectoryPackageFileSystem(dir.Path);
+
+        fs.FileExists(packageRelativePath).Should().BeFalse();
+        fs.TryReadAllBytes(packageRelativePath, out _, out _).Should().BeFalse();
+    }
+
+    [TestMethod]
+    public void EnumerateFiles_returns_canonical_nested_paths()
+    {
+        using var dir = new TempDir();
+        Directory.CreateDirectory(Path.Combine(dir.Path, "sub"));
+        File.WriteAllText(Path.Combine(dir.Path, "sub", "types.json"), "[]");
+        var fs = new DirectoryPackageFileSystem(dir.Path);
+
+        fs.EnumerateFiles().Should().ContainSingle()
+            .Which.Should().Be("sub/types.json");
+    }
+
     // ── Normal reads ────────────────────────────────────────────────────────
 
     [TestMethod]

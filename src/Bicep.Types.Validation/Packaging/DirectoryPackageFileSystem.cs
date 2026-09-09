@@ -83,16 +83,10 @@ namespace Azure.Bicep.Types.Validation.Packaging
         /// </summary>
         private bool TryResolvePhysicalPath(string packageRelativePath, out string? physical)
         {
-            if (string.IsNullOrEmpty(packageRelativePath))
-            {
-                physical = null;
-                return false;
-            }
-
-            packageRelativePath = NormalizeSeparators(packageRelativePath);
-
-            // Reject absolute paths
-            if (IsPackagePathRooted(packageRelativePath))
+            if (!PackageRelativePath.TryCanonicalizeFile(
+                packageRelativePath,
+                out string canonicalPackageRelativePath,
+                out _))
             {
                 physical = null;
                 return false;
@@ -102,7 +96,7 @@ namespace Azure.Bicep.Types.Validation.Packaging
             string combined;
             try
             {
-                combined = Path.GetFullPath(Path.Combine(physicalRoot, packageRelativePath));
+                combined = Path.GetFullPath(Path.Combine(physicalRoot, canonicalPackageRelativePath));
             }
             catch
             {
@@ -133,15 +127,5 @@ namespace Azure.Bicep.Types.Validation.Packaging
         private static string NormalizeRoot(string root) =>
             Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-        private static bool IsPackagePathRooted(string path) =>
-            Path.IsPathRooted(path) ||
-            (path.Length >= 2 && path[1] == ':' && IsAsciiLetter(path[0]));
-
-        private static bool IsAsciiLetter(char value) =>
-            (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z');
-
-        /// <summary>Normalizes a package-relative path to use forward slashes.</summary>
-        public static string NormalizeSeparators(string path) =>
-            path.Replace('\\', '/');
     }
 }

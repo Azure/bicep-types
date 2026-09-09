@@ -22,6 +22,7 @@ namespace Azure.Bicep.Types.Validation.Hygiene
     /// </summary>
     internal static class PackageHygieneValidator
     {
+        /// <summary>Validates unreachable and unsupported package files.</summary>
         public static IReadOnlyList<TypeValidationDiagnostic> Validate(
             IPackageFileSystem fileSystem,
             PackageDocumentProvider provider,
@@ -49,6 +50,13 @@ namespace Azure.Bicep.Types.Validation.Hygiene
 
             foreach (var file in files)
             {
+                if (!PackageRelativePath.TryCanonicalizeFile(file, out string canonicalFile, out _) ||
+                    !string.Equals(file, canonicalFile, StringComparison.Ordinal))
+                {
+                    diagnostics.Add(TypeValidationDiagnosticBuilder.UnexpectedPackageFile(file));
+                    continue;
+                }
+
                 if (reached.Contains(file))
                 {
                     continue;

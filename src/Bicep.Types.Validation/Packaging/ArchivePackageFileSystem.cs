@@ -108,13 +108,15 @@ namespace Azure.Bicep.Types.Validation.Packaging
         /// <inheritdoc/>
         public bool FileExists(string packageRelativePath)
         {
-            return TryNormalizeLookup(packageRelativePath, out string key) && membersByKey.ContainsKey(key);
+            return PackageRelativePath.TryCanonicalizeFile(packageRelativePath, out string key, out _) &&
+                membersByKey.ContainsKey(key);
         }
 
         /// <inheritdoc/>
         public bool TryReadAllBytes(string packageRelativePath, out byte[] bytes, out string error)
         {
-            if (TryNormalizeLookup(packageRelativePath, out string key) && membersByKey.TryGetValue(key, out var member))
+            if (PackageRelativePath.TryCanonicalizeFile(packageRelativePath, out string key, out _) &&
+                membersByKey.TryGetValue(key, out var member))
             {
                 bytes = member.Content;
                 error = string.Empty;
@@ -192,29 +194,6 @@ namespace Azure.Bicep.Types.Validation.Packaging
             }
 
             canonical = name;
-            return true;
-        }
-
-        private static bool TryNormalizeLookup(string packageRelativePath, out string key)
-        {
-            key = string.Empty;
-            if (string.IsNullOrEmpty(packageRelativePath))
-            {
-                return false;
-            }
-
-            string name = packageRelativePath.Replace('\\', '/');
-            if (name.StartsWith("./", StringComparison.Ordinal))
-            {
-                name = name.Substring(2);
-            }
-
-            if (name.Length == 0)
-            {
-                return false;
-            }
-
-            key = name;
             return true;
         }
 

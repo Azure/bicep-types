@@ -346,43 +346,22 @@ namespace Azure.Bicep.Types.Validation.Graph
 
             string rawText = refNode.StringValue ?? string.Empty;
             if (!ReferencePath.TryParse(rawText, out string packagePath, out int index)) { return false; }
-            if (IsUnsafePackagePath(packagePath)) { return false; }
-
-            string normalizedPath = packagePath.Length == 0
-                ? string.Empty
-                : DirectoryPackageFileSystem.NormalizeSeparators(packagePath);
+            if (!PackageRelativePath.TryCanonicalizeReferenceTarget(
+                packagePath,
+                out string canonicalPackagePath,
+                out _)) { return false; }
 
             string sourcePointer = refObjectPointer + "/$ref";
             var loc = sourceDocument.SourceMap.GetLocation(refNode.ByteOffset);
 
             reference = new ParsedTypeReference(
                 rawText,
-                normalizedPath,
+                canonicalPackagePath,
                 index,
                 sourceDocument.PackageRelativePath,
                 sourcePointer,
                 loc);
             return true;
-        }
-
-        /// <summary>
-        /// Mirrors the structural layer's safe-path check: rejects rooted paths and any
-        /// <c>..</c> traversal segment so graph resolution never escapes the package root.
-        /// </summary>
-        private static bool IsUnsafePackagePath(string packagePath)
-        {
-            if (string.IsNullOrEmpty(packagePath)) { return false; }
-
-            string normalized = packagePath.Replace('\\', '/');
-
-            if (normalized.StartsWith("/", StringComparison.Ordinal)) { return true; }
-            if (normalized.Length >= 2 && normalized[1] == ':') { return true; }
-
-            foreach (string segment in normalized.Split('/'))
-            {
-                if (segment == "..") { return true; }
-            }
-            return false;
         }
 
         private static string JsonPointerEscape(string token)

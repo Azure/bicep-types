@@ -61,6 +61,22 @@ public class ReferenceSyntaxTests
         result.Index.Should().Be(3);
     }
 
+    [TestMethod]
+    [DataRow("./types.json#/0", "types.json")]
+    [DataRow("common/./types.json#/0", "common/types.json")]
+    [DataRow("common////types.json#/0", "common/types.json")]
+    [DataRow(@"common\types.json#/0", "common/types.json")]
+    public void Safe_reference_path_aliases_are_canonicalized(string reference, string expectedPath)
+    {
+        var (ctx, root) = ParseJson($"{{\"$ref\":\"{reference.Replace("\\", "\\\\", System.StringComparison.Ordinal)}\"}}");
+
+        var result = ReferenceSyntax.Validate(root, "prop", "/prop", ctx);
+
+        result.IsValid.Should().BeTrue();
+        result.PackageRelativePath.Should().Be(expectedPath);
+        ctx.GetDiagnostics().Should().BeEmpty();
+    }
+
     // ── Invalid reference forms ──────────────────────────────────────────────
 
     [TestMethod]
@@ -139,6 +155,22 @@ public class ReferenceSyntaxTests
         result.IsValid.Should().BeFalse();
         ctx.GetDiagnostics().Should().ContainSingle(d =>
             d.Code == TypeValidationDiagnosticCodes.ReferenceSyntaxInvalid);
+    }
+
+    [TestMethod]
+    [DataRow(".#/0")]
+    [DataRow("./#/0")]
+    [DataRow("types.json/#/0")]
+    [DataRow("C:types.json#/0")]
+    public void Non_file_or_context_dependent_package_path_is_rejected(string reference)
+    {
+        var (ctx, root) = ParseJson($"{{\"$ref\":\"{reference}\"}}");
+
+        var result = ReferenceSyntax.Validate(root, "prop", "/prop", ctx);
+
+        result.IsValid.Should().BeFalse();
+        ctx.GetDiagnostics().Should().ContainSingle()
+            .Which.Code.Should().Be(TypeValidationDiagnosticCodes.ReferenceSyntaxInvalid);
     }
 
     [TestMethod]
