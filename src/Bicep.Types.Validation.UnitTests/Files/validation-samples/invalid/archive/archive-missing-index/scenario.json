@@ -1,0 +1,14 @@
+{
+  "name": "archive-missing-index",
+  "description": "A valid gzip/tar archive container that has no index.json at the package root reports the standard missing-index diagnostic.",
+  "category": "invalid.archive",
+  "inputs": [
+    {
+      "kind": "archiveFile",
+      "path": "package.tgz"
+    }
+  ],
+  "modes": [
+    "canonicalWriter"
+  ]
+}

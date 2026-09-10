@@ -1,0 +1,8 @@
+{
+  "name": "namespace-function-target-kind",
+  "description": "A namespaceFunctions index entry references a non-NamespaceFunctionType object.",
+  "category": "invalid.graph",
+  "modes": [
+    "canonicalWriter"
+  ]
+}

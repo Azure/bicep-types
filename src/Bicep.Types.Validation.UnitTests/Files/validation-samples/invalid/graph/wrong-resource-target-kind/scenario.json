@@ -1,0 +1,8 @@
+{
+  "name": "wrong-resource-target-kind",
+  "description": "A resource index entry references a non-resource type object.",
+  "category": "invalid.graph",
+  "modes": [
+    "canonicalWriter"
+  ]
+}

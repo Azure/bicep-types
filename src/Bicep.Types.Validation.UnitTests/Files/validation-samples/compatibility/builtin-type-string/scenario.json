@@ -1,0 +1,1 @@
+{"name":"builtin-type-string","description":"A BuiltInType uses a documented legacy kind (String): rejected in CanonicalWriter, accepted with a warning in CompatibleReader.","category":"compatibility","modes":["canonicalWriter","compatibleReader"]}

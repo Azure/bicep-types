@@ -1,0 +1,40 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "extensionConfiguration",
+    "properties": {
+      "endpoint": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1,
+        "description": "The service endpoint used by the extension."
+      }
+    }
+  },
+  {
+    "$type": "ObjectType",
+    "name": "configuredWidgetBody",
+    "properties": {
+      "displayName": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 0,
+        "description": "The widget display name."
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Sample.Provider/configuredWidgets@2026-01-01",
+    "body": {
+      "$ref": "#/2"
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  }
+]

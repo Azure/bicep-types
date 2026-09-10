@@ -1,0 +1,1 @@
+{"name":"type-object-unsupported-discriminator","description":"A type object has a $type value that is not a supported type kind.","category":"structural","modes":["canonicalWriter","compatibleReader"]}

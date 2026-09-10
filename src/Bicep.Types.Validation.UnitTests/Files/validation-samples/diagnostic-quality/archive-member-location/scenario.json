@@ -1,0 +1,14 @@
+{
+  "name": "archive-member-location",
+  "description": "A reachable defect inside an archive member reports the package-relative member path (types.json) and json pointer, never a temp extraction path.",
+  "category": "diagnostic-quality",
+  "inputs": [
+    {
+      "kind": "archiveFile",
+      "path": "package.tgz"
+    }
+  ],
+  "modes": [
+    "canonicalWriter"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "resources": {
+    "Sample.Provider/widgets@2026-01-01": {
+      "$ref": "resources/types.json#/2"
+    }
+  },
+  "resourceFunctions": {},
+  "namespaceFunctions": [],
+  "settings": {
+    "name": "SampleMultiFile",
+    "isSingleton": true,
+    "isPreview": false,
+    "isDeprecated": false,
+    "version": "1.0.0",
+    "configurationType": {
+      "$ref": "common/types.json#/1"
+    }
+  },
+  "fallbackResourceType": {
+    "$ref": "fallback/types.json#/1"
+  }
+}
