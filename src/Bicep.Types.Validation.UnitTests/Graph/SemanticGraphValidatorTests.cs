@@ -43,11 +43,9 @@ public class SemanticGraphValidatorTests
     [TestMethod]
     public void Missing_referenced_file_reports_bcpvt016()
     {
-        var fs = new InMemoryPackageFileSystem().AddText("types.json",
-            "[{\"$type\":\"ResourceType\",\"name\":\"My.Rp/x@2026-01-01\"," +
-            "\"body\":{\"$ref\":\"missing.json#/0\"},\"readableScopes\":8,\"writableScopes\":8}]");
+        var fs = new InMemoryPackageFileSystem();
 
-        var diagnostics = Validate(ResourceIndex("types.json#/0"), fs);
+        var diagnostics = Validate(ResourceIndex("missing.json#/0"), fs);
 
         diagnostics.Should().ContainSingle()
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.ReferencedTypeFileMissing);
@@ -253,17 +251,13 @@ public class SemanticGraphValidatorTests
     [TestMethod]
     public void Graph_time_read_failure_reports_source_ref_location()
     {
-        var fs = new InMemoryPackageFileSystem()
-            .AddText("types.json",
-                "[{\"$type\":\"ResourceType\",\"name\":\"My.Rp/x@2026-01-01\"," +
-                "\"body\":{\"$ref\":\"bad.json#/0\"},\"readableScopes\":8,\"writableScopes\":8}]")
-            .AddUnreadable("bad.json");
+        var fs = new InMemoryPackageFileSystem().AddUnreadable("bad.json");
 
-        var diagnostic = Validate(ResourceIndex("types.json#/0"), fs).Should().ContainSingle().Subject;
+        var diagnostic = Validate(ResourceIndex("bad.json#/0"), fs).Should().ContainSingle().Subject;
 
         diagnostic.Code.Should().Be(TypeValidationDiagnosticCodes.PackageFileReadFailed);
-        diagnostic.Path.Should().Be("types.json");
-        diagnostic.JsonPointer.Should().Be("/0/body/$ref");
+        diagnostic.Path.Should().Be("index.json");
+        diagnostic.JsonPointer.Should().Be("/resources/My.Rp~1x@2026-01-01/$ref");
         diagnostic.Line.Should().NotBeNull();
     }
 }

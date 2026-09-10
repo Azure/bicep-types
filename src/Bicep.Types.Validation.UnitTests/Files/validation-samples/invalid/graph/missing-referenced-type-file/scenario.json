@@ -1,8 +1,9 @@
 {
   "name": "missing-referenced-type-file",
-  "description": "A reference targets a type file that does not exist in the package.",
+  "description": "An index.json resource entry targets a type file that does not exist in the package.",
   "category": "invalid.graph",
   "modes": [
-    "canonicalWriter"
+    "canonicalWriter",
+    "compatibleReader"
   ]
 }

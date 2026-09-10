@@ -163,10 +163,19 @@ namespace Azure.Bicep.Types.Validation.Structural
                         }
                     }
                     break;
-                case FieldShape.ObjectMap:
-                    RequireObject(fieldValue, fieldPointer, descriptor.Name);
+                case FieldShape.ObjectMapOfReferences:
+                    if (RequireObject(fieldValue, fieldPointer, descriptor.Name))
+                    {
+                        CheckReferenceMap(fieldValue, fieldPointer, descriptor.Name);
+                    }
                     break;
-                case FieldShape.ArrayOfObjects:
+                case FieldShape.ObjectMapOfObjectsWithTypeReference:
+                    if (RequireObject(fieldValue, fieldPointer, descriptor.Name))
+                    {
+                        CheckObjectMapTypeReferences(fieldValue, fieldPointer);
+                    }
+                    break;
+                case FieldShape.ArrayOfObjectsWithTypeReference:
                     if (RequireArray(fieldValue, fieldPointer, descriptor.Name, out var objElements))
                     {
                         for (int i = 0; i < objElements.Count; i++)
@@ -178,9 +187,49 @@ namespace Azure.Bicep.Types.Validation.Structural
                                     FilePath, fieldPointer + "/" + i, descriptor.Name + "[" + i + "]",
                                     "object", DescribeKind(objElements[i].Kind), loc.Line, loc.Column));
                             }
+                            else if (objElements[i].TryGetProperty("type", out var typeReference))
+                            {
+                                ReferenceSyntax.Validate(
+                                    typeReference,
+                                    "type",
+                                    fieldPointer + "/" + i + "/type",
+                                    context);
+                            }
                         }
                     }
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(descriptor), descriptor.Shape, "Unsupported field shape.");
+            }
+        }
+
+        /// <summary>Validates every direct reference value in an object map.</summary>
+        private void CheckReferenceMap(JsonValueNode map, string pointer, string fieldName)
+        {
+            foreach (var member in map.Properties)
+            {
+                ReferenceSyntax.Validate(
+                    member.Value,
+                    fieldName + "[" + member.Name + "]",
+                    pointer + "/" + JsonPointerEscape(member.Name),
+                    context);
+            }
+        }
+
+        /// <summary>Validates present <c>type</c> references inside object-map values.</summary>
+        private void CheckObjectMapTypeReferences(JsonValueNode map, string pointer)
+        {
+            foreach (var member in map.Properties)
+            {
+                if (member.Value.Kind == JsonValueKind.Object &&
+                    member.Value.TryGetProperty("type", out var typeReference))
+                {
+                    ReferenceSyntax.Validate(
+                        typeReference,
+                        "type",
+                        pointer + "/" + JsonPointerEscape(member.Name) + "/type",
+                        context);
+                }
             }
         }
 
@@ -190,6 +239,10 @@ namespace Azure.Bicep.Types.Validation.Structural
         public SourceLocation GetKeyLocation(JsonProperty prop) => SM.GetLocation(prop.NameByteOffset);
 
         // ── String description helpers ───────────────────────────────────────────
+
+        /// <summary>Escapes one JSON pointer token according to RFC 6901.</summary>
+        private static string JsonPointerEscape(string token) =>
+            token.Replace("~", "~0").Replace("/", "~1");
 
         private static string DescribeKind(JsonValueKind kind) => JsonValueKindText.Describe(kind);
     }

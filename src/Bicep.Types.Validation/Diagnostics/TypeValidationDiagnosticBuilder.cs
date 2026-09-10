@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using Azure.Bicep.Types.Validation.Packaging;
 
 namespace Azure.Bicep.Types.Validation.Diagnostics
 {
@@ -179,6 +180,29 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
                 code: TypeValidationDiagnosticCodes.ReferenceSyntaxInvalid,
                 severity: TypeValidationDiagnosticSeverity.Error,
                 message: $"Reference '{refValue}' at '{jsonPointer}' in '{packageRelativePath}' has invalid syntax: {reason}.",
+                path: packageRelativePath,
+                jsonPointer: jsonPointer,
+                line: line,
+                column: column);
+        }
+
+        /// <summary>A parsed reference form is not allowed in its source document.</summary>
+        internal static TypeValidationDiagnostic ReferencePlacementInvalid(
+            string packageRelativePath,
+            string jsonPointer,
+            string refValue,
+            PackageDocumentKind sourceDocumentKind,
+            int line,
+            int column)
+        {
+            string reason = sourceDocumentKind == PackageDocumentKind.Index
+                ? "entry-point references in 'index.json' must use the cross-file '<path>#/<index>' form"
+                : "references inside type files must use the same-file '#/<index>' form";
+
+            return new TypeValidationDiagnostic(
+                code: TypeValidationDiagnosticCodes.ReferenceSyntaxInvalid,
+                severity: TypeValidationDiagnosticSeverity.Error,
+                message: $"Reference '{refValue}' at '{jsonPointer}' in '{packageRelativePath}' is not allowed: {reason}.",
                 path: packageRelativePath,
                 jsonPointer: jsonPointer,
                 line: line,

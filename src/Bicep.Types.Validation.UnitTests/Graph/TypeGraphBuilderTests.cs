@@ -49,6 +49,19 @@ public class TypeGraphBuilderTests
     }
 
     [TestMethod]
+    public void ExtractRoots_skips_same_file_reference_in_index()
+    {
+        const string indexJson = @"{
+  ""resources"": { ""My.Rp/things@2026-01-01"": { ""$ref"": ""#/0"" } },
+  ""resourceFunctions"": {},
+  ""namespaceFunctions"": []
+}";
+        var index = GraphTestHelpers.Document("index.json", indexJson);
+
+        TypeGraphBuilder.ExtractRoots(index).Should().BeEmpty();
+    }
+
+    [TestMethod]
     public void ExtractRoots_canonicalizes_target_path_and_preserves_raw_reference()
     {
         const string indexJson = @"{
@@ -184,6 +197,20 @@ public class TypeGraphBuilderTests
 ]";
         var doc = GraphTestHelpers.Document("types.json", json);
         var node = TypeGraphBuilder.BuildNodes(doc)![0]!;
+        TypeGraphBuilder.ExtractEdges(node).Should().BeEmpty();
+    }
+
+    [TestMethod]
+    [DataRow("other.json#/0")]
+    [DataRow("./other.json#/0")]
+    public void ExtractEdges_skips_cross_file_reference_in_type_file(string reference)
+    {
+        string json = $@"[
+  {{ ""$type"": ""ArrayType"", ""itemType"": {{ ""$ref"": ""{reference}"" }} }}
+]";
+        var doc = GraphTestHelpers.Document("types.json", json);
+        var node = TypeGraphBuilder.BuildNodes(doc)![0]!;
+
         TypeGraphBuilder.ExtractEdges(node).Should().BeEmpty();
     }
 

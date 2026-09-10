@@ -12,6 +12,9 @@ namespace Azure.Bicep.Types.Validation.Structural
     /// </summary>
     internal enum FieldShape
     {
+        /// <summary>No field shape has been specified.</summary>
+        Unspecified,
+
         /// <summary>JSON string value.</summary>
         String,
 
@@ -27,11 +30,14 @@ namespace Azure.Bicep.Types.Validation.Structural
         /// <summary>JSON array where each element is a reference object.</summary>
         ArrayOfRefs,
 
-        /// <summary>JSON object (map); deep-validation of each value is deferred.</summary>
-        ObjectMap,
+        /// <summary>JSON object whose values are reference objects.</summary>
+        ObjectMapOfReferences,
 
-        /// <summary>JSON array of objects; deep-validation of elements is deferred.</summary>
-        ArrayOfObjects,
+        /// <summary>JSON object whose values are objects with a nested <c>type</c> reference.</summary>
+        ObjectMapOfObjectsWithTypeReference,
+
+        /// <summary>JSON array of objects with a nested <c>type</c> reference.</summary>
+        ArrayOfObjectsWithTypeReference,
     }
 
     /// <summary>

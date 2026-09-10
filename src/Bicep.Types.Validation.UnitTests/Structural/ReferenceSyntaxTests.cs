@@ -3,6 +3,7 @@
 
 using System.Linq;
 using Azure.Bicep.Types.Validation.Diagnostics;
+using Azure.Bicep.Types.Validation.Packaging;
 using Azure.Bicep.Types.Validation.Structural;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,18 +14,21 @@ namespace Azure.Bicep.Types.Validation.UnitTests.Structural;
 public class ReferenceSyntaxTests
 {
     // Helper: build a fake context pointing at a package document made from in-memory JSON
-    private static (StructuralValidationContext ctx, Azure.Bicep.Types.Validation.Packaging.JsonValueNode root) ParseJson(string json)
+    private static (StructuralValidationContext ctx, JsonValueNode root) ParseJson(
+        string json,
+        PackageDocumentKind documentKind = PackageDocumentKind.Index,
+        TypePackageValidationMode mode = TypePackageValidationMode.CanonicalWriter)
     {
         byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
-        Azure.Bicep.Types.Validation.Packaging.SourceMap.TryParse(bytes, "test.json", out var root, out var sm, out _);
-        var doc = new Azure.Bicep.Types.Validation.Packaging.PackageDocument("test.json",
-            Azure.Bicep.Types.Validation.Packaging.PackageDocumentKind.Index, root!, sm);
-        var ctx = new StructuralValidationContext(new TypePackageValidationOptions());
+        string path = documentKind == PackageDocumentKind.Index ? "index.json" : "types.json";
+        SourceMap.TryParse(bytes, path, out var root, out var sm, out _);
+        var doc = new PackageDocument(path, documentKind, root!, sm);
+        var ctx = new StructuralValidationContext(new TypePackageValidationOptions { Mode = mode });
         ctx.SetCurrentDocument(doc);
         return (ctx, root!);
     }
 
-    private static Azure.Bicep.Types.Validation.Packaging.JsonValueNode ParseRef(string refJson,
+    private static JsonValueNode ParseRef(string refJson,
         StructuralValidationContext ctx) =>
         ParseJson(refJson).root;
 
@@ -33,7 +37,7 @@ public class ReferenceSyntaxTests
     [TestMethod]
     public void Same_file_ref_is_accepted()
     {
-        var (ctx, root) = ParseJson("{\"$ref\":\"#/0\"}");
+        var (ctx, root) = ParseJson("{\"$ref\":\"#/0\"}", PackageDocumentKind.TypeFile);
         var result = ReferenceSyntax.Validate(root, "prop", "/prop", ctx);
         result.IsValid.Should().BeTrue();
         result.PackageRelativePath.Should().BeEmpty();
@@ -44,7 +48,7 @@ public class ReferenceSyntaxTests
     [TestMethod]
     public void Cross_file_ref_is_accepted()
     {
-        var (ctx, root) = ParseJson("{\"$ref\":\"types.json#/0\"}");
+        var (ctx, root) = ParseJson("{\"$ref\":\"types.json#/0\"}", PackageDocumentKind.Index);
         var result = ReferenceSyntax.Validate(root, "prop", "/prop", ctx);
         result.IsValid.Should().BeTrue();
         result.PackageRelativePath.Should().Be("types.json");
@@ -54,7 +58,7 @@ public class ReferenceSyntaxTests
     [TestMethod]
     public void Nested_package_path_ref_is_accepted()
     {
-        var (ctx, root) = ParseJson("{\"$ref\":\"common/types.json#/3\"}");
+        var (ctx, root) = ParseJson("{\"$ref\":\"common/types.json#/3\"}", PackageDocumentKind.Index);
         var result = ReferenceSyntax.Validate(root, "prop", "/prop", ctx);
         result.IsValid.Should().BeTrue();
         result.PackageRelativePath.Should().Be("common/types.json");
@@ -68,13 +72,58 @@ public class ReferenceSyntaxTests
     [DataRow(@"common\types.json#/0", "common/types.json")]
     public void Safe_reference_path_aliases_are_canonicalized(string reference, string expectedPath)
     {
-        var (ctx, root) = ParseJson($"{{\"$ref\":\"{reference.Replace("\\", "\\\\", System.StringComparison.Ordinal)}\"}}");
+        var (ctx, root) = ParseJson(
+            $"{{\"$ref\":\"{reference.Replace("\\", "\\\\", System.StringComparison.Ordinal)}\"}}",
+            PackageDocumentKind.Index);
 
         var result = ReferenceSyntax.Validate(root, "prop", "/prop", ctx);
 
         result.IsValid.Should().BeTrue();
         result.PackageRelativePath.Should().Be(expectedPath);
         ctx.GetDiagnostics().Should().BeEmpty();
+    }
+
+    [TestMethod]
+    [DataRow(TypePackageValidationMode.CanonicalWriter)]
+    [DataRow(TypePackageValidationMode.CompatibleReader)]
+    public void Same_file_ref_in_index_is_rejected(TypePackageValidationMode mode)
+    {
+        var (ctx, root) = ParseJson("{\"$ref\":\"#/0\"}", PackageDocumentKind.Index, mode);
+
+        var result = ReferenceSyntax.Validate(root, "resource", "/resources/r", ctx);
+
+        result.IsValid.Should().BeFalse();
+        var diagnostic = ctx.GetDiagnostics().Should().ContainSingle().Subject;
+        diagnostic.Code.Should().Be(TypeValidationDiagnosticCodes.ReferenceSyntaxInvalid);
+        diagnostic.Path.Should().Be("index.json");
+        diagnostic.JsonPointer.Should().Be("/resources/r/$ref");
+        diagnostic.Line.Should().NotBeNull();
+        diagnostic.Column.Should().NotBeNull();
+        diagnostic.Message.Should().Contain("#/0");
+        diagnostic.Message.Should().Contain("cross-file");
+    }
+
+    [TestMethod]
+    [DataRow(TypePackageValidationMode.CanonicalWriter)]
+    [DataRow(TypePackageValidationMode.CompatibleReader)]
+    public void Cross_file_ref_in_type_file_is_rejected(TypePackageValidationMode mode)
+    {
+        var (ctx, root) = ParseJson(
+            "{\"$ref\":\"./common/types.json#/3\"}",
+            PackageDocumentKind.TypeFile,
+            mode);
+
+        var result = ReferenceSyntax.Validate(root, "body", "/0/body", ctx);
+
+        result.IsValid.Should().BeFalse();
+        var diagnostic = ctx.GetDiagnostics().Should().ContainSingle().Subject;
+        diagnostic.Code.Should().Be(TypeValidationDiagnosticCodes.ReferenceSyntaxInvalid);
+        diagnostic.Path.Should().Be("types.json");
+        diagnostic.JsonPointer.Should().Be("/0/body/$ref");
+        diagnostic.Line.Should().NotBeNull();
+        diagnostic.Column.Should().NotBeNull();
+        diagnostic.Message.Should().Contain("./common/types.json#/3");
+        diagnostic.Message.Should().Contain("same-file");
     }
 
     // ── Invalid reference forms ──────────────────────────────────────────────
@@ -206,7 +255,9 @@ public class ReferenceSyntaxTests
     [TestMethod]
     public void Reference_object_with_extra_properties_reports_unknown_property_in_canonical_mode()
     {
-        var (ctx, root) = ParseJson("{\"$ref\":\"#/0\",\"extra\":1}");
+        var (ctx, root) = ParseJson(
+            "{\"$ref\":\"#/0\",\"extra\":1}",
+            PackageDocumentKind.TypeFile);
         ctx.Options.Mode.Should().Be(TypePackageValidationMode.CanonicalWriter); // default
         var result = ReferenceSyntax.Validate(root, "prop", "/prop", ctx);
         // $ref itself is valid

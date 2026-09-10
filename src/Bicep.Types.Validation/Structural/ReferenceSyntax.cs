@@ -9,9 +9,8 @@ namespace Azure.Bicep.Types.Validation.Structural
 {
     /// <summary>
     /// Validates the syntax of reference objects (<c>{"$ref": "path#/index"}</c>) and
-    /// produces structural diagnostics.  Uses <see cref="ReferencePath"/> for the actual
-    /// string parsing so that <see cref="PackageReader"/> and structural validation share
-    /// the same parser without coupling layers.
+    /// validates whether each form is allowed in its source document. Uses
+    /// <see cref="ReferencePath"/> for string parsing.
     /// </summary>
     internal static class ReferenceSyntax
     {
@@ -86,6 +85,19 @@ namespace Azure.Bicep.Types.Validation.Structural
                     path, jsonPointer + "/$ref", refValue,
                     DescribePackagePathError(pathError),
                     loc.Line, loc.Column));
+                return ReferenceSyntaxResult.Invalid;
+            }
+
+            if (!ReferencePlacement.IsAllowed(doc.Kind, canonicalPackagePath))
+            {
+                var loc = sm.GetLocation(refNode.ByteOffset);
+                context.Add(TypeValidationDiagnosticBuilder.ReferencePlacementInvalid(
+                    path,
+                    jsonPointer + "/$ref",
+                    refValue,
+                    doc.Kind,
+                    loc.Line,
+                    loc.Column));
                 return ReferenceSyntaxResult.Invalid;
             }
 

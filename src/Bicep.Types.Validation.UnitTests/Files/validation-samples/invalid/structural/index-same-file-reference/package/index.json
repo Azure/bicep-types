@@ -1,7 +1,7 @@
 {
   "resources": {
     "My.Rp/things@2026-01-01": {
-      "$ref": "missing.json#/0"
+      "$ref": "#/0"
     }
   },
   "resourceFunctions": {},

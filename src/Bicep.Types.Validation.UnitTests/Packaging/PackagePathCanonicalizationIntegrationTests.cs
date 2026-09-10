@@ -112,26 +112,26 @@ public class PackagePathCanonicalizationIntegrationTests
     }
 
     [TestMethod]
-    public void Cycle_using_path_alias_terminates_without_duplicate_diagnostics()
+    public void Cycle_with_aliased_index_path_terminates_without_duplicate_diagnostics()
     {
         const string typesJson = @"[
   {
     ""$type"": ""ObjectType"",
     ""name"": ""body"",
     ""properties"": {
-      ""self"": { ""type"": { ""$ref"": ""./types.json#/0"" }, ""flags"": 0 }
+      ""self"": { ""type"": { ""$ref"": ""#/0"" }, ""flags"": 0 }
     }
   },
   {
     ""$type"": ""ResourceType"",
     ""name"": ""My.Rp/x@2026-01-01"",
-    ""body"": { ""$ref"": ""types.json#/0"" },
+    ""body"": { ""$ref"": ""#/0"" },
     ""readableScopes"": 8,
     ""writableScopes"": 8
   }
 ]";
         using var directory = new TempDir();
-        WritePackageFile(directory.Path, "index.json", ResourceIndex("types.json#/1"));
+        WritePackageFile(directory.Path, "index.json", ResourceIndex("./types.json#/1"));
         WritePackageFile(directory.Path, "types.json", typesJson);
 
         var result = Validator.Validate(

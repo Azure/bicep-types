@@ -170,6 +170,75 @@ public class TypeDocumentValidatorTests
             .Which.Code.Should().Be(TypeValidationDiagnosticCodes.ReferenceObjectInvalid);
     }
 
+    [TestMethod]
+    public void Object_property_rejects_cross_file_type_reference()
+    {
+        AssertNestedCrossFileReferenceRejected(
+            "[{\"$type\":\"ObjectType\",\"name\":\"o\",\"properties\":{\"p\":{\"type\":{\"$ref\":\"other.json#/0\"},\"flags\":0}}}]",
+            "/0/properties/p/type/$ref");
+    }
+
+    [TestMethod]
+    public void Discriminated_object_base_property_rejects_cross_file_type_reference()
+    {
+        AssertNestedCrossFileReferenceRejected(
+            "[{\"$type\":\"DiscriminatedObjectType\",\"name\":\"d\",\"discriminator\":\"kind\",\"baseProperties\":{\"p\":{\"type\":{\"$ref\":\"other.json#/0\"},\"flags\":0}},\"elements\":{}}]",
+            "/0/baseProperties/p/type/$ref");
+    }
+
+    [TestMethod]
+    public void Discriminated_object_element_rejects_cross_file_reference()
+    {
+        AssertNestedCrossFileReferenceRejected(
+            "[{\"$type\":\"DiscriminatedObjectType\",\"name\":\"d\",\"discriminator\":\"kind\",\"baseProperties\":{},\"elements\":{\"a/b~c\":{\"$ref\":\"other.json#/0\"}}}]",
+            "/0/elements/a~1b~0c/$ref");
+    }
+
+    [TestMethod]
+    public void Resource_type_function_rejects_cross_file_type_reference()
+    {
+        AssertNestedCrossFileReferenceRejected(
+            "[{\"$type\":\"ResourceType\",\"name\":\"r\",\"body\":{\"$ref\":\"#/0\"},\"readableScopes\":8,\"writableScopes\":8,\"functions\":{\"f\":{\"type\":{\"$ref\":\"other.json#/0\"}}}}]",
+            "/0/functions/f/type/$ref");
+    }
+
+    [TestMethod]
+    public void Function_parameter_rejects_cross_file_type_reference()
+    {
+        AssertNestedCrossFileReferenceRejected(
+            "[{\"$type\":\"FunctionType\",\"parameters\":[{\"name\":\"p\",\"type\":{\"$ref\":\"other.json#/0\"}}],\"output\":{\"$ref\":\"#/0\"}}]",
+            "/0/parameters/0/type/$ref");
+    }
+
+    [TestMethod]
+    public void Namespace_function_parameter_rejects_cross_file_type_reference()
+    {
+        AssertNestedCrossFileReferenceRejected(
+            "[{\"$type\":\"NamespaceFunctionType\",\"name\":\"f\",\"parameters\":[{\"name\":\"p\",\"type\":{\"$ref\":\"other.json#/0\"},\"flags\":0}],\"outputType\":{\"$ref\":\"#/0\"}}]",
+            "/0/parameters/0/type/$ref");
+    }
+
+    private static void AssertNestedCrossFileReferenceRejected(string json, string expectedPointer)
+    {
+        foreach (var mode in new[]
+        {
+            TypePackageValidationMode.CanonicalWriter,
+            TypePackageValidationMode.CompatibleReader,
+        })
+        {
+            var (ctx, reader) = CreateContext(json, mode);
+
+            TypeDocumentValidator.Validate(reader, ctx);
+
+            var diagnostic = ctx.GetDiagnostics().Should().ContainSingle().Subject;
+            diagnostic.Code.Should().Be(TypeValidationDiagnosticCodes.ReferenceSyntaxInvalid);
+            diagnostic.Path.Should().Be("types.json");
+            diagnostic.JsonPointer.Should().Be(expectedPointer);
+            diagnostic.Message.Should().Contain("other.json#/0");
+            diagnostic.Message.Should().Contain("same-file");
+        }
+    }
+
     // ── Valid minimal type objects ───────────────────────────────────────────
 
     [TestMethod]

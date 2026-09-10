@@ -10,9 +10,9 @@ namespace Azure.Bicep.Types.Validation.Graph
 {
     /// <summary>
     /// Extracts graph roots (from <c>index.json</c>), graph nodes (type objects), and graph
-    /// edges (nested references) from already-parsed package documents.  Only well-formed,
-    /// structurally usable references are surfaced; malformed references are silently skipped
-    /// because they are already reported by the structural layer.
+    /// edges (nested references) from already-parsed package documents. Only well-formed references
+    /// allowed in their source document are surfaced. Invalid references are skipped because the
+    /// structural layer already reports them.
     /// </summary>
     internal static class TypeGraphBuilder
     {
@@ -350,6 +350,7 @@ namespace Azure.Bicep.Types.Validation.Graph
                 packagePath,
                 out string canonicalPackagePath,
                 out _)) { return false; }
+            if (!ReferencePlacement.IsAllowed(sourceDocument.Kind, canonicalPackagePath)) { return false; }
 
             string sourcePointer = refObjectPointer + "/$ref";
             var loc = sourceDocument.SourceMap.GetLocation(refNode.ByteOffset);

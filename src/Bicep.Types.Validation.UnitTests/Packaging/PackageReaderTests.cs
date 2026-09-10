@@ -70,8 +70,8 @@ public class PackageReaderTests
     [TestMethod]
     public void Reader_does_not_load_type_files()
     {
-        // Type-file loading and transitive closure are owned by the graph layer's
-        // package document provider; the reader materializes only index.json.
+        // Type-file loading is owned by the graph layer's package document provider;
+        // the reader materializes only index.json.
         using var pkg = CreatePackageWithTypes();
         var resolution = Resolve(pkg.Path, isDirectory: true);
         var result = PackageReader.Read(resolution, DefaultOptions);

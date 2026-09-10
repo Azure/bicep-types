@@ -78,7 +78,7 @@ namespace Azure.Bicep.Types.Validation.Structural
             // ObjectType: required name + properties, optional additionalProperties + sensitive
             Add(catalog, "ObjectType",
                 Req("name", FieldShape.String),
-                Req("properties", FieldShape.ObjectMap),
+                Req("properties", FieldShape.ObjectMapOfObjectsWithTypeReference),
                 Opt("additionalProperties", FieldShape.Ref),
                 Opt("sensitive", FieldShape.Bool));
 
@@ -96,12 +96,12 @@ namespace Azure.Bicep.Types.Validation.Structural
             Add(catalog, "DiscriminatedObjectType",
                 Req("name", FieldShape.String),
                 Req("discriminator", FieldShape.String),
-                Req("baseProperties", FieldShape.ObjectMap),
-                Req("elements", FieldShape.ObjectMap));
+                Req("baseProperties", FieldShape.ObjectMapOfObjectsWithTypeReference),
+                Req("elements", FieldShape.ObjectMapOfReferences));
 
             // FunctionType: required parameters (array of objects) and output (ref)
             Add(catalog, "FunctionType",
-                Req("parameters", FieldShape.ArrayOfObjects),
+                Req("parameters", FieldShape.ArrayOfObjectsWithTypeReference),
                 Req("output", FieldShape.Ref));
 
             // ResourceFunctionType
@@ -115,7 +115,7 @@ namespace Azure.Bicep.Types.Validation.Structural
             // NamespaceFunctionType
             Add(catalog, "NamespaceFunctionType",
                 Req("name", FieldShape.String),
-                Req("parameters", FieldShape.ArrayOfObjects),
+                Req("parameters", FieldShape.ArrayOfObjectsWithTypeReference),
                 Req("outputType", FieldShape.Ref),
                 Opt("description", FieldShape.String),
                 Opt("evaluatedLanguageExpression", FieldShape.String),
@@ -127,7 +127,7 @@ namespace Azure.Bicep.Types.Validation.Structural
                 Req("body", FieldShape.Ref),
                 Req("readableScopes", FieldShape.Integer),
                 Req("writableScopes", FieldShape.Integer),
-                Opt("functions", FieldShape.ObjectMap),
+                Opt("functions", FieldShape.ObjectMapOfObjectsWithTypeReference),
                 // legacy fields: accepted in CompatibleReader, rejected as unknown in CanonicalWriter
                 Legacy("scopeType", FieldShape.Integer),
                 Legacy("readOnlyScopes", FieldShape.Integer),

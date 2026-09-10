@@ -1,6 +1,6 @@
 # Azure.Bicep.Types.Validation
 
-`Azure.Bicep.Types.Validation` validates serialized Bicep type packages before they are published or consumed. It checks package layout, JSON structure, cross-file references, etc. Diagnostics are returned as structured data with stable codes, severity, message and source locations.
+`Azure.Bicep.Types.Validation` validates serialized Bicep type packages before they are published or consumed. It checks package layout and JSON structure. It also checks reference placement and resolution. Diagnostics are returned as structured data with stable codes, severity, message and source locations.
 
 The validator accepts:
 
@@ -57,6 +57,10 @@ example, `./common//types.json` becomes `common/types.json`. Rooted paths, drive
 exact `..` segments, empty file paths, and trailing separators are rejected. Path case is preserved,
 while package identity retains its existing case-insensitive comparison. Raw archive member names
 remain stricter: noncanonical member names are rejected so normalization cannot hide collisions.
+
+Entry-point references in `index.json` use the cross-file `<path>#/<index>` form. References inside
+type objects use the same-file `#/<index>` form. Both validation modes reject a reference form used
+in the wrong document.
 
 ### Validation modes
 

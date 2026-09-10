@@ -80,6 +80,26 @@ public class TypeShapeCatalogTests
     }
 
     [TestMethod]
+    public void Nested_reference_containers_have_reference_aware_shapes()
+    {
+        TypeShapeCatalog.GetDescriptor("ObjectType")!.Fields
+            .Single(f => f.Name == "properties").Shape
+            .Should().Be(FieldShape.ObjectMapOfObjectsWithTypeReference);
+        TypeShapeCatalog.GetDescriptor("DiscriminatedObjectType")!.Fields
+            .Single(f => f.Name == "elements").Shape
+            .Should().Be(FieldShape.ObjectMapOfReferences);
+        TypeShapeCatalog.GetDescriptor("FunctionType")!.Fields
+            .Single(f => f.Name == "parameters").Shape
+            .Should().Be(FieldShape.ArrayOfObjectsWithTypeReference);
+        TypeShapeCatalog.GetDescriptor("NamespaceFunctionType")!.Fields
+            .Single(f => f.Name == "parameters").Shape
+            .Should().Be(FieldShape.ArrayOfObjectsWithTypeReference);
+        TypeShapeCatalog.GetDescriptor("ResourceType")!.Fields
+            .Single(f => f.Name == "functions").Shape
+            .Should().Be(FieldShape.ObjectMapOfObjectsWithTypeReference);
+    }
+
+    [TestMethod]
     public void ResourceType_legacy_fields_are_marked_as_legacy_compat_only()
     {
         var resourceType = TypeShapeCatalog.GetDescriptor("ResourceType");

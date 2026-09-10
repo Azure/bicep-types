@@ -11,8 +11,8 @@ namespace Azure.Bicep.Types.Validation.Packaging
     /// <summary>
     /// Reads a package's <c>index.json</c> into a <see cref="PackageReadResult"/> by resolving the
     /// package root and parsing the index document. Type files are not loaded here; they are
-    /// loaded on demand by the graph layer's package document provider, which owns transitive
-    /// closure and per-file structural validation.
+    /// loaded on demand by the graph layer's package document provider. The provider owns
+    /// per-file structural validation.
     /// </summary>
     internal static class PackageReader
     {

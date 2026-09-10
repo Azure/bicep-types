@@ -1,6 +1,6 @@
 {
   "isValid": false,
-  "mode": "canonicalWriter",
+  "mode": "compatibleReader",
   "diagnostics": [
     {
       "code": "BCPVT016",

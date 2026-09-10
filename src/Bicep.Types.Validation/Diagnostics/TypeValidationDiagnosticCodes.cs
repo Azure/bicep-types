@@ -42,7 +42,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
         /// <summary>A reference value is not a well-formed reference object.</summary>
         public const string ReferenceObjectInvalid = "BCPVT011";
 
-        /// <summary>A reference string does not match the expected <c>path#/index</c> syntax.</summary>
+        /// <summary>A reference string has invalid syntax or is not allowed in its source document.</summary>
         public const string ReferenceSyntaxInvalid = "BCPVT012";
 
         /// <summary>An unexpected property was found on a JSON object.</summary>
