@@ -13,7 +13,7 @@ namespace Azure.Bicep.Types.Validation.Structural
         public TypeKindDescriptor(string discriminator, TypeFieldDescriptor[] fields)
         {
             Discriminator = discriminator;
-            Fields = fields ?? new TypeFieldDescriptor[0];
+            Fields = fields;
         }
 
         /// <summary>The <c>$type</c> discriminator string, e.g. <c>"ResourceType"</c>.</summary>

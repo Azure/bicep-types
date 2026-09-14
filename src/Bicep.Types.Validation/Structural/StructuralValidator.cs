@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using Azure.Bicep.Types.Validation.Diagnostics;
 using Azure.Bicep.Types.Validation.Packaging;
@@ -19,9 +18,6 @@ namespace Azure.Bicep.Types.Validation.Structural
             JsonDocumentSet documents,
             TypePackageValidationOptions options)
         {
-            if (documents == null) { throw new ArgumentNullException(nameof(documents)); }
-            if (options == null) { throw new ArgumentNullException(nameof(options)); }
-
             var context = new StructuralValidationContext(options);
             var reader = new JsonShapeReader(context);
 
@@ -59,9 +55,6 @@ namespace Azure.Bicep.Types.Validation.Structural
             PackageDocument typeFile,
             TypePackageValidationOptions options)
         {
-            if (typeFile == null) { throw new ArgumentNullException(nameof(typeFile)); }
-            if (options == null) { throw new ArgumentNullException(nameof(options)); }
-
             var context = new StructuralValidationContext(options);
             var reader = new JsonShapeReader(context);
 

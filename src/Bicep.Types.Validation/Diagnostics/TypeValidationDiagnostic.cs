@@ -17,8 +17,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
     /// </remarks>
     public sealed class TypeValidationDiagnostic
     {
-        private static readonly IReadOnlyList<TypeValidationDiagnosticRelatedLocation> NoRelatedLocations =
-            new TypeValidationDiagnosticRelatedLocation[0];
+        private static readonly IReadOnlyList<TypeValidationDiagnosticRelatedLocation> NoRelatedLocations = [];
 
         public TypeValidationDiagnostic(
             string code,
