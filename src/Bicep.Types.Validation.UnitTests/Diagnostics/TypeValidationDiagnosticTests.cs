@@ -38,6 +38,29 @@ public class TypeValidationDiagnosticTests
     }
 
     [TestMethod]
+    public void Missing_path_sorts_before_empty_path_within_input_level_scope()
+    {
+        var missingPath = Diag("BCPVT100", path: null);
+        var emptyPath = Diag("BCPVT100", path: string.Empty);
+
+        TypeValidationDiagnosticComparer.Instance.Compare(missingPath, emptyPath).Should().BeLessThan(0);
+        TypeValidationDiagnosticComparer.Instance.Compare(emptyPath, missingPath).Should().BeGreaterThan(0);
+    }
+
+    [TestMethod]
+    public void Missing_json_pointer_sorts_before_document_root_and_child_locations()
+    {
+        var missingPointer = Diag("BCPVT100", path: "types.json", jsonPointer: null);
+        var documentRoot = Diag("BCPVT100", path: "types.json", jsonPointer: string.Empty);
+        var childLocation = Diag("BCPVT100", path: "types.json", jsonPointer: "/0");
+
+        TypeValidationDiagnosticComparer.Instance.Compare(missingPointer, documentRoot).Should().BeLessThan(0);
+        TypeValidationDiagnosticComparer.Instance.Compare(documentRoot, missingPointer).Should().BeGreaterThan(0);
+        TypeValidationDiagnosticComparer.Instance.Compare(documentRoot, childLocation).Should().BeLessThan(0);
+        TypeValidationDiagnosticComparer.Instance.Compare(childLocation, documentRoot).Should().BeGreaterThan(0);
+    }
+
+    [TestMethod]
     public void Related_locations_are_preserved()
     {
         var related = new TypeValidationDiagnosticRelatedLocation(
@@ -69,6 +92,18 @@ public class TypeValidationDiagnosticTests
         diagnostic.RelatedLocations.Should().BeEmpty();
     }
 
-    private static TypeValidationDiagnostic Diag(string code, string? path, int? line = null, int? column = null)
-        => new(code, TypeValidationDiagnosticSeverity.Error, $"message for {code}", path: path, line: line, column: column);
+    private static TypeValidationDiagnostic Diag(
+        string code,
+        string? path,
+        string? jsonPointer = null,
+        int? line = null,
+        int? column = null)
+        => new(
+            code,
+            TypeValidationDiagnosticSeverity.Error,
+            $"message for {code}",
+            path: path,
+            jsonPointer: jsonPointer,
+            line: line,
+            column: column);
 }

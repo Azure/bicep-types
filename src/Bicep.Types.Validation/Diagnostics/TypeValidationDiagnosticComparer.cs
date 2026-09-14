@@ -51,7 +51,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
             }
 
             // 2. Package-relative path.
-            var cmp = string.CompareOrdinal(x.Path ?? string.Empty, y.Path ?? string.Empty);
+            var cmp = string.CompareOrdinal(x.Path, y.Path);
             if (cmp != 0)
             {
                 return cmp;
@@ -79,7 +79,7 @@ namespace Azure.Bicep.Types.Validation.Diagnostics
             }
 
             // 6. JSON pointer.
-            cmp = string.CompareOrdinal(x.JsonPointer ?? string.Empty, y.JsonPointer ?? string.Empty);
+            cmp = string.CompareOrdinal(x.JsonPointer, y.JsonPointer);
             if (cmp != 0)
             {
                 return cmp;
