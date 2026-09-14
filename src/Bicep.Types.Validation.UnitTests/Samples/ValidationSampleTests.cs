@@ -24,7 +24,6 @@ public class ValidationSampleTests
     [DynamicData(
         nameof(ValidationSampleData.GetSampleCases),
         typeof(ValidationSampleData),
-        DynamicDataSourceType.Method,
         DynamicDataDisplayName = nameof(ValidationSampleData.GetSampleCaseDisplayName),
         DynamicDataDisplayNameDeclaringType = typeof(ValidationSampleData))]
     public void Sample_matches_expected_baseline(string resourcePrefix, string name, string inputKind, string inputPath, string mode, bool validateUnreachableFiles)

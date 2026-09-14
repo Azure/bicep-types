@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -34,7 +35,7 @@ public class ValidationSampleBaselineTests
     [TestCategory("Baseline")]
     public void Update_baselines_when_requested()
     {
-        var runParameter = TestContext.Properties.Contains("SetBaseLine")
+        var runParameter = TestContext.Properties.Keys.Cast<string>().Contains("SetBaseLine", StringComparer.Ordinal)
             ? TestContext.Properties["SetBaseLine"] as string
             : null;
 
