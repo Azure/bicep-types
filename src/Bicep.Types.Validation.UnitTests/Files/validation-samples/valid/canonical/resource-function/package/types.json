@@ -1,0 +1,65 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "listSecretsInput",
+    "properties": {
+      "secretName": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1,
+        "description": "The secret name."
+      }
+    }
+  },
+  {
+    "$type": "ObjectType",
+    "name": "listSecretsOutput",
+    "properties": {
+      "value": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 2,
+        "description": "The resolved secret value."
+      }
+    }
+  },
+  {
+    "$type": "ResourceFunctionType",
+    "name": "listSecrets",
+    "resourceType": "Sample.Provider/widgets",
+    "apiVersion": "2026-01-01",
+    "output": {
+      "$ref": "#/2"
+    },
+    "input": {
+      "$ref": "#/1"
+    }
+  },
+  {
+    "$type": "ObjectType",
+    "name": "widgetBody",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1,
+        "description": "The widget name."
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Sample.Provider/widgets@2026-01-01",
+    "body": {
+      "$ref": "#/4"
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  }
+]

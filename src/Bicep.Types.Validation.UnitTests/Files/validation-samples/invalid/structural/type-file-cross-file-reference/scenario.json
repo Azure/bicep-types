@@ -1,0 +1,9 @@
+{
+  "name": "type-file-cross-file-reference",
+  "description": "A reference-valued field inside a type file uses a forbidden cross-file reference.",
+  "category": "structural",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

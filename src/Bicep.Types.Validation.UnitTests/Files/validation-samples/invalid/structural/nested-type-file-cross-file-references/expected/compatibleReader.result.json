@@ -1,0 +1,66 @@
+{
+  "isValid": false,
+  "mode": "compatibleReader",
+  "diagnostics": [
+    {
+      "code": "BCPVT012",
+      "severity": "error",
+      "message": "Reference \u0027property-types.json#/0\u0027 at \u0027/0/properties/property/type/$ref\u0027 in \u0027types.json\u0027 is not allowed: references inside type files must use the same-file \u0027#/\u003Cindex\u003E\u0027 form.",
+      "path": "types.json",
+      "jsonPointer": "/0/properties/property/type/$ref",
+      "line": 7,
+      "column": 27
+    },
+    {
+      "code": "BCPVT012",
+      "severity": "error",
+      "message": "Reference \u0027base-property-types.json#/0\u0027 at \u0027/1/baseProperties/property/type/$ref\u0027 in \u0027types.json\u0027 is not allowed: references inside type files must use the same-file \u0027#/\u003Cindex\u003E\u0027 form.",
+      "path": "types.json",
+      "jsonPointer": "/1/baseProperties/property/type/$ref",
+      "line": 18,
+      "column": 27
+    },
+    {
+      "code": "BCPVT012",
+      "severity": "error",
+      "message": "Reference \u0027element-types.json#/0\u0027 at \u0027/2/elements/element/$ref\u0027 in \u0027types.json\u0027 is not allowed: references inside type files must use the same-file \u0027#/\u003Cindex\u003E\u0027 form.",
+      "path": "types.json",
+      "jsonPointer": "/2/elements/element/$ref",
+      "line": 30,
+      "column": 28
+    },
+    {
+      "code": "BCPVT012",
+      "severity": "error",
+      "message": "Reference \u0027function-types.json#/0\u0027 at \u0027/3/functions/get/type/$ref\u0027 in \u0027types.json\u0027 is not allowed: references inside type files must use the same-file \u0027#/\u003Cindex\u003E\u0027 form.",
+      "path": "types.json",
+      "jsonPointer": "/3/functions/get/type/$ref",
+      "line": 39,
+      "column": 27
+    },
+    {
+      "code": "BCPVT012",
+      "severity": "error",
+      "message": "Reference \u0027parameter-types.json#/0\u0027 at \u0027/4/parameters/0/type/$ref\u0027 in \u0027types.json\u0027 is not allowed: references inside type files must use the same-file \u0027#/\u003Cindex\u003E\u0027 form.",
+      "path": "types.json",
+      "jsonPointer": "/4/parameters/0/type/$ref",
+      "line": 50,
+      "column": 27
+    },
+    {
+      "code": "BCPVT012",
+      "severity": "error",
+      "message": "Reference \u0027namespace-parameter-types.json#/0\u0027 at \u0027/5/parameters/0/type/$ref\u0027 in \u0027types.json\u0027 is not allowed: references inside type files must use the same-file \u0027#/\u003Cindex\u003E\u0027 form.",
+      "path": "types.json",
+      "jsonPointer": "/5/parameters/0/type/$ref",
+      "line": 61,
+      "column": 27
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 6,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

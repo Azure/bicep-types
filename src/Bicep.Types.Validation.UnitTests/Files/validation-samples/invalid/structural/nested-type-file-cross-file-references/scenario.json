@@ -1,0 +1,9 @@
+{
+  "name": "nested-type-file-cross-file-references",
+  "description": "Nested reference containers inside a type file use forbidden cross-file references.",
+  "category": "structural",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}
