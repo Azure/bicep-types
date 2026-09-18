@@ -492,10 +492,15 @@ func (t *ResourceFunctionType) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	// Unmarshal return type reference
-	outputRef, err := unmarshalTypeReference(temp.Output)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal output type: %w", err)
+	var err error
+
+	// Unmarshal return type reference if present
+	var outputRef ITypeReference
+	if temp.Output != nil {
+		outputRef, err = unmarshalTypeReference(temp.Output)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal output type: %w", err)
+		}
 	}
 
 	// Unmarshal input type reference if present
