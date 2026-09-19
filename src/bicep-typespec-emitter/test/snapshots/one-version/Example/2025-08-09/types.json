@@ -1,0 +1,32 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "ExampleExtension",
+    "properties": {
+      "One": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "Two": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Microsoft.Example/exampleExtension@2025-08-09",
+    "body": {
+      "$ref": "#/1"
+    },
+    "readableScopes": 31,
+    "writableScopes": 31
+  }
+]

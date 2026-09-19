@@ -1,0 +1,56 @@
+{
+  "name": "@azure/bicep-typespec-emitter",
+  "version": "0.0.0-placeholder",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "files": [
+    "/dist/src",
+    "/lib"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "typespec": "./lib/main.tsp",
+      "default": "./dist/src/index.js"
+    },
+    "./testing": {
+      "types": "./dist/src/testing/index.d.ts",
+      "default": "./dist/src/testing/index.js"
+    }
+  },
+  "dependencies": {
+    "@azure/bicep-types": "0.6.129"
+  },
+  "peerDependencies": {
+    "@typespec/compiler": "^1.15.0",
+    "@typespec/versioning": "^0.85.0"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.4.2",
+    "@types/node": "latest",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "@typespec/compiler": "latest",
+    "eslint": "^9.15.0",
+    "nerdbank-gitversioning": "^3.5.113",
+    "prettier": "^3.3.3",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.39.1",
+    "vitest": "^5.0.0-rc.4"
+  },
+  "scripts": {
+    "build": "tsc",
+    "package": "nbgv-setversion && npm run build && npm pack && nbgv-setversion --reset",
+    "watch": "tsc --watch",
+    "test": "vitest run",
+    "test:snapshots": "vitest run -u",
+    "test:watch": "vitest",
+    "lint": "eslint src/ test/ --report-unused-disable-directives --max-warnings=0",
+    "lint:fix": "eslint . --report-unused-disable-directives --fix",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx}\""
+  },
+  "private": true,
+  "packageManager": "npm@11.5.1+sha512.232e6f5d9e799bcb486920b3e9ba907fdf96e576cf7e8c9446c8162e33a416096a1d37a9e910d9a918f6b1f606791c99bc6bb61ee2569b496ec74af13d0dbd95"
+}

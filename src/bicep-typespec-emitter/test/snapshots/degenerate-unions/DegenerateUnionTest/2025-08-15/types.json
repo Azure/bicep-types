@@ -1,0 +1,224 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "hello"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "DefaultVariant",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "test": {
+        "type": {
+          "$ref": "#/1"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "One"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "envelope",
+    "properties": {
+      "kind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/3"
+        }
+      },
+      "value": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/2"
+        }
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "One"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "hello there"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "CustomVariant",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "test": {
+        "type": {
+          "$ref": "#/6"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "One"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "envelope",
+    "properties": {
+      "customKind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/8"
+        }
+      },
+      "custom": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/7"
+        }
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "One"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "hello there"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "CustomVariant",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "test": {
+        "type": {
+          "$ref": "#/11"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "One"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "envelope",
+    "properties": {
+      "customKind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/13"
+        }
+      },
+      "custom": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/12"
+        }
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "One"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "One"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "hello world"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "InlineVariant",
+    "properties": {
+      "customKind": {
+        "type": {
+          "$ref": "#/16"
+        },
+        "flags": 1
+      },
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "test": {
+        "type": {
+          "$ref": "#/17"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "One"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "DiscriminatedUnionTest",
+    "properties": {
+      "default": {
+        "type": {
+          "$ref": "#/4"
+        },
+        "flags": 1
+      },
+      "customDiscriminatorAndEnvelope": {
+        "type": {
+          "$ref": "#/9"
+        },
+        "flags": 1
+      },
+      "customDiscriminatorAndEnvelopeWithExplicitEnvelope": {
+        "type": {
+          "$ref": "#/14"
+        },
+        "flags": 1
+      },
+      "inline": {
+        "type": {
+          "$ref": "#/18"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Test.DegenerateUnions/DegenerateUnion@2025-08-15",
+    "body": {
+      "$ref": "#/20"
+    },
+    "readableScopes": 31,
+    "writableScopes": 31
+  }
+]

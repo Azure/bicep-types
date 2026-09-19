@@ -1,0 +1,12 @@
+{
+  "resources": {},
+  "resourceFunctions": {},
+  "namespaceFunctions": [],
+  "settings": {
+    "name": "test",
+    "version": "1.0.0",
+    "isSingleton": false,
+    "isPreview": false,
+    "isDeprecated": false
+  }
+}

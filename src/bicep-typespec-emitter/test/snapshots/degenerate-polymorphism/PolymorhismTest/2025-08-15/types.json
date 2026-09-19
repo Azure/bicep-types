@@ -1,0 +1,76 @@
+[
+  {
+    "$type": "StringLiteralType",
+    "value": "dog"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "yes"
+  },
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "Dog",
+    "properties": {
+      "petKind": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "bark": {
+        "type": {
+          "$ref": "#/1"
+        },
+        "flags": 1
+      },
+      "name": {
+        "type": {
+          "$ref": "#/2"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "DiscriminatedObjectType",
+    "name": "Pet",
+    "discriminator": "petKind",
+    "baseProperties": {
+      "name": {
+        "type": {
+          "$ref": "#/2"
+        },
+        "flags": 1
+      }
+    },
+    "elements": {
+      "dog": {
+        "$ref": "#/3"
+      }
+    }
+  },
+  {
+    "$type": "ObjectType",
+    "name": "OneVariant",
+    "properties": {
+      "default": {
+        "type": {
+          "$ref": "#/4"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Test.Polymorphism/OneVariant@2025-08-15",
+    "body": {
+      "$ref": "#/5"
+    },
+    "readableScopes": 31,
+    "writableScopes": 31
+  }
+]
