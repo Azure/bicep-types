@@ -1,0 +1,19 @@
+{
+  "resources": {
+    "Microsoft.Example/exampleExtension@2025-07-01": {
+      "$ref": "./VersionedNamespace/2025-07-01/types.json#/2"
+    },
+    "Microsoft.Example/exampleExtension@2025-08-01": {
+      "$ref": "./VersionedNamespace/2025-08-01/types.json#/2"
+    }
+  },
+  "resourceFunctions": {},
+  "namespaceFunctions": [],
+  "settings": {
+    "name": "test",
+    "version": "1.0.0",
+    "isSingleton": false,
+    "isPreview": false,
+    "isDeprecated": false
+  }
+}
