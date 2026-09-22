@@ -1,0 +1,27 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "Minimal",
+    "properties": {
+      "StringProperty": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1,
+        "description": "A string property"
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Microsoft.Example/ExampleExtension@2025-11-11",
+    "body": {
+      "$ref": "#/1"
+    },
+    "readableScopes": 31,
+    "writableScopes": 31
+  }
+]

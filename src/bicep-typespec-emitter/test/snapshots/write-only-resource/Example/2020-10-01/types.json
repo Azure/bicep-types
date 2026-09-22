@@ -1,0 +1,26 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "WriteOnlyResource",
+    "properties": {
+      "StringProperty": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 17
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Microsoft.Example/ExampleExtension@2020-10-01",
+    "body": {
+      "$ref": "#/1"
+    },
+    "readableScopes": 0,
+    "writableScopes": 31
+  }
+]

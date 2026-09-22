@@ -61,8 +61,20 @@ jobs:
         uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
 
   build-npm:
-    name: Build NPM
+    name: Build NPM (${{ matrix.package }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - package: bicep-types
+            directory: ./src/bicep-types
+            artifact: azure-bicep-types
+          - package: bicep-typespec-emitter
+            directory: ./src/bicep-typespec-emitter
+            artifact: azure-bicep-typespec-emitter
+    defaults:
+      run:
+        working-directory: ${{ matrix.directory }}
     permissions:
       actions: read
       contents: read
@@ -85,35 +97,32 @@ jobs:
       
       - name: Install
         run: npm ci
-        working-directory: ./src/bicep-types
       
       - name: Lint
         run: npm run lint
-        working-directory: ./src/bicep-types
-      
-      - name: Test
-        run: npm test
-        working-directory: ./src/bicep-types
       
       - name: Build
         run: npm run build
-        working-directory: ./src/bicep-types
+
+      - name: Test
+        run: npm test
 
       - name: Package
         run: |
           npm run package
-          mv azure-bicep-types-*.tgz azure-bicep-types.tgz
-        working-directory: ./src/bicep-types
+          mv ${{ matrix.artifact }}-*.tgz ${{ matrix.artifact }}.tgz
 
       - name: Upload NPM package
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: azure-bicep-types.tgz
-          path: ./src/bicep-types/azure-bicep-types.tgz
+          name: ${{ matrix.artifact }}.tgz
+          path: ${{ matrix.directory }}/${{ matrix.artifact }}.tgz
           if-no-files-found: error
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        with:
+          category: /language:javascript/package:${{ matrix.package }}
 
   build-go:
     name: Build Go
