@@ -1,0 +1,1 @@
+{"name":"index-resources-not-object","description":"The resources field is not a JSON object.","category":"structural","modes":["canonicalWriter","compatibleReader"]}

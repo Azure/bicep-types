@@ -1,0 +1,8 @@
+{
+  "name": "missing-referenced-type-file",
+  "description": "A reference targets a type file that does not exist in the package.",
+  "category": "invalid.graph",
+  "modes": [
+    "canonicalWriter"
+  ]
+}

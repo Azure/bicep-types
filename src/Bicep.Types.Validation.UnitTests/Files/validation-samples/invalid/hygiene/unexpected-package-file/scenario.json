@@ -1,0 +1,11 @@
+{
+  "name": "unexpected-package-file",
+  "description": "With strict hygiene enabled, a non-JSON regular file in the package reports BCPVT035.",
+  "category": "invalid.hygiene",
+  "options": {
+    "validateUnreachableFiles": true
+  },
+  "modes": [
+    "canonicalWriter"
+  ]
+}

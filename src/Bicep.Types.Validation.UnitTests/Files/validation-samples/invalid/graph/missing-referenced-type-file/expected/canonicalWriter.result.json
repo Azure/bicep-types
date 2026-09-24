@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT017",
+      "severity": "error",
+      "message": "Reference at \u0027/0/body/$ref\u0027 in \u0027types.json\u0027 targets missing type file \u0027missing.json\u0027.",
+      "path": "types.json",
+      "jsonPointer": "/0/body/$ref",
+      "line": 6,
+      "column": 15
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

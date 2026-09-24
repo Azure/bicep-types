@@ -1,0 +1,14 @@
+{
+  "name": "archive-resource-function-missing-type-file",
+  "description": "An archive whose index.json declares a resourceFunctions root that references a type file absent from the archive reports BCPVT017. Guards the known archive-writer gap where resource-function-only type files can be omitted.",
+  "category": "invalid.graph",
+  "inputs": [
+    {
+      "kind": "archiveFile",
+      "path": "package.tgz"
+    }
+  ],
+  "modes": [
+    "canonicalWriter"
+  ]
+}
