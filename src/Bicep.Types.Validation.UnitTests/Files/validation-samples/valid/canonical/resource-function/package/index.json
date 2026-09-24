@@ -1,0 +1,17 @@
+{
+  "resources": {
+    "Sample.Provider/widgets@2026-01-01": {
+      "$ref": "types.json#/5"
+    }
+  },
+  "resourceFunctions": {
+    "Sample.Provider/widgets": {
+      "2026-01-01": [
+        {
+          "$ref": "types.json#/3"
+        }
+      ]
+    }
+  },
+  "namespaceFunctions": []
+}

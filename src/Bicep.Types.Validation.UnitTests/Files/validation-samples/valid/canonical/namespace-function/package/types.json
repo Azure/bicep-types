@@ -1,0 +1,50 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "AnyType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "widgetBody",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1,
+        "description": "The widget name."
+      }
+    }
+  },
+  {
+    "$type": "NamespaceFunctionType",
+    "name": "lookupWidget",
+    "description": "Looks up a widget by name.",
+    "evaluatedLanguageExpression": "[externalInput('lookupWidget', parameters('name'))]",
+    "parameters": [
+      {
+        "name": "name",
+        "type": {
+          "$ref": "#/0"
+        },
+        "description": "The widget name.",
+        "flags": 1
+      }
+    ],
+    "outputType": {
+      "$ref": "#/1"
+    },
+    "visibleInFileKind": 1
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Sample.Provider/widgets@2026-01-01",
+    "body": {
+      "$ref": "#/2"
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  }
+]

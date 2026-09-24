@@ -1,0 +1,9 @@
+{
+  "name": "fallback-resource-type",
+  "description": "fallbackResourceType can reference ResourceType.",
+  "category": "valid.canonical",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

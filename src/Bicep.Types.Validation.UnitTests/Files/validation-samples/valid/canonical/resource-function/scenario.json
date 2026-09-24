@@ -1,0 +1,9 @@
+{
+  "name": "resource-function",
+  "description": "resourceFunctions can target ResourceFunctionType.",
+  "category": "valid.canonical",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

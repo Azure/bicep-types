@@ -1,0 +1,1 @@
+{"name":"resource-scope-type","description":"A ResourceType uses only the legacy scopeType scope field: rejected in CanonicalWriter, accepted with a warning in CompatibleReader.","category":"compatibility","modes":["canonicalWriter","compatibleReader"]}

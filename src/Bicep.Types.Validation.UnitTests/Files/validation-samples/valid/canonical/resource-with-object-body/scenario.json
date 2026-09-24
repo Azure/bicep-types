@@ -1,0 +1,9 @@
+{
+  "name": "resource-with-object-body",
+  "description": "A resource body can reference an object type with primitive properties.",
+  "category": "valid.canonical",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

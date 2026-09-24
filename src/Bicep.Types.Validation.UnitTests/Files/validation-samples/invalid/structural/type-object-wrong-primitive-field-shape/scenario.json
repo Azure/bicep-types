@@ -1,0 +1,1 @@
+{"name":"type-object-wrong-primitive-field-shape","description":"A type object field has the wrong JSON type (number where string expected).","category":"structural","modes":["canonicalWriter","compatibleReader"]}
