@@ -44,7 +44,7 @@ func TestJSONWriter_WriteTypeIndex(t *testing.T) {
 	// Create test index
 	idx := index.NewTypeIndex()
 	idx.AddResource("Microsoft.Test/resources", "2023-01-01", types.TypeReference{Ref: 0})
-	idx.AddResourceFunction("Microsoft.Test/resources", "2023-01-01", "list", types.TypeReference{Ref: 1})
+	idx.AddResourceFunction("Microsoft.Test/resources", "2023-01-01", types.TypeReference{Ref: 1})
 
 	var buf bytes.Buffer
 	err := writer.WriteTypeIndex(&buf, idx)
@@ -55,7 +55,6 @@ func TestJSONWriter_WriteTypeIndex(t *testing.T) {
 	// Should contain resource and function mappings
 	assert.Contains(t, output, "Microsoft.Test/resources")
 	assert.Contains(t, output, "2023-01-01")
-	assert.Contains(t, output, "list")
 	assert.Contains(t, output, `"$ref"`)
 }
 
