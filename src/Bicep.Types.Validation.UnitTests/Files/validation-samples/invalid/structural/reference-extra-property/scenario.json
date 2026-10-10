@@ -1,0 +1,1 @@
+{"name":"reference-extra-property","description":"A reference object contains an extra property besides $ref (canonical mode only).","category":"structural","modes":["canonicalWriter"]}

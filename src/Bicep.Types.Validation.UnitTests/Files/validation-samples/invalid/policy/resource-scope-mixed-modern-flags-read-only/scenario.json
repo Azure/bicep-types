@@ -1,0 +1,1 @@
+{"name":"resource-scope-mixed-modern-flags-read-only","description":"A ResourceType mixes the modern scope pair with the effective legacy flags:1 field, which is an error in both modes (BCPVT024).","category":"invalid.policy","modes":["canonicalWriter","compatibleReader"]}

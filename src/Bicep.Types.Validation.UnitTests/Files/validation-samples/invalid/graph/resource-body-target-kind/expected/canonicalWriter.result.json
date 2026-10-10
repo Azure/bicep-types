@@ -1,0 +1,30 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT021",
+      "severity": "error",
+      "message": "Reference at \u0027/0/body/$ref\u0027 in \u0027types.json\u0027 for role \u0027resource body\u0027 must target an object type (\u0027ObjectType\u0027 or \u0027DiscriminatedObjectType\u0027), but the target is \u0027StringType\u0027.",
+      "path": "types.json",
+      "jsonPointer": "/0/body/$ref",
+      "line": 6,
+      "column": 15,
+      "relatedLocations": [
+        {
+          "message": "Target type is declared here.",
+          "path": "types.json",
+          "jsonPointer": "/1",
+          "line": 11,
+          "column": 3
+        }
+      ]
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}
