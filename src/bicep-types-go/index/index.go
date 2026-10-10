@@ -63,11 +63,9 @@ func (s *TypeSettings) UnmarshalJSON(data []byte) error {
 // ResourceVersionMap maps API versions to type references
 type ResourceVersionMap map[string]types.ITypeReference
 
-// ResourceFunctionMap maps function names to type references
-type ResourceFunctionMap map[string]types.ITypeReference
-
-// ResourceFunctionVersionMap maps API versions to function maps
-type ResourceFunctionVersionMap map[string]ResourceFunctionMap
+// ResourceFunctionVersionMap maps API versions to the list of resource-function
+// references declared for that version.
+type ResourceFunctionVersionMap map[string][]types.ITypeReference
 
 // TypeIndex represents an index of types organized by resource type
 type TypeIndex struct {
@@ -140,7 +138,7 @@ func BuildIndex(typeFiles []TypeFile, logFunc func(string), settings *TypeSettin
 				functionSeen[lowerFuncKey] = struct{}{}
 
 				ref := types.CrossFileTypeReference{RelativePath: file.RelativePath, Ref: typeIndex}
-				idx.AddResourceFunction(concrete.ResourceType, concrete.ApiVersion, concrete.Name, ref)
+				idx.AddResourceFunction(concrete.ResourceType, concrete.ApiVersion, ref)
 
 			case *types.NamespaceFunctionType:
 				ref := types.CrossFileTypeReference{RelativePath: file.RelativePath, Ref: typeIndex}
@@ -175,7 +173,7 @@ func (idx *TypeIndex) AddResource(resourceType string, apiVersion string, typeRe
 }
 
 // AddResourceFunction adds a resource function to the index
-func (idx *TypeIndex) AddResourceFunction(resourceType string, apiVersion string, functionName string, typeRef types.ITypeReference) {
+func (idx *TypeIndex) AddResourceFunction(resourceType string, apiVersion string, typeRef types.ITypeReference) {
 	if idx.ResourceFunctions == nil {
 		idx.ResourceFunctions = make(map[string]ResourceFunctionVersionMap)
 	}
@@ -184,11 +182,7 @@ func (idx *TypeIndex) AddResourceFunction(resourceType string, apiVersion string
 		idx.ResourceFunctions[resourceType] = make(ResourceFunctionVersionMap)
 	}
 
-	if _, exists := idx.ResourceFunctions[resourceType][apiVersion]; !exists {
-		idx.ResourceFunctions[resourceType][apiVersion] = make(ResourceFunctionMap)
-	}
-
-	idx.ResourceFunctions[resourceType][apiVersion][functionName] = typeRef
+	idx.ResourceFunctions[resourceType][apiVersion] = append(idx.ResourceFunctions[resourceType][apiVersion], typeRef)
 }
 
 // AddNamespaceFunction adds a namespace function to the index
@@ -211,8 +205,8 @@ func (idx *TypeIndex) GetResource(resourceType string, apiVersion string) (types
 	return ref, exists
 }
 
-// GetResourceFunction retrieves a resource function reference
-func (idx *TypeIndex) GetResourceFunction(resourceType string, apiVersion string, functionName string) (types.ITypeReference, bool) {
+// GetResourceFunctions retrieves the list of resource function references
+func (idx *TypeIndex) GetResourceFunctions(resourceType string, apiVersion string) ([]types.ITypeReference, bool) {
 	if idx.ResourceFunctions == nil {
 		return nil, false
 	}
@@ -222,13 +216,8 @@ func (idx *TypeIndex) GetResourceFunction(resourceType string, apiVersion string
 		return nil, false
 	}
 
-	functionMap, exists := versionMap[apiVersion]
-	if !exists {
-		return nil, false
-	}
-
-	ref, exists := functionMap[functionName]
-	return ref, exists
+	refs, exists := versionMap[apiVersion]
+	return refs, exists
 }
 
 // MarshalJSON implements custom JSON marshaling for TypeIndex
@@ -265,11 +254,11 @@ func (idx *TypeIndex) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements custom JSON unmarshaling for TypeIndex
 func (idx *TypeIndex) UnmarshalJSON(data []byte) error {
 	var temp struct {
-		Resources          map[string]json.RawMessage                       `json:"resources,omitempty"`
-		ResourceFunctions  map[string]map[string]map[string]json.RawMessage `json:"resourceFunctions,omitempty"`
-		NamespaceFunctions []json.RawMessage                                `json:"namespaceFunctions,omitempty"`
-		FallbackResource   json.RawMessage                                  `json:"fallbackResourceType,omitempty"`
-		Settings           *TypeSettings                                    `json:"settings,omitempty"`
+		Resources          map[string]json.RawMessage              `json:"resources,omitempty"`
+		ResourceFunctions  map[string]map[string][]json.RawMessage `json:"resourceFunctions,omitempty"`
+		NamespaceFunctions []json.RawMessage                       `json:"namespaceFunctions,omitempty"`
+		FallbackResource   json.RawMessage                         `json:"fallbackResourceType,omitempty"`
+		Settings           *TypeSettings                           `json:"settings,omitempty"`
 	}
 
 	if err := json.Unmarshal(data, &temp); err != nil {
@@ -309,20 +298,23 @@ func (idx *TypeIndex) UnmarshalJSON(data []byte) error {
 	// Unmarshal resource functions
 	if temp.ResourceFunctions != nil {
 		for resourceType, versionMap := range temp.ResourceFunctions {
-			if versionMap != nil {
-				idx.ResourceFunctions[resourceType] = make(ResourceFunctionVersionMap)
-				for version, functionMap := range versionMap {
-					if functionMap != nil {
-						idx.ResourceFunctions[resourceType][version] = make(ResourceFunctionMap)
-						for functionName, refData := range functionMap {
-							ref, err := unmarshalTypeReference(refData)
-							if err != nil {
-								return err
-							}
-							idx.ResourceFunctions[resourceType][version][functionName] = ref
-						}
-					}
+			if versionMap == nil {
+				continue
+			}
+			idx.ResourceFunctions[resourceType] = make(ResourceFunctionVersionMap)
+			for version, refList := range versionMap {
+				if refList == nil {
+					continue
 				}
+				refs := make([]types.ITypeReference, 0, len(refList))
+				for i, refData := range refList {
+					ref, err := unmarshalTypeReference(refData)
+					if err != nil {
+						return fmt.Errorf("failed to unmarshal resource function reference for %s@%s at index %d: %w", resourceType, version, i, err)
+					}
+					refs = append(refs, ref)
+				}
+				idx.ResourceFunctions[resourceType][version] = refs
 			}
 		}
 	}
