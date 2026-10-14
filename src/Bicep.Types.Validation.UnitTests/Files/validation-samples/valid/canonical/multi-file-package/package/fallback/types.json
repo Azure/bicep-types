@@ -1,0 +1,16 @@
+[
+  {
+    "$type": "ObjectType",
+    "name": "fallbackBody",
+    "properties": {}
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Sample.Provider/*@2026-01-01",
+    "body": {
+      "$ref": "#/0"
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  }
+]

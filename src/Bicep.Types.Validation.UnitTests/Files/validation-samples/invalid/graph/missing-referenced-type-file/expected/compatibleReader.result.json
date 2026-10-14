@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "compatibleReader",
+  "diagnostics": [
+    {
+      "code": "BCPVT016",
+      "severity": "error",
+      "message": "Reference at \u0027/resources/My.Rp~1things@2026-01-01/$ref\u0027 in \u0027index.json\u0027 targets missing type file \u0027missing.json\u0027.",
+      "path": "index.json",
+      "jsonPointer": "/resources/My.Rp~1things@2026-01-01/$ref",
+      "line": 4,
+      "column": 15
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

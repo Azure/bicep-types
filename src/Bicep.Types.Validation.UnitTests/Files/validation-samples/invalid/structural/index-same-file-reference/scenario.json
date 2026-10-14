@@ -1,0 +1,9 @@
+{
+  "name": "index-same-file-reference",
+  "description": "An index.json entry point uses a forbidden same-file reference.",
+  "category": "structural",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

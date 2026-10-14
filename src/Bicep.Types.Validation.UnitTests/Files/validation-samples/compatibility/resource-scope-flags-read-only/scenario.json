@@ -1,0 +1,1 @@
+{"name":"resource-scope-flags-read-only","description":"A ResourceType uses only the legacy flags scope field: rejected in CanonicalWriter, accepted with a warning in CompatibleReader.","category":"compatibility","modes":["canonicalWriter","compatibleReader"]}
