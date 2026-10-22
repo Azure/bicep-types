@@ -1,0 +1,2 @@
+This file exists only to ensure the package directory is materialized as an empty folder.
+The validator will look for index.json, which is intentionally absent for this scenario.

@@ -1,0 +1,1 @@
+{"name":"resource-scope-modern-plus-flags-zero","description":"A ResourceType carries the modern scope pair plus flags:0. flags:0 is not effective-legacy so this is not mixing; the flags field is classified per-field (error in CanonicalWriter, warning in CompatibleReader).","category":"compatibility","modes":["canonicalWriter","compatibleReader"]}

@@ -1,0 +1,8 @@
+{
+  "name": "resource-function-target-kind",
+  "description": "A resourceFunctions index entry references a non-ResourceFunctionType object.",
+  "category": "invalid.graph",
+  "modes": [
+    "canonicalWriter"
+  ]
+}
