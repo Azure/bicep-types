@@ -1,0 +1,15 @@
+# MacOS
+.DS_Store
+
+# Default TypeSpec output
+tsp-output/
+dist/
+
+# Dependency directories
+node_modules/
+
+# Generated Bicep Test Types
+test/bicep/**/*.tgz
+
+# npm pack output
+azure-*.tgz

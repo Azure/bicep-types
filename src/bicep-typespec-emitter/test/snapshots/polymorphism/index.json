@@ -1,0 +1,16 @@
+{
+  "resources": {
+    "Test.Polymorphism/PolymorphismTest@2025-08-15": {
+      "$ref": "./PolymorhismTest/2025-08-15/types.json#/9"
+    }
+  },
+  "resourceFunctions": {},
+  "namespaceFunctions": [],
+  "settings": {
+    "name": "test",
+    "version": "1.0.0",
+    "isSingleton": false,
+    "isPreview": false,
+    "isDeprecated": false
+  }
+}

@@ -1,0 +1,110 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "BooleanType"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "true"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "false"
+  },
+  {
+    "$type": "UnionType",
+    "elements": [
+      {
+        "$ref": "#/2"
+      },
+      {
+        "$ref": "#/3"
+      }
+    ]
+  },
+  {
+    "$type": "ArrayType",
+    "itemType": {
+      "$ref": "#/0"
+    }
+  },
+  {
+    "$type": "IntegerType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "PayloadProperty<string>",
+    "properties": {
+      "value": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "type": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 0
+      }
+    }
+  },
+  {
+    "$type": "ObjectType",
+    "name": "SetCertificateIssuer",
+    "properties": {
+      "StringProperty": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1,
+        "description": "A string property"
+      },
+      "BoolProperty": {
+        "type": {
+          "$ref": "#/1"
+        },
+        "flags": 1,
+        "description": "A boolean property"
+      },
+      "StringBoolProperty": {
+        "type": {
+          "$ref": "#/4"
+        },
+        "flags": 1,
+        "description": "A string boolean property"
+      },
+      "StringArrayProperty": {
+        "type": {
+          "$ref": "#/5"
+        },
+        "flags": 1,
+        "description": "An array property"
+      },
+      "Int64Property": {
+        "type": {
+          "$ref": "#/6"
+        },
+        "flags": 1,
+        "description": "An int64 property"
+      },
+      "TemplatizedProperty": {
+        "type": {
+          "$ref": "#/7"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Microsoft.Example/ExampleExtension@2020-10-01",
+    "body": {
+      "$ref": "#/8"
+    },
+    "readableScopes": 31,
+    "writableScopes": 31
+  }
+]

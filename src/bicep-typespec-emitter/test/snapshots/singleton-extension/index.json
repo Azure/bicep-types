@@ -1,0 +1,16 @@
+{
+  "resources": {
+    "Microsoft.Example/ExampleExtension@2025-11-11": {
+      "$ref": "./Example/2025-11-11/types.json#/2"
+    }
+  },
+  "resourceFunctions": {},
+  "namespaceFunctions": [],
+  "settings": {
+    "name": "SingletonExtension",
+    "version": "1.0.0-justone",
+    "isSingleton": true,
+    "isPreview": false,
+    "isDeprecated": false
+  }
+}

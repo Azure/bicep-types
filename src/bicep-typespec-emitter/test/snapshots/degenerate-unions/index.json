@@ -1,0 +1,16 @@
+{
+  "resources": {
+    "Test.DegenerateUnions/DegenerateUnion@2025-08-15": {
+      "$ref": "./DegenerateUnionTest/2025-08-15/types.json#/21"
+    }
+  },
+  "resourceFunctions": {},
+  "namespaceFunctions": [],
+  "settings": {
+    "name": "test",
+    "version": "1.0.0",
+    "isSingleton": false,
+    "isPreview": false,
+    "isDeprecated": false
+  }
+}

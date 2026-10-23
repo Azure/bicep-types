@@ -1,0 +1,532 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "yes"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "DefaultCat",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "meow": {
+        "type": {
+          "$ref": "#/1"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Cat"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "envelope",
+    "properties": {
+      "kind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/3"
+        }
+      },
+      "value": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/2"
+        }
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "yes"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "DefaultDog",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "bark": {
+        "type": {
+          "$ref": "#/5"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Dog"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "envelope",
+    "properties": {
+      "kind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/7"
+        }
+      },
+      "value": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/6"
+        }
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Cat"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Dog"
+  },
+  {
+    "$type": "UnionType",
+    "elements": [
+      {
+        "$ref": "#/9"
+      },
+      {
+        "$ref": "#/10"
+      }
+    ]
+  },
+  {
+    "$type": "DiscriminatedObjectType",
+    "name": "DefaultDiscriminatedUnion",
+    "discriminator": "kind",
+    "baseProperties": {
+      "kind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/11"
+        }
+      }
+    },
+    "elements": {
+      "Cat": {
+        "$ref": "#/4"
+      },
+      "Dog": {
+        "$ref": "#/8"
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "yes"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "CustomCat",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "meow": {
+        "type": {
+          "$ref": "#/13"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Cat"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "envelope",
+    "properties": {
+      "petKind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/15"
+        }
+      },
+      "pet": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/14"
+        }
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "yes"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "CustomDog",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "bark": {
+        "type": {
+          "$ref": "#/17"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Dog"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "envelope",
+    "properties": {
+      "petKind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/19"
+        }
+      },
+      "pet": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/18"
+        }
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Cat"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Dog"
+  },
+  {
+    "$type": "UnionType",
+    "elements": [
+      {
+        "$ref": "#/21"
+      },
+      {
+        "$ref": "#/22"
+      }
+    ]
+  },
+  {
+    "$type": "DiscriminatedObjectType",
+    "name": "CustomDicriminatorAndEnvelopeProperty",
+    "discriminator": "petKind",
+    "baseProperties": {
+      "petKind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/23"
+        }
+      }
+    },
+    "elements": {
+      "Cat": {
+        "$ref": "#/16"
+      },
+      "Dog": {
+        "$ref": "#/20"
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "yes"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "CustomCat",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "meow": {
+        "type": {
+          "$ref": "#/25"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Cat"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "envelope",
+    "properties": {
+      "petKind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/27"
+        }
+      },
+      "pet": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/26"
+        }
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "yes"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "CustomDog",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "bark": {
+        "type": {
+          "$ref": "#/29"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Dog"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "envelope",
+    "properties": {
+      "petKind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/31"
+        }
+      },
+      "pet": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/30"
+        }
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Cat"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Dog"
+  },
+  {
+    "$type": "UnionType",
+    "elements": [
+      {
+        "$ref": "#/33"
+      },
+      {
+        "$ref": "#/34"
+      }
+    ]
+  },
+  {
+    "$type": "DiscriminatedObjectType",
+    "name": "CustomDicriminatorAndEnvelopePropertyWithExplicitEnvelope",
+    "discriminator": "petKind",
+    "baseProperties": {
+      "petKind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/35"
+        }
+      }
+    },
+    "elements": {
+      "Cat": {
+        "$ref": "#/28"
+      },
+      "Dog": {
+        "$ref": "#/32"
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Cat"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "yes"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "InlineCat",
+    "properties": {
+      "petKind": {
+        "type": {
+          "$ref": "#/37"
+        },
+        "flags": 1
+      },
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "meow": {
+        "type": {
+          "$ref": "#/38"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Dog"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "yes"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "InlineDog",
+    "properties": {
+      "petKind": {
+        "type": {
+          "$ref": "#/40"
+        },
+        "flags": 1
+      },
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      },
+      "bark": {
+        "type": {
+          "$ref": "#/41"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Cat"
+  },
+  {
+    "$type": "StringLiteralType",
+    "value": "Dog"
+  },
+  {
+    "$type": "UnionType",
+    "elements": [
+      {
+        "$ref": "#/43"
+      },
+      {
+        "$ref": "#/44"
+      }
+    ]
+  },
+  {
+    "$type": "DiscriminatedObjectType",
+    "name": "InlineDiscriminator",
+    "discriminator": "petKind",
+    "baseProperties": {
+      "petKind": {
+        "flags": 1,
+        "type": {
+          "$ref": "#/45"
+        }
+      }
+    },
+    "elements": {
+      "Cat": {
+        "$ref": "#/39"
+      },
+      "Dog": {
+        "$ref": "#/42"
+      }
+    }
+  },
+  {
+    "$type": "ObjectType",
+    "name": "DiscriminatedUnionTest",
+    "properties": {
+      "default": {
+        "type": {
+          "$ref": "#/12"
+        },
+        "flags": 1
+      },
+      "customDiscriminatorAndEnvelope": {
+        "type": {
+          "$ref": "#/24"
+        },
+        "flags": 1
+      },
+      "customDiscriminatorAndEnvelopeWithExplicitEnvelope": {
+        "type": {
+          "$ref": "#/36"
+        },
+        "flags": 1
+      },
+      "inline": {
+        "type": {
+          "$ref": "#/46"
+        },
+        "flags": 1
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Test.DiscriminatedUnions/DiscriminatedUnionTest@2025-08-15",
+    "body": {
+      "$ref": "#/47"
+    },
+    "readableScopes": 31,
+    "writableScopes": 31
+  }
+]

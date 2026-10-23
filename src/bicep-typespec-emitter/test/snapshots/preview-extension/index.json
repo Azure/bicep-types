@@ -1,0 +1,16 @@
+{
+  "resources": {
+    "Microsoft.Example/ExampleExtension@2025-11-11": {
+      "$ref": "./Example/2025-11-11/types.json#/2"
+    }
+  },
+  "resourceFunctions": {},
+  "namespaceFunctions": [],
+  "settings": {
+    "name": "PreviewExtension",
+    "version": "1.0.0-preview",
+    "isSingleton": false,
+    "isPreview": true,
+    "isDeprecated": false
+  }
+}

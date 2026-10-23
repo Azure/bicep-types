@@ -8,6 +8,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 env:
@@ -27,17 +29,17 @@ jobs:
       security-events: write
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           languages: csharp
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
       
       - name: Build
         run: dotnet build --configuration release
@@ -46,7 +48,7 @@ jobs:
         run: dotnet pack --configuration release
 
       - name: Upload Nuget packages
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: bicep-types-packages
           path: ./out/*
@@ -56,62 +58,71 @@ jobs:
         run: dotnet test --configuration release
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
 
   build-npm:
-    name: Build NPM
+    name: Build NPM (${{ matrix.package }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - package: bicep-types
+            directory: ./src/bicep-types
+            artifact: azure-bicep-types
+          - package: bicep-typespec-emitter
+            directory: ./src/bicep-typespec-emitter
+            artifact: azure-bicep-typespec-emitter
+    defaults:
+      run:
+        working-directory: ${{ matrix.directory }}
     permissions:
       actions: read
       contents: read
       security-events: write
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           languages: javascript
   
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 16.x
+          node-version: 24.x
       
       - name: Install
         run: npm ci
-        working-directory: ./src/bicep-types
       
       - name: Lint
         run: npm run lint
-        working-directory: ./src/bicep-types
-      
-      - name: Test
-        run: npm test
-        working-directory: ./src/bicep-types
       
       - name: Build
         run: npm run build
-        working-directory: ./src/bicep-types
+
+      - name: Test
+        run: npm test
 
       - name: Package
         run: |
           npm run package
-          mv bicep-types-*.tgz bicep-types.tgz
-        working-directory: ./src/bicep-types
+          mv ${{ matrix.artifact }}-*.tgz ${{ matrix.artifact }}.tgz
 
       - name: Upload NPM package
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: bicep-types.tgz
-          path: ./src/bicep-types/bicep-types.tgz
+          name: ${{ matrix.artifact }}.tgz
+          path: ${{ matrix.directory }}/${{ matrix.artifact }}.tgz
           if-no-files-found: error
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        with:
+          category: /language:javascript/package:${{ matrix.package }}
 
   build-go:
     name: Build Go
@@ -122,17 +133,17 @@ jobs:
       security-events: write
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           languages: go
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.25.4'
           cache-dependency-path: ./src/bicep-types-go/go.sum
@@ -168,4 +179,4 @@ jobs:
         working-directory: ./src/bicep-types-go
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9

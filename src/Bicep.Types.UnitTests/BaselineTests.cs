@@ -53,7 +53,7 @@ public class BaselineTests
     }
 
     [TestMethod]
-    [DynamicData(nameof(GetBaselinePaths), DynamicDataSourceType.Method)]
+    [DynamicData(nameof(GetBaselinePaths))]
     public void TypeLoader_can_load_all_types_without_throwing(string baselineName)
     {
         var typeLoader = new BaselineTypeLoader(baselineName);

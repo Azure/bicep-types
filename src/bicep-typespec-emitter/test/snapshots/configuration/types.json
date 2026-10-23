@@ -1,0 +1,17 @@
+[
+  {
+    "$type": "BooleanType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "Config",
+    "properties": {
+      "configProperty": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1
+      }
+    }
+  }
+]

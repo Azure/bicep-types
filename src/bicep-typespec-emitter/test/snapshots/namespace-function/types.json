@@ -1,0 +1,26 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "AnyType"
+  },
+  {
+    "$type": "NamespaceFunctionType",
+    "name": "ExampleFunction",
+    "description": "A function that can be used in bicep files",
+    "parameters": [
+      {
+        "name": "config",
+        "type": {
+          "$ref": "#/0"
+        },
+        "description": "A compile-time constant parameter",
+        "flags": 3
+      }
+    ],
+    "outputType": {
+      "$ref": "#/1"
+    }
+  }
+]
