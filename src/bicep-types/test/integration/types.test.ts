@@ -4,6 +4,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { mkdir, writeFile, readFile } from 'fs/promises';
+import { describe, expect, it } from 'vitest';
 import { CrossFileTypeReference, FunctionParameter, ObjectTypePropertyFlags, ScopeType, TypeFactory, TypeFile, TypeIndex, TypeSettings, ResourceType, AllExceptExtension, All, NamespaceFunctionParameterFlags, BicepSourceFileKind, NamespaceFunctionType } from '../../src/types';
 import { readTypesJson, writeIndexJson, writeTypesJson } from '../../src/writers/json';
 import { writeIndexMarkdown, writeMarkdown } from '../../src/writers/markdown';
@@ -216,7 +217,7 @@ async function verifyBaselines(factory: TypeFactory, typesPath: string, testName
     });
   }
 
-  expectFiles(testName, typeFiles, index);
+  await expectFiles(testName, typeFiles, index);
 }
 
 async function expectFiles(testName: string, typeFiles: TypeFile[], index: TypeIndex) {

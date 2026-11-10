@@ -37,7 +37,12 @@
     "prettier": "^3.3.3",
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.39.1",
-    "vitest": "^5.0.0-rc.4"
+    "vitest": "^5.1.0"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    }
   },
   "scripts": {
     "build": "tsc",
