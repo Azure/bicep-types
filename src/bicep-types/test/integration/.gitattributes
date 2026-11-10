@@ -1,2 +1,2 @@
 # Generated baselines are compared byte-for-byte against LF output, so keep them LF on all platforms.
-* text eol=lf
+baselines/** text eol=lf
