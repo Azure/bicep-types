@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT029",
+      "severity": "error",
+      "message": "ResourceType readableScopes at \u0027/0/readableScopes\u0027 in \u0027types.json\u0027 contain unknown bits 32 for this validator version. Known mask is 31.",
+      "path": "types.json",
+      "jsonPointer": "/0/readableScopes",
+      "line": 8,
+      "column": 5
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

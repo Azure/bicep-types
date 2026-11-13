@@ -1,0 +1,21 @@
+{
+  "isValid": true,
+  "mode": "compatibleReader",
+  "diagnostics": [
+    {
+      "code": "BCPVT023",
+      "severity": "warning",
+      "message": "Property \u0027scopeType\u0027 at \u0027/0/scopeType\u0027 in \u0027types.json\u0027 is accepted only for CompatibleReader mode. Prefer canonical fields \u0027readableScopes\u0027 and \u0027writableScopes\u0027.",
+      "path": "types.json",
+      "jsonPointer": "/0/scopeType",
+      "line": 6,
+      "column": 5
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0
+  }
+}

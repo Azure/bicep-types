@@ -1,0 +1,20 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT014",
+      "severity": "error",
+      "message": "Unexpected property \u0027unknownField\u0027 at \u0027\u0027 in \u0027index.json\u0027.",
+      "path": "index.json",
+      "line": 1,
+      "column": 64
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

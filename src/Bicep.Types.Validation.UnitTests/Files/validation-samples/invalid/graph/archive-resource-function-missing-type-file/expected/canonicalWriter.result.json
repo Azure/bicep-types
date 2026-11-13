@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT017",
+      "severity": "error",
+      "message": "Reference at '/resourceFunctions/Sample.Provider~1widgets/2026-01-01/0/$ref' in 'index.json' targets missing type file 'functions.json'.",
+      "path": "index.json",
+      "jsonPointer": "/resourceFunctions/Sample.Provider~1widgets/2026-01-01/0/$ref",
+      "line": 11,
+      "column": 19
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

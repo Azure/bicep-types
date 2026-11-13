@@ -1,0 +1,27 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "widgetBody",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1,
+        "description": "The widget name."
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Sample.Provider/widgets@2026-01-01",
+    "body": {
+      "$ref": "#/1"
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "isValid": true,
+  "mode": "compatibleReader",
+  "diagnostics": [
+    {
+      "code": "BCPVT029",
+      "severity": "warning",
+      "message": "ObjectType property flags at \u0027/1/properties/name/flags\u0027 in \u0027types.json\u0027 contain unknown bits 32 for this validator version. Known mask is 31.",
+      "path": "types.json",
+      "jsonPointer": "/1/properties/name/flags",
+      "line": 19,
+      "column": 9
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0
+  }
+}

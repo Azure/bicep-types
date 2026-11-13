@@ -1,0 +1,34 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "treeNode",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1,
+        "description": "The node name."
+      },
+      "child": {
+        "type": {
+          "$ref": "#/1"
+        },
+        "flags": 0,
+        "description": "The optional child node."
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Sample.Provider/trees@2026-01-01",
+    "body": {
+      "$ref": "#/1"
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  }
+]

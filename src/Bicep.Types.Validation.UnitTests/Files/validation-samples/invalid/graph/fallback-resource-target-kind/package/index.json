@@ -1,0 +1,8 @@
+{
+  "resources": {},
+  "resourceFunctions": {},
+  "namespaceFunctions": [],
+  "fallbackResourceType": {
+    "$ref": "types.json#/0"
+  }
+}

@@ -1,0 +1,1 @@
+{"name":"builtin-type-resource-ref","description":"A BuiltInType uses the reserved legacy kind 8 (ResourceRef), which has no canonical replacement: rejected in CanonicalWriter, accepted with a warning in CompatibleReader.","category":"compatibility","modes":["canonicalWriter","compatibleReader"]}
