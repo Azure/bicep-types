@@ -1,0 +1,49 @@
+[
+  {
+    "$type": "StringType"
+  },
+  {
+    "$type": "IntegerType",
+    "minValue": 0,
+    "maxValue": 100
+  },
+  {
+    "$type": "BooleanType"
+  },
+  {
+    "$type": "ObjectType",
+    "name": "widgetBody",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/0"
+        },
+        "flags": 1,
+        "description": "The widget name."
+      },
+      "capacity": {
+        "type": {
+          "$ref": "#/1"
+        },
+        "flags": 0,
+        "description": "The requested widget capacity."
+      },
+      "enabled": {
+        "type": {
+          "$ref": "#/2"
+        },
+        "flags": 0,
+        "description": "Whether the widget is enabled."
+      }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "Sample.Provider/widgets@2026-01-01",
+    "body": {
+      "$ref": "#/3"
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  }
+]

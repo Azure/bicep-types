@@ -1,0 +1,8 @@
+{
+  "name": "configuration-type-target-kind",
+  "description": "The settings.configurationType index entry references a non-object-like type.",
+  "category": "invalid.graph",
+  "modes": [
+    "canonicalWriter"
+  ]
+}

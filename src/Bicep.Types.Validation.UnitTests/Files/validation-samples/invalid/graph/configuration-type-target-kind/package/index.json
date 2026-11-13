@@ -1,0 +1,13 @@
+{
+  "resources": {},
+  "resourceFunctions": {},
+  "namespaceFunctions": [],
+  "settings": {
+    "name": "SampleConfig",
+    "isSingleton": true,
+    "version": "1.0.0",
+    "configurationType": {
+      "$ref": "types.json#/0"
+    }
+  }
+}

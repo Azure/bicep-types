@@ -1,0 +1,9 @@
+{
+  "name": "settings-configuration-type",
+  "description": "settings.configurationType can reference an object-like type.",
+  "category": "valid.canonical",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

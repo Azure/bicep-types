@@ -1,0 +1,9 @@
+{
+  "name": "minimal-resource",
+  "description": "A package with index.json, one type file, and one resource entry targeting ResourceType is valid.",
+  "category": "valid.canonical",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

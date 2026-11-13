@@ -1,0 +1,1 @@
+{"name":"type-file-element-primitive","description":"A type-file array element is a primitive (number), not an object.","category":"structural","modes":["canonicalWriter","compatibleReader"]}

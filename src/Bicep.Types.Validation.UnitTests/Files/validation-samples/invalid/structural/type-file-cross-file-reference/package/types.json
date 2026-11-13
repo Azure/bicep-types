@@ -1,0 +1,16 @@
+[
+  {
+    "$type": "ObjectType",
+    "name": "body",
+    "properties": {}
+  },
+  {
+    "$type": "ResourceType",
+    "name": "My.Rp/things@2026-01-01",
+    "body": {
+      "$ref": "other.json#/0"
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  }
+]

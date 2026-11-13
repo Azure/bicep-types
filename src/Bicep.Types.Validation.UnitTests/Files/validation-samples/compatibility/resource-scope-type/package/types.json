@@ -1,0 +1,13 @@
+[
+  {
+    "$type": "ResourceType",
+    "name": "My.Rp/x@2026-01-01",
+    "body": { "$ref": "#/1" },
+    "scopeType": 4
+  },
+  {
+    "$type": "ObjectType",
+    "name": "body",
+    "properties": {}
+  }
+]

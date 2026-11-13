@@ -1,0 +1,1 @@
+{"name":"reference-non-string-ref","description":"A reference object has a $ref property that is not a string.","category":"structural","modes":["canonicalWriter","compatibleReader"]}
