@@ -1,0 +1,1 @@
+{"name":"resource-scope-mixed-modern-legacy","description":"A ResourceType mixes the modern scope pair with the legacy scopeType field, which is an error in both modes (BCPVT024).","category":"invalid.policy","modes":["canonicalWriter","compatibleReader"]}

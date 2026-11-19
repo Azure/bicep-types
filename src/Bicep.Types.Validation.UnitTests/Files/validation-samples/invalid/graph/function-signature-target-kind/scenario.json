@@ -1,0 +1,8 @@
+{
+  "name": "function-signature-target-kind",
+  "description": "Graph traversal descends into a resource-type FunctionType signature: both a parameter type and the output reference a ResourceType (not a value type), each reported as BCPVT021.",
+  "category": "invalid.graph",
+  "modes": [
+    "canonicalWriter"
+  ]
+}

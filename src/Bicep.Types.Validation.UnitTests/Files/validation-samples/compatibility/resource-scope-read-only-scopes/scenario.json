@@ -1,0 +1,1 @@
+{"name":"resource-scope-read-only-scopes","description":"A ResourceType uses the legacy scopeType plus readOnlyScopes scope fields (no modern pair): both are rejected in CanonicalWriter and accepted with warnings in CompatibleReader.","category":"compatibility","modes":["canonicalWriter","compatibleReader"]}

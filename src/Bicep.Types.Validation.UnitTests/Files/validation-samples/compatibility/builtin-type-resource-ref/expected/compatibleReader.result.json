@@ -1,0 +1,21 @@
+{
+  "isValid": true,
+  "mode": "compatibleReader",
+  "diagnostics": [
+    {
+      "code": "BCPVT023",
+      "severity": "warning",
+      "message": "BuiltInType.kind at \u0027/2/kind\u0027 in \u0027types.json\u0027 uses reserved legacy built-in kind 8 (\u0027ResourceRef\u0027), accepted only for CompatibleReader mode.",
+      "path": "types.json",
+      "jsonPointer": "/2/kind",
+      "line": 16,
+      "column": 5
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0
+  }
+}

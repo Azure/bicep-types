@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "compatibleReader",
+  "diagnostics": [
+    {
+      "code": "BCPVT025",
+      "severity": "error",
+      "message": "BuiltInType.kind at \u0027/2/kind\u0027 in \u0027types.json\u0027 must be one of 1..8, but got 9.",
+      "path": "types.json",
+      "jsonPointer": "/2/kind",
+      "line": 16,
+      "column": 5
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

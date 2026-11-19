@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT013",
+      "severity": "error",
+      "message": "Reference \u0027notavalidref\u0027 at \u0027/resources/S~1r@v1/$ref\u0027 in \u0027index.json\u0027 has invalid syntax: the reference string must contain a \u0027#/\u0027 fragment separator.",
+      "path": "index.json",
+      "jsonPointer": "/resources/S~1r@v1/$ref",
+      "line": 1,
+      "column": 32
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

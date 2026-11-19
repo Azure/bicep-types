@@ -1,0 +1,9 @@
+{
+  "name": "multi-file-package",
+  "description": "Cross-file references work for positions where they are allowed.",
+  "category": "valid.canonical",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

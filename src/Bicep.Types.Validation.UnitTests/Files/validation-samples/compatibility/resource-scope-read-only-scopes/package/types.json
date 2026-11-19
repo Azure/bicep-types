@@ -1,0 +1,14 @@
+[
+  {
+    "$type": "ResourceType",
+    "name": "My.Rp/x@2026-01-01",
+    "body": { "$ref": "#/1" },
+    "scopeType": 0,
+    "readOnlyScopes": 1
+  },
+  {
+    "$type": "ObjectType",
+    "name": "body",
+    "properties": {}
+  }
+]

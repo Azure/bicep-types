@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT012",
+      "severity": "error",
+      "message": "Property \u0027Sample/r@v1\u0027 at \u0027/resources/Sample~1r@v1\u0027 in \u0027index.json\u0027 must be a reference object ({\u0022$ref\u0022: \u0022...\u0022}): expected an object with a \u0027$ref\u0027 property, got string.",
+      "path": "index.json",
+      "jsonPointer": "/resources/Sample~1r@v1",
+      "line": 1,
+      "column": 29
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

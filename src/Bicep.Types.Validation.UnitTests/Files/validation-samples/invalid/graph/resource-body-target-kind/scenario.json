@@ -1,0 +1,8 @@
+{
+  "name": "resource-body-target-kind",
+  "description": "A ResourceType body references a non-object-like type.",
+  "category": "invalid.graph",
+  "modes": [
+    "canonicalWriter"
+  ]
+}

@@ -1,0 +1,1 @@
+{"name":"index-root-array","description":"index.json root is an array instead of an object.","category":"structural","modes":["canonicalWriter","compatibleReader"]}

@@ -1,0 +1,30 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT020",
+      "severity": "error",
+      "message": "Namespace function [0] must reference a namespace function type (\u0027NamespaceFunctionType\u0027), but the target is \u0027ObjectType\u0027.",
+      "path": "index.json",
+      "jsonPointer": "/namespaceFunctions/0/$ref",
+      "line": 6,
+      "column": 15,
+      "relatedLocations": [
+        {
+          "message": "Target type is declared here.",
+          "path": "types.json",
+          "jsonPointer": "/0",
+          "line": 2,
+          "column": 3
+        }
+      ]
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

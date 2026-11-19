@@ -1,0 +1,15 @@
+{
+  "name": "types-tgz-input",
+  "description": "A tiny valid types.tgz archive validates successfully through the full pipeline, exercising archive input wiring.",
+  "category": "valid.input-forms",
+  "inputs": [
+    {
+      "kind": "archiveFile",
+      "path": "package.tgz"
+    }
+  ],
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

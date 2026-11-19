@@ -1,0 +1,1 @@
+{"name":"reference-invalid-syntax","description":"A $ref string does not match the expected path#/index format.","category":"structural","modes":["canonicalWriter","compatibleReader"]}

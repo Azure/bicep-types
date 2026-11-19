@@ -1,0 +1,21 @@
+{
+  "isValid": false,
+  "mode": "canonicalWriter",
+  "diagnostics": [
+    {
+      "code": "BCPVT026",
+      "severity": "error",
+      "message": "ArrayType at \u0027/2\u0027 in \u0027types.json\u0027 has minLength 10 greater than maxLength 5.",
+      "path": "types.json",
+      "jsonPointer": "/2",
+      "line": 22,
+      "column": 5
+    }
+  ],
+  "diagnosticsTruncated": false,
+  "summary": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0
+  }
+}

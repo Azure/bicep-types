@@ -1,0 +1,9 @@
+{
+  "name": "visible-in-file-kind-invalid",
+  "description": "A NamespaceFunctionType visibleInFileKind is outside the known enum domain (BCPVT028): error in canonicalWriter, warning in compatibleReader.",
+  "category": "invalid.semantic",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

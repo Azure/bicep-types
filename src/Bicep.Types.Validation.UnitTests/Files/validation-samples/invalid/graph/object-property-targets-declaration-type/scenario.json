@@ -1,0 +1,8 @@
+{
+  "name": "object-property-targets-declaration-type",
+  "description": "An object property type references a resource type, which is not a value type.",
+  "category": "invalid.graph",
+  "modes": [
+    "canonicalWriter"
+  ]
+}
