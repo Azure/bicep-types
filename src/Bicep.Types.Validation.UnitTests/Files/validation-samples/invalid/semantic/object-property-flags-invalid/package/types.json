@@ -1,0 +1,26 @@
+[
+  {
+    "$type": "ResourceType",
+    "name": "My.Rp/things@2026-01-01",
+    "body": {
+      "$ref": "#/1"
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  },
+  {
+    "$type": "ObjectType",
+    "name": "body",
+    "properties": {
+      "name": {
+        "type": {
+          "$ref": "#/2"
+        },
+        "flags": 32
+      }
+    }
+  },
+  {
+    "$type": "StringType"
+  }
+]

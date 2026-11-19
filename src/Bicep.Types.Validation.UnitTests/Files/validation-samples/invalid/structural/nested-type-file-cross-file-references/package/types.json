@@ -1,0 +1,72 @@
+[
+  {
+    "$type": "ObjectType",
+    "name": "objectWithProperty",
+    "properties": {
+      "property": {
+        "type": { "$ref": "property-types.json#/0" },
+        "flags": 0
+      }
+    }
+  },
+  {
+    "$type": "DiscriminatedObjectType",
+    "name": "objectWithBaseProperty",
+    "discriminator": "kind",
+    "baseProperties": {
+      "property": {
+        "type": { "$ref": "base-property-types.json#/0" },
+        "flags": 0
+      }
+    },
+    "elements": {}
+  },
+  {
+    "$type": "DiscriminatedObjectType",
+    "name": "objectWithElement",
+    "discriminator": "kind",
+    "baseProperties": {},
+    "elements": {
+      "element": { "$ref": "element-types.json#/0" }
+    }
+  },
+  {
+    "$type": "ResourceType",
+    "name": "My.Rp/things@2026-01-01",
+    "body": { "$ref": "#/6" },
+    "functions": {
+      "get": {
+        "type": { "$ref": "function-types.json#/0" }
+      }
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  },
+  {
+    "$type": "FunctionType",
+    "parameters": [
+      {
+        "name": "input",
+        "type": { "$ref": "parameter-types.json#/0" }
+      }
+    ],
+    "output": { "$ref": "#/6" }
+  },
+  {
+    "$type": "NamespaceFunctionType",
+    "name": "get",
+    "parameters": [
+      {
+        "name": "input",
+        "type": { "$ref": "namespace-parameter-types.json#/0" },
+        "flags": 0
+      }
+    ],
+    "outputType": { "$ref": "#/6" }
+  },
+  {
+    "$type": "ObjectType",
+    "name": "body",
+    "properties": {}
+  }
+]

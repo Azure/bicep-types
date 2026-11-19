@@ -1,0 +1,9 @@
+{
+  "name": "namespace-function",
+  "description": "namespaceFunctions can target NamespaceFunctionType.",
+  "category": "valid.canonical",
+  "modes": [
+    "canonicalWriter",
+    "compatibleReader"
+  ]
+}

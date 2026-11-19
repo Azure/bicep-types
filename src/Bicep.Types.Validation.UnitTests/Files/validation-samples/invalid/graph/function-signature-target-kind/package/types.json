@@ -1,0 +1,37 @@
+[
+  {
+    "$type": "ResourceType",
+    "name": "My.Rp/things@2026-01-01",
+    "body": {
+      "$ref": "#/1"
+    },
+    "functions": {
+      "compute": {
+        "type": {
+          "$ref": "#/2"
+        }
+      }
+    },
+    "readableScopes": 8,
+    "writableScopes": 8
+  },
+  {
+    "$type": "ObjectType",
+    "name": "body",
+    "properties": {}
+  },
+  {
+    "$type": "FunctionType",
+    "parameters": [
+      {
+        "name": "arg",
+        "type": {
+          "$ref": "#/0"
+        }
+      }
+    ],
+    "output": {
+      "$ref": "#/0"
+    }
+  }
+]

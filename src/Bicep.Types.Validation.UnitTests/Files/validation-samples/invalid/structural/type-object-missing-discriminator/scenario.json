@@ -1,0 +1,1 @@
+{"name":"type-object-missing-discriminator","description":"A type object is missing the required $type field.","category":"structural","modes":["canonicalWriter","compatibleReader"]}
