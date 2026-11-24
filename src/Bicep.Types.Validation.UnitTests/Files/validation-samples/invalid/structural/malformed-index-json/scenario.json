@@ -1,0 +1,1 @@
+{"name":"malformed-index-json","description":"index.json contains a JSON syntax error.","category":"structural","modes":["canonicalWriter","compatibleReader"]}

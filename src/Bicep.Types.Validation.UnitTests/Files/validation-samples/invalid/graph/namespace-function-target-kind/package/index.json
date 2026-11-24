@@ -1,0 +1,9 @@
+{
+  "resources": {},
+  "resourceFunctions": {},
+  "namespaceFunctions": [
+    {
+      "$ref": "types.json#/0"
+    }
+  ]
+}
